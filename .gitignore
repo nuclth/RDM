@@ -1,0 +1,8 @@
+# ignore object files
+*.o
+
+# ignore executable
+run_rdm
+
+# ignore swap files
+*.swp

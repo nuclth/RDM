@@ -1,0 +1,24 @@
+# Number of weight/node points to use for 
+# Gauss-Legendre integration (ACTIVE ONLY FOR S-WAVE)
+100
+
+# Size of the Gauss-Legendre mesh (ACTIVE ONLY FOR S-WAVE)
+100
+
+# Size of the basis for the s-wave choice 
+# (not active for full-j or full-m)
+1
+
+# Number of particles
+2
+
+# Value of hbar * c in MeV * fm
+197.32891
+
+# mass of the Nucleon in MeV/c^2
+938.9059
+
+# value for hbar * omega of the Harmonic oscillator
+10
+
+
