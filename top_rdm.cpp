@@ -56,6 +56,8 @@ struct parameters
 	double hc;
 	double mass;
 	double hw;
+  std::string m_ref;
+  std::string m_mat;
 };
 
 
@@ -65,48 +67,50 @@ extern void gauss (int npts, int job, double a, double b, double xpts[], double 
 parameters read_in_inputs ();
 
 template <typename two_array>
-void populate_1body (two_array & h1_mat, const double hw)
+void populate_1body (const two_array & ref_m, two_array & h1_mat, const double hw)
 {
 
 	size_t mat_length = h1_mat.size();
 
-  size_t spatial_orbs = mat_length/2;
 
 	for (size_t i = 0; i < mat_length; ++i)
   {
-    size_t j = i;
+    double n = ref_m [i][1];
+    double l = ref_m [i][2];
 
-    if (j >= spatial_orbs)
-      j = i - spatial_orbs; 
-
-		h1_mat[i][i] = (2.*(double)j + 1.5) * hw;
+		h1_mat[i][i] = (2.*n + l + 1.5) * hw;
   }
 
 }
 
 
 template <typename Array>
-void print(std::ostream& os, const Array& A)
+void print(std::ostream& os, const Array & A)
 {
   typename Array::const_iterator i;
+  os.precision(2);
   os << "[";
   for (i = A.begin(); i != A.end(); ++i) {
     print(os, *i);
-    if (boost::next(i) != A.end())
-      os << ',';
+//    if (boost::next(i) != A.end())
+//      os << ',' << "\t";
   }
   os << "]";
   os << "\n";
 }
 
 
-template<> void print<double>(std::ostream& os, const double& x)
+template<> void print<double>(std::ostream& os, const double & x)
+{
+  os << x << "\t";
+}
+
+template<> void print<int>(std::ostream& os, const int & x)
 {
   os << x;
 }
 
-
-double ho_radial (const int n, const int l, const double b, const double r)
+/*double ho_radial (const int n, const int l, const double b, const double r)
 {
   double xi = r/b;
   double alpha = (double)l + 0.5;
@@ -130,9 +134,9 @@ double potential (double i, double j)
   output *= numerical_prefactor;
 
   return output;
-}
+}*/
 
-double swave_ME (const int a, const int b, const int c, const int d, const double x[], const double w[], const int mesh_size, const double l_param)
+/*double swave_ME (const int a, const int b, const int c, const int d, const double x[], const double w[], const int mesh_size, const double l_param)
 {
 
   double direct = 0.;
@@ -158,10 +162,10 @@ double swave_ME (const int a, const int b, const int c, const int d, const doubl
   }
 
   return (direct + exchange);
-}
+}*/
 
 
-template <typename four_array>
+/*template <typename four_array>
 void populate_2body (four_array & h2_mat, const double x[], const double w[], const int mesh_size, const double l_param)
 {
 
@@ -204,7 +208,7 @@ void populate_2body (four_array & h2_mat, const double x[], const double w[], co
   }
   }     // end oscillator shell loops
 
-}
+}*/
 
 template <typename two_array, typename four_array>
   void create_spda_file (const two_array h1_mat, const four_array h2_mat)
@@ -227,6 +231,234 @@ template <typename two_array, typename four_array>
   }
 
 
+
+
+template <typename ref_array>
+void read_in_reference_m_scheme (ref_array & ref_m, std::string m_ref_file)
+{
+  const char * m_reference_file = (m_ref_file).c_str();
+  // input file stream for m_scheme
+  std::ifstream m_ref_in (m_reference_file);
+ 
+  if (m_ref_in.fail())
+  throw "ERROR: Cannot open m-scheme reference file";
+ 
+  size_t total_lines = 0;
+  std::string dummy;
+  double ref_num, n, l, j , m_j, tz;
+
+  // find total number of defined reference lines
+  while (std::getline (m_ref_in, dummy))
+  ++total_lines;
+
+
+  // clear the file stream, reset to read in the elements
+  m_ref_in.clear();
+  m_ref_in.seekg (0, std::ios::beg);
+
+  size_t ref_size = ref_m.size();
+  size_t ele_in = 0;
+
+  // read in and assign the references line by line
+  // to the matrix ref_m
+  for (size_t i = 0; i < total_lines; i++)
+  {
+  std::string orbit_dummy_1;
+  std::string orbit_dummy_2;
+  std::getline (m_ref_in, dummy);
+
+  if (!dummy.length() || dummy[0] == '#')     // skip zero length lines and lines that start with #
+    continue;
+
+  std::stringstream ss;
+
+  ss << dummy;            // read in the line to stringstream ss
+
+  ss >> orbit_dummy_1 >> orbit_dummy_2 >> ref_num >> n >> l >> j >> m_j >> tz;  // assign values of the line
+
+  std::cout << ref_num << " " << n << " " << l << " " << j << " " << m_j << " " << tz << "\n";
+
+
+  // only extract neutron-neutron states
+  if (tz == 1.)
+  {
+    ref_m [ele_in][0] = ref_num;    // reference number of the line
+    ref_m [ele_in][1] = n;          // principle quantum number
+    ref_m [ele_in][2] = l;          // orbital angular mom.
+    ref_m [ele_in][3] = j * 0.5;    // total angular mom.
+    ref_m [ele_in][4] = m_j * 0.5;  // total angular mom. projection
+    ref_m [ele_in][5] = tz;         // isospin projection (should all be +1.0)
+    ele_in++;
+  }
+
+  if (ele_in >= ref_size)
+    break;
+
+  }
+  
+  
+  
+
+  print(std::cout, ref_m);            // print the resulting matrix
+
+
+  
+}
+
+/**********************************************
+
+Function to read in the actual m scheme matrix  elements 
+calculated from Morten's code. 
+
+THIS WILL BREAK IF THE INPUT FILE .dat CHANGES TITLE OR FORMAT.
+
+**********************************************/
+
+template <typename ref_array, typename four_array>
+void read_in_matrix_m_scheme (ref_array & ref_m, four_array & h2_mat, std::string m_mat_file)
+{
+  // input file stream
+  const char * m_matrix_file = (m_mat_file).c_str();
+  std::ifstream m_matrix_in (m_matrix_file);
+
+  size_t total_lines = 0;
+  std::string dummy;
+  int alpha, beta, gamma, delta;
+  double value;
+
+  if (m_matrix_in.fail())
+  throw "ERROR: Cannot read m-scheme matrix file";
+
+  // get the total number of lines in the matrix elements file
+  while(std::getline(m_matrix_in, dummy))
+  ++total_lines;
+ 
+  // clear and reset the file stream
+  m_matrix_in.clear();
+  m_matrix_in.seekg(0, std::ios::beg);
+
+  size_t m_size = h2_mat.size();
+
+  // set the size of the m_scheme holder
+  //m_scheme_matrix.set_size (m_size, m_size);
+
+
+  int i,j,k,l;
+
+  for (size_t n = 0; n < total_lines; n++)
+  {
+  std::getline (m_matrix_in, dummy);
+
+  if (!dummy.length() || dummy[0] == '#')
+    continue;
+
+  i = -1;
+  j = -1;
+  k = -1;
+  l = -1;
+
+  std::stringstream ss;
+
+  ss << dummy;
+
+  ss >> alpha >> beta >> gamma >> delta >> value;
+
+  // check to see if alpha, beta, gamma, delta we're reading in
+  // matches the reference numbers in our reference matrix
+  // if yes --> read it in, otherwise discard it
+
+  for (size_t w = 0; w < m_size; w++)
+  {
+    if (alpha == ref_m[w][0]) 
+      i = w;
+  }
+  
+  for (size_t w = 0; w < m_size; w++)
+  {
+    if (beta == ref_m[w][0]) 
+      j = w;
+  }
+
+  for (size_t w = 0; w < m_size; w++)
+  {
+    if (gamma == ref_m[w][0]) 
+      k = w;
+  }
+
+  for (size_t w = 0; w < m_size; w++)
+  {
+    if (delta == ref_m[w][0]) 
+      l = w;
+  }
+
+  if (i >= 0 && j >= 0 && k >= 0 && l >= 0) // only activates if all 4 "if" statements above are true
+    h2_mat [i][j][k][l] = value;
+
+  }
+
+  // reset index term on reference matrix to span 0 to m_size instead of e.g. 3, 4, 9, 10, etc... for neutrons
+
+  for (size_t n = 0; n < m_size; n++)
+  ref_m[n][0] = n;
+
+  print(std::cout, ref_m);
+
+
+}
+
+
+template <typename two_array, typename four_array>
+void fullm_populate_hamiltonian (two_array & ref_m, two_array & h1_mat, four_array & h2_mat, const std::string reference_file, const std::string matrix_file, const double hw) 
+{
+
+  try
+  {
+    read_in_reference_m_scheme (ref_m, reference_file);
+    populate_1body (ref_m, h1_mat, hw);
+    read_in_matrix_m_scheme (ref_m, h2_mat, matrix_file);
+  }
+
+  catch (const char * msg)
+  {
+    std::cerr << msg << std::endl;  
+  }
+ 
+}
+
+template <typename two_array, typename four_array>
+void compactify_h2 (two_array & comp_h2, four_array & h2_mat)
+{
+  size_t mat_length = h2_mat.size();
+
+  double value;
+
+  for (size_t i = 0; i < mat_length; ++i)
+  {
+    for (size_t j = 0; j < mat_length; ++j)
+    {
+      for (size_t k = 0; k < mat_length; ++k)
+      {
+        for (size_t l = 0; l < mat_length; ++l)
+        {
+            value = h2_mat [i][j][k][l];
+
+            size_t left  = j * mat_length + i;
+
+            size_t right = k * mat_length + l; 
+
+            comp_h2 [left][right] = value;
+
+        }
+
+      }
+
+    }
+
+
+  }
+}
+
+
 /********************************************
 
 BEGIN MAIN PROGRAM
@@ -242,12 +474,15 @@ int main ()
 
 
   const int mesh_size = input_params.mesh_size;		// how many points to use for Gauss-Legendre (G-L) quadrature 
-  const int bsize = 2 * input_params.s_wave_basis;	// the size of the HO basis used, ONLY ACTIVE FOR S-WAVE
+  const int bsize = input_params.s_wave_basis;	// the size of the HO basis used, ONLY ACTIVE FOR S-WAVE
   const int particles = input_params.particles;		// the number of neutrons (particles) in the trap
   const int nodes = input_params.nodes;
   const double hc = input_params.hc;					// hbar * c - given in MeV * fm
   const double mass = input_params.mass;				// Nucleon mass - given in MeV/c^2
   const double hw = input_params.hw;					// hbar * omega 
+  const std::string m_ref = input_params.m_ref;    // single particle reference file - m scheme
+  const std::string m_mat = input_params.m_mat;    // m scheme matrix elements
+
   const double l_param = hc / sqrt(mass * hw);		// the relevant length parameter for the HO
 
 
@@ -263,32 +498,31 @@ int main ()
 
  
   typedef boost::multi_array<double, 2> two_array;
-//  typedef two_array::index index;
+  two_array ref_m (boost::extents[bsize][6]);
   two_array h1_mat(boost::extents[bsize][bsize]);
 
-
-  print(std::cout, h1_mat); 
-
-  populate_1body (h1_mat, hw);
-
-/*  // Assign values to the elements
-  int values = 0;
-  for(size_t i = 0; i != bsize; ++i) 
-    for(size_t j = 0; j != bsize; ++j)
-       		h1_mat[i][j] = values++;
-*/
-  print(std::cout, h1_mat); 
-
-//  test_pass_2 (h1_mat);
-
-
   typedef boost::multi_array<double, 4> four_array;
-//  typedef four_array::index index;
   four_array h2_mat(boost::extents[bsize][bsize][bsize][bsize]);
 
-  populate_2body (h2_mat, x, weight, mesh_size, l_param);
 
-  print(std::cout, h2_mat);
+
+
+
+
+
+
+
+
+
+  fullm_populate_hamiltonian (ref_m, h1_mat, h2_mat, m_ref, m_mat, hw);
+
+  print(std::cout, h1_mat); 
+
+  two_array comp_h2 (boost::extents[bsize*bsize][bsize*bsize]);
+
+  compactify_h2 (comp_h2, h2_mat);
+
+  print(std::cout, comp_h2);
 
   create_spda_file (h1_mat, h2_mat);
 
@@ -332,6 +566,8 @@ int main ()
 END MAIN PROGRAM
 
 ************************************************/
+
+
 
 /**********************************************
 
@@ -378,200 +614,17 @@ parameters read_in_inputs ()
 	if (counter == 6)
 	  ss >> input.hw;
 
+  if (counter == 7)
+    ss >> input.m_ref;
+
+  if (counter == 8)
+    ss >> input.m_mat;
+
+
 	counter++;					// increase the counter after reading in a parameter	
   }
 
   return input;						// return the struct 
 }
 
-
-
-
-int read_in_reference_m_scheme (std::string m_ref_file)
-{
-  const char * m_reference_file = (m_ref_file).c_str();
-  // input file stream for m_scheme
-  std::ifstream m_ref_in (m_reference_file);
- 
-  if (m_ref_in.fail())
-  throw "ERROR: Cannot open m-scheme reference file";
- 
-  size_t total_lines = 0;
-  std::string dummy;
-  double ref_num, n, l , j , m_j, tz;
-
-  // find total number of defined reference lines
-  while (std::getline (m_ref_in, dummy))
-  ++total_lines;
-
-  // Matrix to hold reference values. Divide by 2 for size because we only want to store
-  // and process elements for neutrons. Input file contains both proton and neutron terms.
-  //ref_m = arma::zeros (total_lines/2, 6); 
-  ref_m = arma::zeros (8, 6); 
-
-  // clear the file stream, reset to read in the elements
-  m_ref_in.clear();
-  m_ref_in.seekg (0, std::ios::beg);
-
-  std::size_t ele_in = 0;
-
-  // read in and assign the references line by line
-  // to the matrix ref_m
-  for (std::size_t i = 0; i < total_lines; i++)
-  {
-  std::string orbit_dummy_1;
-  std::string orbit_dummy_2;
-  std::getline (m_ref_in, dummy);
-
-  if (!dummy.length() || dummy[0] == '#')     // skip zero length lines and lines that start with #
-    continue;
-
-  std::stringstream ss;
-
-  ss << dummy;            // read in the line to stringstream ss
-
-  ss >> orbit_dummy_1 >> orbit_dummy_2 >> ref_num >> n >> l >> j >> m_j >> tz;  // assign values of the line
-
-  // only extract neutron-neutron states
-  if (tz == 1. && ele_in < 8)
-  {
-    ref_m (ele_in,0) = ref_num;       // reference number of the line
-    ref_m (ele_in,1) = n;         // principle quantum number
-    ref_m (ele_in,2) = l;         // orbital angular mom.
-    ref_m (ele_in,3) = j * 0.5;       // total angular mom.
-    ref_m (ele_in,4) = m_j * 0.5;       // total angular mom. projection
-    ref_m (ele_in,5) = tz;        // isospin projection (should all be +1.0)
-    ele_in++;
-  }
-  
-  
-  }
-
-  ref_m.print();            // print the resulting matrix
-
-  // return final dimensionality of reference matrix
-  return ele_in;
-}
-
-/**********************************************
-
-Function to read in the actual m scheme matrix  elements 
-calculated from Morten's code. 
-
-THIS WILL BREAK IF THE INPUT FILE .dat CHANGES TITLE OR FORMAT.
-
-**********************************************/
-
-
-void read_in_matrix_m_scheme (int m_size, std::string m_mat_file)
-{
-  // input file stream
-  const char * m_matrix_file = (m_mat_file).c_str();
-  std::ifstream m_matrix_in (m_matrix_file);
-
-  std::size_t total_lines = 0;
-  std::string dummy;
-  int alpha, beta, gamma, delta;
-  double value;
-
-  if (m_matrix_in.fail())
-  throw "ERROR: Cannot read m-scheme matrix file";
-
-  // get the total number of lines in the matrix elements file
-  while(std::getline(m_matrix_in, dummy))
-  ++total_lines;
- 
-  // clear and reset the file stream
-  m_matrix_in.clear();
-  m_matrix_in.seekg(0, std::ios::beg);
-
-  // set the size of the m_scheme holder
-  m_scheme_matrix.set_size (m_size, m_size);
-
-  for (int a = 0; a < m_size; a++)
-  {
-  for (int b = 0; b < m_size; b++)
-  {
-  m_scheme_matrix (a,b).set_size (m_size, m_size);
-  }
-  }
-
-  int i,j,k,l;
-
-  for (size_t n = 0; n < total_lines; n++)
-  {
-  std::getline (m_matrix_in, dummy);
-
-  if (!dummy.length() || dummy[0] == '#')
-    continue;
-
-  i = -1;
-  j = -1;
-  k = -1;
-  l = -1;
-
-  std::stringstream ss;
-
-  ss << dummy;
-
-  ss >> alpha >> beta >> gamma >> delta >> value;
-
-  // check to see if alpha, beta, gamma, delta we're reading in
-  // matches the reference numbers in our reference matrix
-  // if yes --> read it in, otherwise discard it
-
-  for (int w = 0; w < m_size; w++)
-  {
-    if (alpha == ref_m(w,0)) 
-      i = w;
-  }
-  
-  for (int w = 0; w < m_size; w++)
-  {
-    if (beta == ref_m(w,0)) 
-      j = w;
-  }
-
-  for (int w = 0; w < m_size; w++)
-  {
-    if (gamma == ref_m(w,0)) 
-      k = w;
-  }
-
-  for (int w = 0; w < m_size; w++)
-  {
-    if (delta == ref_m(w,0)) 
-      l = w;
-  }
-
-  if (i >= 0 && j >= 0 && k >= 0 && l >= 0) // only activates if all 4 "if" statements above are true
-    m_scheme_matrix (i,j)(k,l) = value;
-
-  }
-
-  // reset index term on reference matrix to span 0 to m_size instead of e.g. 3, 4, 9, 10, etc... for neutrons
-
-  for (int n = 0; n < m_size; n++)
-  ref_m(n,0) = n;
-
-  ref_m.print();
-
-
-}
-
-void fullm (std::string choice, std::string reference_file, std::string matrix_file) 
-{
-
-  try
-  {
-    nmax = read_in_reference_m_scheme (reference_file);
-    read_in_matrix_m_scheme (nmax, matrix_file);
-  }
-
-  catch (const char * msg)
-  {
-    std::cerr << msg << std::endl;  
-  }
- 
-}
 

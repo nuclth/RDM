@@ -5,9 +5,8 @@
 # Size of the Gauss-Legendre mesh (ACTIVE ONLY FOR S-WAVE)
 100
 
-# Size of the basis for the s-wave choice 
-# (not active for full-j or full-m)
-1
+# Size of the basis  
+5
 
 # Number of particles
 2
@@ -21,4 +20,9 @@
 # value for hbar * omega of the Harmonic oscillator
 10
 
+# input reference file for m-scheme
+test-spM.dat
+
+# input matrix file for m-scheme 
+test-VM-scheme.dat
 
