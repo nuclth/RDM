@@ -261,8 +261,7 @@ int main ()
 	printf ("\n");
   }*/
 
-  int test = 10;
-
+ 
   typedef boost::multi_array<double, 2> two_array;
 //  typedef two_array::index index;
   two_array h1_mat(boost::extents[bsize][bsize]);
@@ -384,3 +383,195 @@ parameters read_in_inputs ()
 
   return input;						// return the struct 
 }
+
+
+
+
+int read_in_reference_m_scheme (std::string m_ref_file)
+{
+  const char * m_reference_file = (m_ref_file).c_str();
+  // input file stream for m_scheme
+  std::ifstream m_ref_in (m_reference_file);
+ 
+  if (m_ref_in.fail())
+  throw "ERROR: Cannot open m-scheme reference file";
+ 
+  size_t total_lines = 0;
+  std::string dummy;
+  double ref_num, n, l , j , m_j, tz;
+
+  // find total number of defined reference lines
+  while (std::getline (m_ref_in, dummy))
+  ++total_lines;
+
+  // Matrix to hold reference values. Divide by 2 for size because we only want to store
+  // and process elements for neutrons. Input file contains both proton and neutron terms.
+  //ref_m = arma::zeros (total_lines/2, 6); 
+  ref_m = arma::zeros (8, 6); 
+
+  // clear the file stream, reset to read in the elements
+  m_ref_in.clear();
+  m_ref_in.seekg (0, std::ios::beg);
+
+  std::size_t ele_in = 0;
+
+  // read in and assign the references line by line
+  // to the matrix ref_m
+  for (std::size_t i = 0; i < total_lines; i++)
+  {
+  std::string orbit_dummy_1;
+  std::string orbit_dummy_2;
+  std::getline (m_ref_in, dummy);
+
+  if (!dummy.length() || dummy[0] == '#')     // skip zero length lines and lines that start with #
+    continue;
+
+  std::stringstream ss;
+
+  ss << dummy;            // read in the line to stringstream ss
+
+  ss >> orbit_dummy_1 >> orbit_dummy_2 >> ref_num >> n >> l >> j >> m_j >> tz;  // assign values of the line
+
+  // only extract neutron-neutron states
+  if (tz == 1. && ele_in < 8)
+  {
+    ref_m (ele_in,0) = ref_num;       // reference number of the line
+    ref_m (ele_in,1) = n;         // principle quantum number
+    ref_m (ele_in,2) = l;         // orbital angular mom.
+    ref_m (ele_in,3) = j * 0.5;       // total angular mom.
+    ref_m (ele_in,4) = m_j * 0.5;       // total angular mom. projection
+    ref_m (ele_in,5) = tz;        // isospin projection (should all be +1.0)
+    ele_in++;
+  }
+  
+  
+  }
+
+  ref_m.print();            // print the resulting matrix
+
+  // return final dimensionality of reference matrix
+  return ele_in;
+}
+
+/**********************************************
+
+Function to read in the actual m scheme matrix  elements 
+calculated from Morten's code. 
+
+THIS WILL BREAK IF THE INPUT FILE .dat CHANGES TITLE OR FORMAT.
+
+**********************************************/
+
+
+void read_in_matrix_m_scheme (int m_size, std::string m_mat_file)
+{
+  // input file stream
+  const char * m_matrix_file = (m_mat_file).c_str();
+  std::ifstream m_matrix_in (m_matrix_file);
+
+  std::size_t total_lines = 0;
+  std::string dummy;
+  int alpha, beta, gamma, delta;
+  double value;
+
+  if (m_matrix_in.fail())
+  throw "ERROR: Cannot read m-scheme matrix file";
+
+  // get the total number of lines in the matrix elements file
+  while(std::getline(m_matrix_in, dummy))
+  ++total_lines;
+ 
+  // clear and reset the file stream
+  m_matrix_in.clear();
+  m_matrix_in.seekg(0, std::ios::beg);
+
+  // set the size of the m_scheme holder
+  m_scheme_matrix.set_size (m_size, m_size);
+
+  for (int a = 0; a < m_size; a++)
+  {
+  for (int b = 0; b < m_size; b++)
+  {
+  m_scheme_matrix (a,b).set_size (m_size, m_size);
+  }
+  }
+
+  int i,j,k,l;
+
+  for (size_t n = 0; n < total_lines; n++)
+  {
+  std::getline (m_matrix_in, dummy);
+
+  if (!dummy.length() || dummy[0] == '#')
+    continue;
+
+  i = -1;
+  j = -1;
+  k = -1;
+  l = -1;
+
+  std::stringstream ss;
+
+  ss << dummy;
+
+  ss >> alpha >> beta >> gamma >> delta >> value;
+
+  // check to see if alpha, beta, gamma, delta we're reading in
+  // matches the reference numbers in our reference matrix
+  // if yes --> read it in, otherwise discard it
+
+  for (int w = 0; w < m_size; w++)
+  {
+    if (alpha == ref_m(w,0)) 
+      i = w;
+  }
+  
+  for (int w = 0; w < m_size; w++)
+  {
+    if (beta == ref_m(w,0)) 
+      j = w;
+  }
+
+  for (int w = 0; w < m_size; w++)
+  {
+    if (gamma == ref_m(w,0)) 
+      k = w;
+  }
+
+  for (int w = 0; w < m_size; w++)
+  {
+    if (delta == ref_m(w,0)) 
+      l = w;
+  }
+
+  if (i >= 0 && j >= 0 && k >= 0 && l >= 0) // only activates if all 4 "if" statements above are true
+    m_scheme_matrix (i,j)(k,l) = value;
+
+  }
+
+  // reset index term on reference matrix to span 0 to m_size instead of e.g. 3, 4, 9, 10, etc... for neutrons
+
+  for (int n = 0; n < m_size; n++)
+  ref_m(n,0) = n;
+
+  ref_m.print();
+
+
+}
+
+void fullm (std::string choice, std::string reference_file, std::string matrix_file) 
+{
+
+  try
+  {
+    nmax = read_in_reference_m_scheme (reference_file);
+    read_in_matrix_m_scheme (nmax, matrix_file);
+  }
+
+  catch (const char * msg)
+  {
+    std::cerr << msg << std::endl;  
+  }
+ 
+}
+
