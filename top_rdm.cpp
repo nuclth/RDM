@@ -426,7 +426,7 @@ void fullm_populate_hamiltonian (two_array & ref_m, two_array & h1_mat, four_arr
 }
 
 template <typename two_array, typename four_array>
-void compactify_h2 (two_array & comp_h2, four_array & h2_mat)
+void compactify_h2 (const two_array & ref_m, two_array & comp_h2, four_array & h2_mat)
 {
   size_t mat_length = h2_mat.size();
 
@@ -442,10 +442,27 @@ void compactify_h2 (two_array & comp_h2, four_array & h2_mat)
         {
             value = h2_mat [i][j][k][l];
 
+            if (value != 0.)
+            {
+            	std::cout << i << " " << j << " " << k << " " << l << " " << value << "\n";
+
+            }
+
+
             size_t left  = j * mat_length + i;
 
             size_t right = k * mat_length + l; 
 
+  /*         if (i == 0 && j == 4 && k == 0)
+            {
+            	std::cout << ref_m[l][1] << "\t" << ref_m[l][2] << "\n";
+            }
+
+           if (i == 0 && j == 1)
+            {
+            	std::cout << right << " " << l << " " << k << "\t" << value << "\n"; 
+            }
+*/
             comp_h2 [left][right] = value;
 
         }
@@ -520,7 +537,7 @@ int main ()
 
   two_array comp_h2 (boost::extents[bsize*bsize][bsize*bsize]);
 
-  compactify_h2 (comp_h2, h2_mat);
+  compactify_h2 (ref_m, comp_h2, h2_mat);
 
   print(std::cout, comp_h2);
 
