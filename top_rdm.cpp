@@ -288,6 +288,7 @@ void read_in_reference_m_scheme (ref_array & ref_m, std::string m_ref_file)
     ref_m [ele_in][3] = j * 0.5;    // total angular mom.
     ref_m [ele_in][4] = m_j * 0.5;  // total angular mom. projection
     ref_m [ele_in][5] = tz;         // isospin projection (should all be +1.0)
+    ref_m [ele_in][6] = ele_in;
     ele_in++;
   }
 
@@ -314,8 +315,8 @@ THIS WILL BREAK IF THE INPUT FILE .dat CHANGES TITLE OR FORMAT.
 
 **********************************************/
 
-template <typename ref_array, typename four_array>
-void read_in_matrix_m_scheme (ref_array & ref_m, four_array & h2_mat, std::string m_mat_file)
+template <typename ref_array, typename five_array>
+void read_in_matrix_m_scheme (const ref_array & ref_m, five_array & h2_mat, const std::string m_mat_file)
 {
   // input file stream
   const char * m_matrix_file = (m_mat_file).c_str();
@@ -337,7 +338,7 @@ void read_in_matrix_m_scheme (ref_array & ref_m, four_array & h2_mat, std::strin
   m_matrix_in.clear();
   m_matrix_in.seekg(0, std::ios::beg);
 
-  size_t m_size = h2_mat.size();
+  const size_t m_size = h2_mat.size();
 
   // set the size of the m_scheme holder
   //m_scheme_matrix.set_size (m_size, m_size);
@@ -392,14 +393,19 @@ void read_in_matrix_m_scheme (ref_array & ref_m, four_array & h2_mat, std::strin
   }
 
   if (i >= 0 && j >= 0 && k >= 0 && l >= 0) // only activates if all 4 "if" statements above are true
-    h2_mat [i][j][k][l] = value;
-
+    {
+      h2_mat [i][j][k][l][0] = value;
+      h2_mat [i][j][k][l][1] = alpha;
+      h2_mat [i][j][k][l][2] = beta;
+      h2_mat [i][j][k][l][3] = gamma;
+      h2_mat [i][j][k][l][4] = delta;
+    }
   }
 
   // reset index term on reference matrix to span 0 to m_size instead of e.g. 3, 4, 9, 10, etc... for neutrons
 
-  for (size_t n = 0; n < m_size; n++)
-  ref_m[n][0] = n;
+//  for (size_t n = 0; n < m_size; n++)
+//  ref_m[n][0] = n;
 
   print(std::cout, ref_m);
 
@@ -407,8 +413,8 @@ void read_in_matrix_m_scheme (ref_array & ref_m, four_array & h2_mat, std::strin
 }
 
 
-template <typename two_array, typename four_array>
-void fullm_populate_hamiltonian (two_array & ref_m, two_array & h1_mat, four_array & h2_mat, const std::string reference_file, const std::string matrix_file, const double hw) 
+template <typename two_array, typename five_array>
+void fullm_populate_hamiltonian (two_array & ref_m, two_array & h1_mat, five_array & h2_mat, const std::string reference_file, const std::string matrix_file, const double hw) 
 {
 
   try
@@ -425,12 +431,14 @@ void fullm_populate_hamiltonian (two_array & ref_m, two_array & h1_mat, four_arr
  
 }
 
-template <typename two_array, typename four_array>
-void compactify_h2 (const two_array & ref_m, two_array & comp_h2, four_array & h2_mat)
+template <typename two_array, typename five_array>
+void compactify_h2 (const two_array & ref_m, two_array & comp_h2, five_array & h2_mat)
 {
-  size_t mat_length = h2_mat.size();
+  const size_t mat_length = h2_mat.size();
 
   double value;
+
+  size_t alpha, beta, gamma, delta;
 
   for (size_t i = 0; i < mat_length; ++i)
   {
@@ -440,11 +448,43 @@ void compactify_h2 (const two_array & ref_m, two_array & comp_h2, four_array & h
       {
         for (size_t l = 0; l < mat_length; ++l)
         {
-            value = h2_mat [i][j][k][l];
+            value = h2_mat [i][j][k][l][0];
+
+            alpha = h2_mat [i][j][k][l][1];
+            beta  = h2_mat [i][j][k][l][2];
+            gamma = h2_mat [i][j][k][l][3];
+            delta = h2_mat [i][j][k][l][4];
 
             if (value != 0.)
             {
-            	std::cout << i << " " << j << " " << k << " " << l << " " << value << "\n";
+            	std::cout << alpha << " " << beta << " " << gamma << " " << delta << " " << value << " \t";
+
+              for (size_t loop = 0; loop < mat_length; loop++)
+              {
+                if (alpha == ref_m[loop][0])
+                  std::cout << ref_m[loop][2] << "\t";
+              }
+
+
+              for (size_t loop = 0; loop < mat_length; loop++)
+              {
+                if (beta == ref_m[loop][0])
+                  std::cout << ref_m[loop][2] << "\t";
+              }
+
+
+              for (size_t loop = 0; loop < mat_length; loop++)
+              {
+                if (gamma == ref_m[loop][0])
+                  std::cout << ref_m[loop][2] << "\t";
+              }
+
+
+              for (size_t loop = 0; loop < mat_length; loop++)
+              {
+                if (delta == ref_m[loop][0])
+                  std::cout << ref_m[loop][2] << "\n";
+              }
 
             }
 
@@ -473,6 +513,37 @@ void compactify_h2 (const two_array & ref_m, two_array & comp_h2, four_array & h
 
 
   }
+}
+
+template <typename two_array>
+void create_c_matrix (two_array & h1_mat, two_array & h2_mat, two_array & c_matrix)
+{
+  size_t h1_len = h1_mat.size();
+  size_t h2_len = h2_mat.size();
+
+  for (size_t i = 0; i < h1_len; i++) 
+  {
+    for (size_t j = 0; j < h1_len; j++)
+    {
+      c_matrix[i][j] = h1_mat [i][j];
+    }
+
+  }
+
+  print(std::cout, c_matrix);
+
+  for (size_t i = 0; i < h2_len; i++) 
+  {
+    for (size_t j = 0; j < h2_len; j++)
+    {
+      size_t ic = i + h1_len;
+      size_t jc = j + h1_len;
+
+      c_matrix[ic][jc] = h2_mat [i][j];
+    }
+
+  }
+
 }
 
 
@@ -515,11 +586,11 @@ int main ()
 
  
   typedef boost::multi_array<double, 2> two_array;
-  two_array ref_m (boost::extents[bsize][6]);
+  two_array ref_m (boost::extents[bsize][7]);
   two_array h1_mat(boost::extents[bsize][bsize]);
 
-  typedef boost::multi_array<double, 4> four_array;
-  four_array h2_mat(boost::extents[bsize][bsize][bsize][bsize]);
+  typedef boost::multi_array<double, 5> five_array;
+  five_array h2_mat(boost::extents[bsize][bsize][bsize][bsize][5]);
 
 
 
@@ -541,7 +612,13 @@ int main ()
 
   print(std::cout, comp_h2);
 
-  create_spda_file (h1_mat, h2_mat);
+  two_array c_matrix (boost::extents[bsize*bsize + bsize][bsize*bsize + bsize]);
+
+  create_c_matrix (h1_mat, comp_h2, c_matrix);
+
+  print(std::cout, c_matrix);
+
+//  create_spda_file (h1_mat, h2_mat);
 
 
 //  print(std::cout, h2_mat);
