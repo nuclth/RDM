@@ -47,6 +47,8 @@ static const double k_r = 1.487;
 static const double k_t = 0.639;
 static const double k_s = 0.465;
 
+// struct to hold the input file variables
+
 struct parameters 
 {
 	int nodes;
@@ -61,10 +63,21 @@ struct parameters
 };
 
 
-
 // function prototypes
 extern void gauss (int npts, int job, double a, double b, double xpts[], double weights[]);
 parameters read_in_inputs ();
+
+
+
+/***************************************************************
+
+
+ Function to populate the 1-body part of the Hamiltonian. 
+ The 1-body part here is T + U for kinetic energy T and external potential U
+
+
+***************************************************************/
+
 
 template <typename two_array>
 void populate_1body (const two_array & ref_m, two_array & h1_mat, const double hw)
@@ -83,6 +96,13 @@ void populate_1body (const two_array & ref_m, two_array & h1_mat, const double h
 
 }
 
+/***************************************************************
+
+
+ Function to print out an arbitrary array
+
+
+***************************************************************/
 
 template <typename Array>
 void print(std::ostream& os, const Array & A)
@@ -100,6 +120,8 @@ void print(std::ostream& os, const Array & A)
 }
 
 
+// individual print functions for different array templates
+
 template<> void print<double>(std::ostream& os, const double & x)
 {
   os << x << "\t";
@@ -109,6 +131,12 @@ template<> void print<int>(std::ostream& os, const int & x)
 {
   os << x;
 }
+
+///////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////
+///        FUNCTIONS RELATING TO SWAVE IMPLEMENTATION
+///////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////
 
 /*double ho_radial (const int n, const int l, const double b, const double r)
 {
@@ -210,31 +238,122 @@ void populate_2body (four_array & h2_mat, const double x[], const double w[], co
 
 }*/
 
-template <typename two_array, typename four_array>
-  void create_spda_file (const two_array h1_mat, const four_array h2_mat)
+///////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////
+///         END SWAVE IMPLEMENTATION
+///////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////
+
+
+
+
+/***************************************************************
+
+ 
+ Function to output the SPD file in correct format.
+
+
+***************************************************************/
+
+template <typename one_array, typename two_array, typename three_array>
+void create_spda_file (const two_array c_matrix, const two_array F1_con, const three_array F2_con, const one_array F2_val, const int particles)
+{
+  size_t F2num = F2_con.size();
+  size_t bsize = F1_con.size() / 2;
+
+  size_t num_cons = 1 + F2num;  // N constraint = 1, F2num = p + q constraints  
+    
+  std::cout << std::endl << num_cons << std::endl;
+  std::cout << 2 << std::endl;
+  std::cout << bsize << " " << bsize << std::endl;
+  std::cout << particles;
+
+  for (size_t i = 0; i < F2num; i++)
+    std::cout << " " << F2_val[i];
+
+  std::cout << std::endl;
+
+//  print(std::cout, F1_con);
+
+  for (size_t i = 0; i < bsize; i++)
   {
-    
-    size_t h1_len = h1_mat.size();
+  for (size_t j = i; j < bsize; j++)
+  {
+    if (c_matrix[i][j] != 0.0)
+      std::cout << 0 << " " << 1 << " " << i+1 << " " << j+1 << " " << c_matrix[i][j] << std::endl;
+  }
+  }
 
-    size_t s_orbs = h1_len / 2;
+  for (size_t i = bsize; i < 2*bsize; i++)
+  {
+  for (size_t j = i; j < 2*bsize; j++)
+  {
+    if (c_matrix[i][j] != 0.0)
+      std::cout << 0 << " " << 2 << " " << i+1-bsize << " " << j+1-bsize << " " << c_matrix[i][j] << std::endl;
+  }
+  }
 
-    for (size_t i = 0; i < h1_len; ++i)
+  size_t con_count = 1;
+
+  for (size_t i = 0; i < bsize; i++)
+  {
+  for (size_t j = i; j < bsize; j++)
+  {
+    if (F1_con[i][j] != 0.0)
+      std::cout << con_count << " " << 1 << " " << i+1 << " " << j+1 << " " << F1_con[i][j] << std::endl;
+  }
+  }
+
+  for (size_t i = bsize; i < 2*bsize; i++)
+  {
+  for (size_t j = i; j < 2*bsize; j++)
+  {
+    if (F1_con[i][j] != 0.0)
+      std::cout << con_count << " " << 2 << " " << i+1-bsize << " " << j+1-bsize << " " << F1_con[i][j] << std::endl;
+  }
+  }
+
+
+  con_count++;
+
+  for (size_t cnum = 0; cnum < F2num; cnum++)
+  {
+    for (size_t i = 0; i < bsize; i++)
     {
-      for (size_t j = i; j < h1_len; ++j)
-      {
-        if (h1_mat[i][j] != 0.)
-          std::cout << h1_mat[i][j] << " ";
-      }
-    }  
+    for (size_t j = i; j < bsize; j++)
+    {
+      if (F2_con[cnum][i][j] != 0.0)
+       std::cout << con_count << " " << 1 << " " << i+1 << " " << j+1 << " " << F2_con[cnum][i][j] << std::endl;
+    }
+    }
 
-    
+    for (size_t i = bsize; i < 2*bsize; i++)
+    {
+    for (size_t j = i; j < 2*bsize; j++)
+    {
+      if (F2_con[cnum][i][j] != 0.0)
+        std::cout << con_count << " " << 2 << " " << i+1-bsize << " " << j+1-bsize << " " << F2_con[cnum][i][j] << std::endl;
+    }
+    }
+
+    con_count++;
+
   }
 
 
 
+}
+
+/***************************************************************
+
+ 
+ Function to read in the reference file for m scheme.
+
+
+***************************************************************/
 
 template <typename ref_array>
-void read_in_reference_m_scheme (ref_array & ref_m, std::string m_ref_file)
+void read_in_reference_m_scheme (ref_array & ref_m, const std::string m_ref_file)
 {
   const char * m_reference_file = (m_ref_file).c_str();
   // input file stream for m_scheme
@@ -407,7 +526,7 @@ void read_in_matrix_m_scheme (const ref_array & ref_m, five_array & h2_mat, cons
 //  for (size_t n = 0; n < m_size; n++)
 //  ref_m[n][0] = n;
 
-  print(std::cout, ref_m);
+//  print(std::cout, ref_m);
 
 
 }
@@ -430,6 +549,7 @@ void fullm_populate_hamiltonian (two_array & ref_m, two_array & h1_mat, five_arr
   }
  
 }
+
 
 template <typename two_array, typename five_array>
 void compactify_h2 (const two_array & ref_m, two_array & comp_h2, five_array & h2_mat)
@@ -516,7 +636,7 @@ void compactify_h2 (const two_array & ref_m, two_array & comp_h2, five_array & h
 }
 
 template <typename two_array>
-void create_c_matrix (two_array & h1_mat, two_array & h2_mat, two_array & c_matrix)
+void create_c_matrix (const two_array & h1_mat, const two_array & h2_mat, two_array & c_matrix, const bool two_body_toggle)
 {
   size_t h1_len = h1_mat.size();
   size_t h2_len = h2_mat.size();
@@ -525,15 +645,17 @@ void create_c_matrix (two_array & h1_mat, two_array & h2_mat, two_array & c_matr
   {
     for (size_t j = 0; j < h1_len; j++)
     {
-      c_matrix[i][j] = h1_mat [i][j];
+      c_matrix[i][j] = h1_mat [i][j] * -1.0;
     }
 
   }
 
   print(std::cout, c_matrix);
 
-  for (size_t i = 0; i < h2_len; i++) 
+  if (two_body_toggle)
   {
+    for (size_t i = 0; i < h2_len; i++) 
+    {
     for (size_t j = 0; j < h2_len; j++)
     {
       size_t ic = i + h1_len;
@@ -542,10 +664,96 @@ void create_c_matrix (two_array & h1_mat, two_array & h2_mat, two_array & c_matr
       c_matrix[ic][jc] = h2_mat [i][j];
     }
 
+    }
   }
-
 }
 
+double kron_del(const size_t i, const size_t j)
+{
+
+  if (i == j)
+    return 1.;
+
+  return 0.;
+}
+
+
+template <typename two_array>
+void init_F1_flag (two_array & F1_con_1, two_array & F1_con)
+{
+  size_t bsize = F1_con_1.size();
+  size_t cmat_extent = F1_con.size();
+
+  for (size_t i = 0; i < bsize; i++)
+  {
+    F1_con_1[i][i] = 1.;    
+  }
+
+  for (size_t i = 0; i < cmat_extent; i++)
+  {
+    if (i < bsize)
+      F1_con[i][i] = F1_con_1[i][i];
+  }
+}
+
+
+template <typename four_array, typename three_array, typename one_array>
+void init_F2_flag (four_array & F2_con_1, three_array & F2_con, one_array & F2_val)
+{
+
+  size_t F2num = F2_con.size();
+  size_t bsize = F2_con_1.size();
+
+  for (size_t i = 0; i < bsize; i++)
+  {
+  for (size_t j = 0; j < bsize; j++)
+  {
+    for (size_t k = 0; k < bsize; k++)
+    {
+    for (size_t l = 0; l < bsize; l++)
+    {
+
+        F2_con_1[i][j][k][l] = (1./2.)*(kron_del(i,k)*kron_del(j,l) + kron_del(i,l)*kron_del(j,k));
+    }
+    }
+
+  }
+  }
+
+  size_t counter = 0;
+
+  for (size_t i1 = 0;  i1 < bsize; i1++)
+  {
+  for (size_t i2 = i1; i2 < bsize; i2++)
+  {
+    for (size_t j = 0; j < bsize; j++)
+    {
+    for (size_t k = 0; k < bsize; k++)
+    {
+      size_t jq = j + bsize;
+      size_t kq = k + bsize;
+
+      size_t i = counter;
+
+      F2_con[i][j][k]   = F2_con_1 [i1][i2][j][k];
+      F2_con[i][jq][kq] = F2_con_1 [i1][i2][j][k];
+    }
+    }
+
+    if (i1 == i2)
+      F2_val[counter] = 1.;
+    else
+      F2_val[counter] = 0.;
+
+    counter++;
+  }
+  }
+
+  printf("%i", F2num);
+  printf("\n");
+  printf("%i", bsize);
+  printf("\n");
+}
 
 /********************************************
 
@@ -555,29 +763,54 @@ BEGIN MAIN PROGRAM
 
 int main ()
 {
-  parameters input_params;						// create a struct to hold user specified parameters
-  input_params = read_in_inputs (); 					// read in the values from inputs.inp, store in input_params	
+  
+  parameters input_params;						             // create a struct to hold user specified parameters
+  input_params = read_in_inputs (); 					     // read in the values from inputs.inp, store in input_params	
 
   // Now create/copy input parameters for ease of reading the code into newly defined local variables
 
 
-  const int mesh_size = input_params.mesh_size;		// how many points to use for Gauss-Legendre (G-L) quadrature 
-  const int bsize = input_params.s_wave_basis;	// the size of the HO basis used, ONLY ACTIVE FOR S-WAVE
-  const int particles = input_params.particles;		// the number of neutrons (particles) in the trap
+  const int mesh_size = input_params.mesh_size;		 // how many points to use for Gauss-Legendre (G-L) quadrature 
+  const int bsize = input_params.s_wave_basis;	   // the size of the HO basis used, ONLY ACTIVE FOR S-WAVE
+  const int particles = input_params.particles;		 // the number of neutrons (particles) in the trap
   const int nodes = input_params.nodes;
-  const double hc = input_params.hc;					// hbar * c - given in MeV * fm
-  const double mass = input_params.mass;				// Nucleon mass - given in MeV/c^2
-  const double hw = input_params.hw;					// hbar * omega 
+  const double hc = input_params.hc;					     // hbar * c - given in MeV * fm
+  const double mass = input_params.mass;			     // Nucleon mass - given in MeV/c^2
+  const double hw = input_params.hw;					     // hbar * omega 
   const std::string m_ref = input_params.m_ref;    // single particle reference file - m scheme
   const std::string m_mat = input_params.m_mat;    // m scheme matrix elements
 
-  const double l_param = hc / sqrt(mass * hw);		// the relevant length parameter for the HO
-
+  const double l_param = hc / sqrt(mass * hw);		 // the relevant length parameter for the HO
 
   std::cout << "Building system..." << std::endl;
 
-  double weight[nodes], x[nodes];							// create arrays to hold gaussian weights/positions
-  gauss (mesh_size, 2, 0., 4., x, weight);						// creating weights/positions for s-wave G-L quad.
+
+  // define flags for all different combinations of conditions in RDM
+
+  bool F1_flag = true;
+  bool F2_flag = true;
+
+  size_t F2num = bsize * (bsize + 1)/2;
+
+  // turn off or on two-body potential
+
+  bool two_body_toggle = false;
+
+  size_t cmat_extent = 0;
+
+  if (two_body_toggle)
+  {
+    cmat_extent = 2*bsize + bsize*bsize;
+  }
+
+  else
+  {
+    cmat_extent = 2*bsize;
+  }
+
+
+//  double weight[nodes], x[nodes];							// create arrays to hold gaussian weights/positions
+//  gauss (mesh_size, 2, 0., 4., x, weight);						// creating weights/positions for s-wave G-L quad.
 /*  for (int i = 0; i < nodes; i++)
   {
 	printf ("%f", x[i]);
@@ -585,22 +818,47 @@ int main ()
   }*/
 
  
+  typedef boost::multi_array<double, 1> one_array;
   typedef boost::multi_array<double, 2> two_array;
+  typedef boost::multi_array<double, 3> three_array;
+  typedef boost::multi_array<double, 4> four_array;
+  typedef boost::multi_array<double, 5> five_array;
+
   two_array ref_m (boost::extents[bsize][7]);
   two_array h1_mat(boost::extents[bsize][bsize]);
 
-  typedef boost::multi_array<double, 5> five_array;
   five_array h2_mat(boost::extents[bsize][bsize][bsize][bsize][5]);
 
 
+  two_array  F1_con_1 (boost::extents[bsize][bsize]);
+  four_array F2_con_1 (boost::extents[bsize][bsize][bsize][bsize]);
 
+  two_array   F1_con (boost::extents[cmat_extent][cmat_extent]);
+  three_array F2_con (boost::extents[F2num][cmat_extent][cmat_extent]);
 
+  one_array   F2_val (boost::extents[F2num]);
 
+  if (F1_flag)
+  {
+    init_F1_flag (F1_con_1, F1_con);
+  }
 
+  if (F2_flag)
+  {
+    init_F2_flag (F2_con_1, F2_con, F2_val);
+  }
 
+  print(std::cout, F1_con);
 
+  printf("\n");
 
+  print(std::cout, F2_con);
 
+  printf("\n");
+
+  print(std::cout, F2_val);
+
+  printf("\n");
 
   fullm_populate_hamiltonian (ref_m, h1_mat, h2_mat, m_ref, m_mat, hw);
 
@@ -610,15 +868,15 @@ int main ()
 
   compactify_h2 (ref_m, comp_h2, h2_mat);
 
-  print(std::cout, comp_h2);
+ // print(std::cout, comp_h2);
 
-  two_array c_matrix (boost::extents[bsize*bsize + bsize][bsize*bsize + bsize]);
+  two_array c_matrix (boost::extents[cmat_extent][cmat_extent]);
 
-  create_c_matrix (h1_mat, comp_h2, c_matrix);
+  create_c_matrix (h1_mat, comp_h2, c_matrix, two_body_toggle);
 
   print(std::cout, c_matrix);
 
-//  create_spda_file (h1_mat, h2_mat);
+  create_spda_file (c_matrix, F1_con, F2_con, F2_val, particles);
 
 
 //  print(std::cout, h2_mat);
