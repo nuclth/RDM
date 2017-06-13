@@ -119,8 +119,15 @@ void print(std::ostream& os, const Array & A)
   os << "\n";
 }
 
+/***************************************************************
 
-// individual print functions for different array templates
+
+ Individual print functions depending on whether template takes 
+ double or int.
+
+
+***************************************************************/
+
 
 template<> void print<double>(std::ostream& os, const double & x)
 {
@@ -425,14 +432,14 @@ void read_in_reference_m_scheme (ref_array & ref_m, const std::string m_ref_file
   
 }
 
-/**********************************************
+/***************************************************************
 
 Function to read in the actual m scheme matrix  elements 
 calculated from Morten's code. 
 
 THIS WILL BREAK IF THE INPUT FILE .dat CHANGES TITLE OR FORMAT.
 
-**********************************************/
+***************************************************************/
 
 template <typename ref_array, typename five_array>
 void read_in_matrix_m_scheme (const ref_array & ref_m, five_array & h2_mat, const std::string m_mat_file)
@@ -531,6 +538,14 @@ void read_in_matrix_m_scheme (const ref_array & ref_m, five_array & h2_mat, cons
 
 }
 
+/***************************************************************
+
+Wrapper function to read in single-particle m scheme reference 
+file, populate 1-body Hamiltonian matrix elements, and then 
+populate 2-body matrix elements.
+
+***************************************************************/
+
 
 template <typename two_array, typename five_array>
 void fullm_populate_hamiltonian (two_array & ref_m, two_array & h1_mat, five_array & h2_mat, const std::string reference_file, const std::string matrix_file, const double hw) 
@@ -550,6 +565,12 @@ void fullm_populate_hamiltonian (two_array & ref_m, two_array & h1_mat, five_arr
  
 }
 
+
+/***************************************************************
+
+
+
+***************************************************************/
 
 template <typename two_array, typename five_array>
 void compactify_h2 (const two_array & ref_m, two_array & comp_h2, five_array & h2_mat)
@@ -635,6 +656,19 @@ void compactify_h2 (const two_array & ref_m, two_array & comp_h2, five_array & h
   }
 }
 
+/***************************************************************
+
+Function to create the F0 constraint matrix for the SDP solver.
+This matrix is just the Hamiltonian matrix elements for the 1RDM
+and 2RDM parts (where applicable) with zeros in the other parts
+of the matrix.
+
+Note that since the SDP solver maximizes the objective function,
+here we multiply all elements by -1 so that we are maximizing
+the negative energy.
+
+***************************************************************/
+
 template <typename two_array>
 void create_c_matrix (const two_array & h1_mat, const two_array & h2_mat, two_array & c_matrix, const bool two_body_toggle)
 {
@@ -668,6 +702,12 @@ void create_c_matrix (const two_array & h1_mat, const two_array & h2_mat, two_ar
   }
 }
 
+/***************************************************************
+
+Kronecker delta function. Returns 1 if i=j and 0 otherwise.
+
+***************************************************************/
+
 double kron_del(const size_t i, const size_t j)
 {
 
@@ -677,6 +717,20 @@ double kron_del(const size_t i, const size_t j)
   return 0.;
 }
 
+
+/***************************************************************
+
+Function to create our F1 constraint matrix to fix the total
+particle number N (fixes trace of the 1RDM to be N). 
+
+In keeping with other constraint functions, first populate the
+F1_con_1 matrix (only one constraint) then populate the full F1_con
+matrix. 
+
+Note that F1_con_1 is a basis x basis size matrix while F1_con 
+matches the dimensions of the F0 constraint matrix.
+
+***************************************************************/
 
 template <typename two_array>
 void init_F1_flag (two_array & F1_con_1, two_array & F1_con)
@@ -697,20 +751,35 @@ void init_F1_flag (two_array & F1_con_1, two_array & F1_con)
 }
 
 
+/***************************************************************
+
+Function to create our F2 constraint matrices to fix the relation
+between the 1RDM and its twin q. 
+
+First populate the F2_con_1 matrix which serves as the basis x basis
+size constraint matrix for the 1RDM sector and the q sector (both 
+have the same constraint matrix).
+
+Then populate this matrix into the full F0 sized constraint term 
+F2_con. 
+
+***************************************************************/
+
+
 template <typename four_array, typename three_array, typename one_array>
 void init_F2_flag (four_array & F2_con_1, three_array & F2_con, one_array & F2_val)
 {
 
-  size_t F2num = F2_con.size();
-  size_t bsize = F2_con_1.size();
+  size_t F2num = F2_con.size();           // number of F2 constraint matrices
+  size_t bsize = F2_con_1.size();         // basis size
 
-  for (size_t i = 0; i < bsize; i++)
+  for (size_t i = 0; i < bsize; i++)      // loop over ith constraint matrix
   {
-  for (size_t j = 0; j < bsize; j++)
+  for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
   {
-    for (size_t k = 0; k < bsize; k++)
+    for (size_t k = 0; k < bsize; k++)    // loop over matrix row
     {
-    for (size_t l = 0; l < bsize; l++)
+    for (size_t l = 0; l < bsize; l++)    // loop over matrix column
     {
 
         F2_con_1[i][j][k][l] = (1./2.)*(kron_del(i,k)*kron_del(j,l) + kron_del(i,l)*kron_del(j,k));
@@ -754,6 +823,8 @@ void init_F2_flag (four_array & F2_con_1, three_array & F2_con, one_array & F2_v
   printf("%i", bsize);
   printf("\n");
 }
+
+
 
 /********************************************
 
