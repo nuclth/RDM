@@ -263,22 +263,22 @@ void populate_2body (four_array & h2_mat, const double x[], const double w[], co
 ***************************************************************/
 
 template <typename one_array, typename two_array, typename three_array>
-void create_spda_file (const two_array c_matrix, const two_array F1_con, const three_array F2_con, const one_array F2_val, const int particles)
+void create_spda_file (const two_array c_matrix, const two_array F1_con, const three_array F2_con, const one_array F2_val, const int particles, std::ofstream & spda_out)
 {
   size_t F2num = F2_con.size();
   size_t bsize = F1_con.size() / 2;
 
   size_t num_cons = 1 + F2num;  // N constraint = 1, F2num = p + q constraints  
     
-  std::cout << std::endl << num_cons << std::endl;
-  std::cout << 2 << std::endl;
-  std::cout << bsize << " " << bsize << std::endl;
-  std::cout << particles;
+  spda_out << num_cons << std::endl;
+  spda_out << 2 << std::endl;
+  spda_out << bsize << " " << bsize << std::endl;
+  spda_out << particles;
 
   for (size_t i = 0; i < F2num; i++)
-    std::cout << " " << F2_val[i];
+    spda_out << " " << F2_val[i];
 
-  std::cout << std::endl;
+  spda_out << std::endl;
 
 //  print(std::cout, F1_con);
 
@@ -287,7 +287,7 @@ void create_spda_file (const two_array c_matrix, const two_array F1_con, const t
   for (size_t j = i; j < bsize; j++)
   {
     if (c_matrix[i][j] != 0.0)
-      std::cout << 0 << " " << 1 << " " << i+1 << " " << j+1 << " " << c_matrix[i][j] << std::endl;
+      spda_out << 0 << " " << 1 << " " << i+1 << " " << j+1 << " " << c_matrix[i][j] << std::endl;
   }
   }
 
@@ -296,7 +296,7 @@ void create_spda_file (const two_array c_matrix, const two_array F1_con, const t
   for (size_t j = i; j < 2*bsize; j++)
   {
     if (c_matrix[i][j] != 0.0)
-      std::cout << 0 << " " << 2 << " " << i+1-bsize << " " << j+1-bsize << " " << c_matrix[i][j] << std::endl;
+      spda_out << 0 << " " << 2 << " " << i+1-bsize << " " << j+1-bsize << " " << c_matrix[i][j] << std::endl;
   }
   }
 
@@ -307,7 +307,7 @@ void create_spda_file (const two_array c_matrix, const two_array F1_con, const t
   for (size_t j = i; j < bsize; j++)
   {
     if (F1_con[i][j] != 0.0)
-      std::cout << con_count << " " << 1 << " " << i+1 << " " << j+1 << " " << F1_con[i][j] << std::endl;
+      spda_out << con_count << " " << 1 << " " << i+1 << " " << j+1 << " " << F1_con[i][j] << std::endl;
   }
   }
 
@@ -316,7 +316,7 @@ void create_spda_file (const two_array c_matrix, const two_array F1_con, const t
   for (size_t j = i; j < 2*bsize; j++)
   {
     if (F1_con[i][j] != 0.0)
-      std::cout << con_count << " " << 2 << " " << i+1-bsize << " " << j+1-bsize << " " << F1_con[i][j] << std::endl;
+      spda_out << con_count << " " << 2 << " " << i+1-bsize << " " << j+1-bsize << " " << F1_con[i][j] << std::endl;
   }
   }
 
@@ -330,7 +330,7 @@ void create_spda_file (const two_array c_matrix, const two_array F1_con, const t
     for (size_t j = i; j < bsize; j++)
     {
       if (F2_con[cnum][i][j] != 0.0)
-       std::cout << con_count << " " << 1 << " " << i+1 << " " << j+1 << " " << F2_con[cnum][i][j] << std::endl;
+       spda_out << con_count << " " << 1 << " " << i+1 << " " << j+1 << " " << F2_con[cnum][i][j] << std::endl;
     }
     }
 
@@ -339,7 +339,7 @@ void create_spda_file (const two_array c_matrix, const two_array F1_con, const t
     for (size_t j = i; j < 2*bsize; j++)
     {
       if (F2_con[cnum][i][j] != 0.0)
-        std::cout << con_count << " " << 2 << " " << i+1-bsize << " " << j+1-bsize << " " << F2_con[cnum][i][j] << std::endl;
+        spda_out << con_count << " " << 2 << " " << i+1-bsize << " " << j+1-bsize << " " << F2_con[cnum][i][j] << std::endl;
     }
     }
 
@@ -855,17 +855,24 @@ int main ()
 
   std::cout << "Building system..." << std::endl;
 
+//  const char * m_matrix_file = (m_mat_file).c_str();
+  
+
 
   // define flags for all different combinations of conditions in RDM
 
   bool F1_flag = true;
   bool F2_flag = true;
 
+  bool two_body_toggle = false;
+
+  bool diag_toggle = true;
+
   size_t F2num = bsize * (bsize + 1)/2;
 
   // turn off or on two-body potential
 
-  bool two_body_toggle = false;
+
 
   size_t cmat_extent = 0;
 
@@ -879,6 +886,11 @@ int main ()
     cmat_extent = 2*bsize;
   }
 
+  std::string diag_file = "diagnostic_out/test_diag.dat";
+  std::string spda_file = "spd_files/test_spd.dat";
+
+  std::ofstream diag_out (diag_file);
+  std::ofstream spda_out (spda_file);
 
 //  double weight[nodes], x[nodes];							// create arrays to hold gaussian weights/positions
 //  gauss (mesh_size, 2, 0., 4., x, weight);						// creating weights/positions for s-wave G-L quad.
@@ -919,21 +931,10 @@ int main ()
     init_F2_flag (F2_con_1, F2_con, F2_val);
   }
 
-  print(std::cout, F1_con);
-
-  printf("\n");
-
-  print(std::cout, F2_con);
-
-  printf("\n");
-
-  print(std::cout, F2_val);
-
-  printf("\n");
 
   fullm_populate_hamiltonian (ref_m, h1_mat, h2_mat, m_ref, m_mat, hw);
 
-  print(std::cout, h1_mat); 
+
 
   two_array comp_h2 (boost::extents[bsize*bsize][bsize*bsize]);
 
@@ -945,10 +946,52 @@ int main ()
 
   create_c_matrix (h1_mat, comp_h2, c_matrix, two_body_toggle);
 
-  print(std::cout, c_matrix);
+  create_spda_file (c_matrix, F1_con, F2_con, F2_val, particles, spda_out);
 
-  create_spda_file (c_matrix, F1_con, F2_con, F2_val, particles);
 
+
+  if (diag_toggle)
+  {
+  	diag_out << "1 term - " << "F1 constraint matrix output" << std::endl << std::endl;
+
+  	print(diag_out, F1_con);
+
+  	diag_out << std::endl << std::endl;
+
+  	diag_out << F2num << " terms - " << "F2 constraint matrix output" << std::endl << std::endl;
+
+  	print(diag_out, F2_con);
+  	
+  	diag_out << std::endl << std::endl;
+
+  	diag_out << "F2 constraint values" << std::endl << std::endl;
+
+  	print(diag_out, F2_val);
+
+  	diag_out << std::endl << std::endl;
+
+  	diag_out << "1 body Hamiltonian matrix" << std::endl << std::endl;
+
+  	print(diag_out, h1_mat); 
+
+  	diag_out << std::endl << std::endl;
+
+  	if (two_body_toggle)
+	{
+  		diag_out << "2 body Hamiltonian matrix" << std::endl << std::endl;
+  		print (diag_out, h2_mat);
+  		diag_out << std::endl << std::endl;
+  	}
+
+  	else
+  		diag_out << "Two-body toggle flag set to false - No 2-body output" << std::endl << std::endl;
+
+  	diag_out << "F0 Constraint Matrix" << std::endl << std::endl;
+
+  	print(diag_out, c_matrix);
+
+  	diag_out << std::endl << std::endl;
+  }
 
 //  print(std::cout, h2_mat);
 
