@@ -62,6 +62,16 @@ struct parameters
   std::string m_mat;
 };
 
+struct con_flags
+{
+	bool F1_flag;
+	bool F2_flag;
+	bool F3_flag;
+	bool F4_flag;
+	bool diag_out;
+	bool two_body_toggle;
+};
+
 
 // function prototypes
 extern void gauss (int npts, int job, double a, double b, double xpts[], double weights[]);
@@ -263,31 +273,50 @@ void populate_2body (four_array & h2_mat, const double x[], const double w[], co
 ***************************************************************/
 
 template <typename one_array, typename two_array, typename three_array>
-void create_spda_file (const two_array c_matrix, const two_array F1_con, const three_array F2_con, const one_array F2_val, const int particles, std::ofstream & spda_out)
+void create_spda_file (const two_array c_matrix, const struct con_flags flag_pass, const two_array F1_con, const three_array F2_con, const one_array F2_val, const two_array F4_con, const int particles, const int bsize, std::ofstream & spda_out)
 {
   size_t F2num = F2_con.size();
-  size_t bsize = F1_con.size() / 2;
+  size_t cmat_extent = F1_con.size();
 
-  size_t num_cons = 1 + F2num;  // N constraint = 1, F2num = p + q constraints  
-    
-  spda_out << num_cons << std::endl;
-  spda_out << 2 << std::endl;
-  spda_out << bsize << " " << bsize << std::endl;
-  spda_out << particles;
+  size_t num_cons = 0;  
+  
+  if (flag_pass.F1_flag)
+  	num_cons += 1;	// N trace constraint 
+
+  if (flag_pass.F2_flag)			
+  	num_cons += F2num; //  p + q constraints  
+
+  if (flag_pass.two_body_toggle)
+  {
+  	if (flag_pass.F4_flag)
+  		num_cons += 1; // N(N+1)/2 trace constraint
+
+
+  }
+
+  spda_out << num_cons << std::endl; 				 // output number of constraints
+  spda_out << 3 << std::endl; 						 // output number of blocks in X
+  spda_out << bsize << " " << bsize << " " << bsize*bsize << std::endl;	 // output block sizes
+  spda_out << particles; 							 // output N trace constraint
 
   for (size_t i = 0; i < F2num; i++)
     spda_out << " " << F2_val[i];
 
+  spda_out << " " << (particles*(particles+1)/2);
+
   spda_out << std::endl;
 
 //  print(std::cout, F1_con);
+
+  size_t con_count = 0;
+
 
   for (size_t i = 0; i < bsize; i++)
   {
   for (size_t j = i; j < bsize; j++)
   {
     if (c_matrix[i][j] != 0.0)
-      spda_out << 0 << " " << 1 << " " << i+1 << " " << j+1 << " " << c_matrix[i][j] << std::endl;
+      spda_out << con_count << " " << 1 << " " << i+1 << " " << j+1 << " " << c_matrix[i][j] << std::endl;
   }
   }
 
@@ -296,12 +325,21 @@ void create_spda_file (const two_array c_matrix, const two_array F1_con, const t
   for (size_t j = i; j < 2*bsize; j++)
   {
     if (c_matrix[i][j] != 0.0)
-      spda_out << 0 << " " << 2 << " " << i+1-bsize << " " << j+1-bsize << " " << c_matrix[i][j] << std::endl;
+      spda_out << con_count << " " << 2 << " " << i+1-bsize << " " << j+1-bsize << " " << c_matrix[i][j] << std::endl;
   }
   }
 
-  size_t con_count = 1;
+  for (size_t i = 2*bsize; i < 2*bsize+bsize*bsize; i++)
+  {
+  for (size_t j = i; j < 2*bsize+bsize*bsize; j++)
+  {
+    if (c_matrix[i][j] != 0.0)
+      spda_out << con_count << " " << 3 << " " << i+1-2*bsize << " " << j+1-2*bsize << " " << c_matrix[i][j] << std::endl;
+  }
+  }
 
+  con_count++;
+  
   for (size_t i = 0; i < bsize; i++)
   {
   for (size_t j = i; j < bsize; j++)
@@ -345,6 +383,21 @@ void create_spda_file (const two_array c_matrix, const two_array F1_con, const t
 
     con_count++;
 
+  }
+
+//  print (std::cout, F4_con);
+
+
+//  std::cout << bsize*bsize << std::endl;
+
+  for (size_t i = 2*bsize; i < 2*bsize+bsize*bsize; i++)
+  {
+  for (size_t j = i; j < 2*bsize+bsize*bsize; j++)
+  {
+	std::cout << F4_con[i][j] << "\t" << i << " " << j << std::endl;  	
+      if (F4_con[i][j] != 0.0)
+       spda_out << con_count << " " << 3 << " " << i+1-2*bsize << " " << j+1-2*bsize << " " << F4_con[i][j] << std::endl;
+  }
   }
 
 
@@ -699,22 +752,22 @@ void create_c_matrix (const two_array & h1_mat, const two_array & h2_mat, two_ar
 
   }
 
-  print(std::cout, c_matrix);
-
   if (two_body_toggle)
   {
     for (size_t i = 0; i < h2_len; i++) 
     {
     for (size_t j = 0; j < h2_len; j++)
     {
-      size_t ic = i + h1_len;
-      size_t jc = j + h1_len;
+      size_t ic = i + 2*h1_len;
+      size_t jc = j + 2*h1_len;
 
-      c_matrix[ic][jc] = h2_mat [i][j];
+      c_matrix[ic][jc] = h2_mat [i][j] * -1.0;
     }
-
     }
   }
+
+
+  print(std::cout, c_matrix);
 }
 
 /***************************************************************
@@ -781,11 +834,12 @@ F2_con.
 ***************************************************************/
 
 
-template <typename four_array, typename three_array, typename one_array>
+template <typename three_array, typename one_array, typename four_array>
 void init_F2_flag (four_array & F2_con_1, three_array & F2_con, one_array & F2_val)
 {
 
-  size_t F2num = F2_con.size();           // number of F2 constraint matrices
+
+//  size_t F2num = F2_con.size();           // number of F2 constraint matrices
   size_t bsize = F2_con_1.size();         // basis size
 
   for (size_t i = 0; i < bsize; i++)      // loop over ith constraint matrix
@@ -840,6 +894,43 @@ void init_F2_flag (four_array & F2_con_1, three_array & F2_con, one_array & F2_v
 }
 
 
+template <typename four_array, typename two_array>
+void init_F4_flag (four_array & F4_con_3, two_array & F4_con)
+{
+
+
+//  size_t cmat  = F4_con.size();           // number of F2 constraint matrices
+  size_t bsize = F4_con_3.size();         // basis size
+
+  for (size_t i = 0; i < bsize; i++)      // loop over ith constraint matrix
+  {
+  for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
+  {
+    for (size_t k = 0; k < bsize; k++)    // loop over matrix row
+    {
+    for (size_t l = 0; l < bsize; l++)    // loop over matrix column
+    {
+
+        F4_con_3[i][j][k][l] = ( kron_del(i,k)*kron_del(j,l) );
+
+        size_t left  = i * bsize + j;
+
+        size_t right = k * bsize + l; 
+
+        left  += 2*bsize;
+        right += 2*bsize;
+
+        F4_con [left][right] = F4_con_3[i][j][k][l];
+
+    }
+    }
+
+  }
+  }
+
+//  print (std::cout, F4_con);
+
+}
 
 /********************************************
 
@@ -856,17 +947,17 @@ int main ()
   // Now create/copy input parameters for ease of reading the code into newly defined local variables
 
 
-  const int mesh_size = input_params.mesh_size;		 // how many points to use for Gauss-Legendre (G-L) quadrature 
+//  const int mesh_size = input_params.mesh_size;		 // how many points to use for Gauss-Legendre (G-L) quadrature 
   const int bsize = input_params.s_wave_basis;	   // the size of the HO basis used, ONLY ACTIVE FOR S-WAVE
   const int particles = input_params.particles;		 // the number of neutrons (particles) in the trap
-  const int nodes = input_params.nodes;
-  const double hc = input_params.hc;					     // hbar * c - given in MeV * fm
-  const double mass = input_params.mass;			     // Nucleon mass - given in MeV/c^2
+//  const int nodes = input_params.nodes;
+//  const double hc = input_params.hc;					     // hbar * c - given in MeV * fm
+//  const double mass = input_params.mass;			     // Nucleon mass - given in MeV/c^2
   const double hw = input_params.hw;					     // hbar * omega 
   const std::string m_ref = input_params.m_ref;    // single particle reference file - m scheme
   const std::string m_mat = input_params.m_mat;    // m scheme matrix elements
 
-  const double l_param = hc / sqrt(mass * hw);		 // the relevant length parameter for the HO
+//  const double l_param = hc / sqrt(mass * hw);		 // the relevant length parameter for the HO
 
   std::cout << "Building system..." << std::endl;
 
@@ -878,10 +969,27 @@ int main ()
 
   const bool F1_flag = true;
   const bool F2_flag = true;
+  const bool F4_flag = true;
 
   const bool two_body_toggle = true;
 
+  if (!two_body_toggle and F4_flag)
+  {
+  	std::cerr << "ERROR: TWO-BODY AND F CONSTRAINT FLAGS INCOMPATIBLE - GIVING UP" << std::endl;
+  	return EXIT_FAILURE;
+  }	
+
   const bool diag_toggle = true;
+
+
+  struct con_flags flag_pass;
+
+  flag_pass.F1_flag = F1_flag;
+  flag_pass.F2_flag = F2_flag;
+  flag_pass.F4_flag = F4_flag;
+
+  flag_pass.two_body_toggle = two_body_toggle;
+
 
   const size_t F2num = bsize * (bsize + 1)/2;
 
@@ -930,9 +1038,11 @@ int main ()
 
   two_array  F1_con_1 (boost::extents[bsize][bsize]);
   four_array F2_con_1 (boost::extents[bsize][bsize][bsize][bsize]);
+  four_array F4_con_3 (boost::extents[bsize][bsize][bsize][bsize]);
 
   two_array   F1_con (boost::extents[cmat_extent][cmat_extent]);
   three_array F2_con (boost::extents[F2num][cmat_extent][cmat_extent]);
+  two_array	  F4_con (boost::extents[cmat_extent][cmat_extent]);
 
   one_array   F2_val (boost::extents[F2num]);
 
@@ -946,6 +1056,10 @@ int main ()
     init_F2_flag (F2_con_1, F2_con, F2_val);
   }
 
+  if (F4_flag)
+  {
+    init_F4_flag (F4_con_3, F4_con);
+  }
 
   fullm_populate_hamiltonian (ref_m, h1_mat, h2_mat, m_ref, m_mat, hw, diag_out, diag_toggle);
 
@@ -961,19 +1075,19 @@ int main ()
 
   create_c_matrix (h1_mat, comp_h2, c_matrix, two_body_toggle);
 
-  create_spda_file (c_matrix, F1_con, F2_con, F2_val, particles, spda_out);
+  create_spda_file (c_matrix, flag_pass, F1_con, F2_con, F2_val, F4_con, particles, bsize, spda_out);
 
   four_array test_h2 (boost::extents[bsize][bsize][bsize][bsize]);
 
   double q = 0.;
 
-  for (size_t i = 0; i < bsize; i++)
+  for (int i = 0; i < bsize; i++)
   {
-  for (size_t j = 0; j < bsize; j++)
+  for (int j = 0; j < bsize; j++)
   {
-  for (size_t k = 0; k < bsize; k++)
+  for (int k = 0; k < bsize; k++)
   {
-  for (size_t l = 0; l < bsize; l++)
+  for (int l = 0; l < bsize; l++)
   {
     test_h2 [i][j][k][l] = h2_mat [i][j][k][l][0];//q;//h2_mat [i][j][k][l][0];
     q++;    
@@ -1007,11 +1121,22 @@ int main ()
       diag_out << "Two-body toggle flag set to false - No 2-body output" << std::endl << std::endl;
 
 
+
+  	diag_out << "F0 Constraint Matrix" << std::endl << std::endl;
+
+  	print(diag_out, c_matrix);
+
+  	diag_out << std::endl << std::endl;
+
+
+
   	diag_out << "1 term - " << "F1 constraint matrix output" << std::endl << std::endl;
 
   	print(diag_out, F1_con);
 
   	diag_out << std::endl << std::endl;
+
+
 
   	diag_out << F2num << " terms - " << "F2 constraint matrix output" << std::endl << std::endl;
 
@@ -1019,15 +1144,19 @@ int main ()
   	
   	diag_out << std::endl << std::endl;
 
+
+
   	diag_out << "F2 constraint values" << std::endl << std::endl;
 
   	print(diag_out, F2_val);
 
   	diag_out << std::endl << std::endl;
 
-  	diag_out << "F0 Constraint Matrix" << std::endl << std::endl;
 
-  	print(diag_out, c_matrix);
+
+  	diag_out << "1 term - " << "F4 constraint matrix output" << std::endl << std::endl;
+
+  	print(diag_out, F4_con);
 
   	diag_out << std::endl << std::endl;
   }
