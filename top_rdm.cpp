@@ -51,10 +51,10 @@ static const double k_s = 0.465;
 
 struct parameters 
 {
-	int nodes;
-	int mesh_size;
-	int s_wave_basis;
-	int particles;
+	size_t nodes;
+	size_t mesh_size;
+	size_t basis;
+	size_t particles;
 	double hc;
 	double mass;
 	double hw;
@@ -68,8 +68,12 @@ struct con_flags
 	bool F2_flag;
 	bool F3_flag;
 	bool F4_flag;
-	bool diag_out;
+  bool F5_flag;
+  bool F6_flag;
+	bool diag_toggle;
 	bool two_body_toggle;
+  bool Q_flag;
+  bool G_flag;
 };
 
 
@@ -261,6 +265,63 @@ void populate_2body (four_array & h2_mat, const double x[], const double w[], co
 ///////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////
 
+template <typename two_array>
+void con_matrix_out (const two_array & m_pass, const size_t con_count, const size_t bsize, const struct con_flags flag_pass, std::ofstream & spda_out)
+{
+
+  size_t lower = 0;
+  size_t upper = bsize;
+
+  for (size_t i = lower; i < upper; i++)
+  {
+  for (size_t j = i;     j < upper; j++)
+  {
+    size_t k = i + 1;
+    size_t l = j + 1;
+
+    if (m_pass[i][j] != 0.0)
+      spda_out << con_count << " " << 1 << " " << k << " " << l << " " << m_pass[i][j] << std::endl;
+  }
+  }
+
+  lower += bsize;
+  upper += bsize;
+
+  for (size_t i = lower; i < upper; i++)
+  {
+  for (size_t j = i;     j < upper; j++)
+  {
+    size_t k = i + 1 - lower;
+    size_t l = j + 1 - lower;
+
+    if (m_pass[i][j] != 0.0)
+      spda_out << con_count << " " << 2 << " " << k << " " << l << " " << m_pass[i][j] << std::endl;
+  }
+  }
+
+  lower += bsize;
+  upper += bsize*bsize;
+
+  if (flag_pass.two_body_toggle)
+  {
+    for (size_t i = lower; i < upper; i++)
+    {
+    for (size_t j = i;     j < upper; j++)
+    {
+      size_t k = i + 1 - lower;
+      size_t l = j + 1 - lower;
+
+      if (m_pass[i][j] != 0.0)
+        spda_out << con_count << " " << 3 << " " << k << " " << l << " " << m_pass[i][j] << std::endl;
+    }
+    }
+  }
+
+  // did this very quickly, check again!
+  lower += bsize*bsize; 
+  upper += bsize*bsize;
+
+}
 
 
 
@@ -273,11 +334,13 @@ void populate_2body (four_array & h2_mat, const double x[], const double w[], co
 ***************************************************************/
 
 template <typename one_array, typename two_array, typename three_array>
-void create_spda_file (const two_array c_matrix, const struct con_flags flag_pass, const two_array F1_con, const three_array F2_con, const one_array F2_val, const two_array F4_con, const int particles, const int bsize, std::ofstream & spda_out)
+void create_spda_file (const two_array c_matrix, const struct con_flags flag_pass, const two_array F1_con, const three_array F2_con, const one_array F2_val, const two_array F4_con, const int particles, const size_t bsize, std::ofstream & spda_out)
 {
   size_t F2num = F2_con.size();
-  size_t cmat_extent = F1_con.size();
+//  size_t cmat_extent = F1_con.size();
 
+
+  // number of constraints start
   size_t num_cons = 0;  
   
   if (flag_pass.F1_flag)
@@ -291,27 +354,86 @@ void create_spda_file (const two_array c_matrix, const struct con_flags flag_pas
   	if (flag_pass.F4_flag)
   		num_cons += 1; // N(N+1)/2 trace constraint
 
-
   }
 
-  spda_out << num_cons << std::endl; 				 // output number of constraints
-  spda_out << 3 << std::endl; 						 // output number of blocks in X
-  spda_out << bsize << " " << bsize << " " << bsize*bsize << std::endl;	 // output block sizes
-  spda_out << particles; 							 // output N trace constraint
+  spda_out << num_cons << std::endl;         // output number of constraints
 
-  for (size_t i = 0; i < F2num; i++)
-    spda_out << " " << F2_val[i];
 
-  spda_out << " " << (particles*(particles+1)/2);
+
+
+  // number of blocks start
+  size_t blocks = 2;
+
+  if (flag_pass.two_body_toggle)
+  {
+    blocks ++;
+
+    if (flag_pass.Q_flag)
+      blocks++;
+
+    if (flag_pass.G_flag)
+      blocks++;
+  }
+
+  spda_out << blocks << std::endl; 						 // output number of blocks in X
+ 
+
+
+
+  // block sizes start
+  spda_out << bsize << " " << bsize << " ";     // output block sizes
+  
+  if (flag_pass.two_body_toggle)
+  {
+    spda_out << bsize*bsize << " ";
+
+  }
+  
+  spda_out << std::endl;	             
+
+
+
+
+  // constraint values start
+
+  if (flag_pass.F1_flag)
+    spda_out << particles << " "; 							 // output N trace constraint
+
+  if (flag_pass.F2_flag)
+  {
+    for (size_t i = 0; i < F2num; i++)
+      spda_out << F2_val[i] << " ";
+  }
+
+  if (flag_pass.F4_flag)
+    spda_out << (particles*(particles+1)/2) << " ";
 
   spda_out << std::endl;
 
-//  print(std::cout, F1_con);
+
+
+
+
+
+  // constraint matrix start
 
   size_t con_count = 0;
 
+  con_matrix_out (c_matrix, con_count, bsize, flag_pass, spda_out);
+  con_count++;
+  con_matrix_out (F1_con, con_count, bsize, flag_pass, spda_out);
+  con_count++;
 
-  for (size_t i = 0; i < bsize; i++)
+  for (size_t cnum = 0; cnum < F2num; cnum++)
+  {
+    con_matrix_out (F2_con[cnum], con_count, bsize, flag_pass, spda_out);
+    con_count++;
+  }
+
+  con_matrix_out (F4_con, con_count, bsize, flag_pass, spda_out);
+  con_count++;
+
+/*  for (size_t i = 0; i < bsize; i++)
   {
   for (size_t j = i; j < bsize; j++)
   {
@@ -338,8 +460,8 @@ void create_spda_file (const two_array c_matrix, const struct con_flags flag_pas
   }
   }
 
-  con_count++;
-  
+  con_count++;*/
+/*  
   for (size_t i = 0; i < bsize; i++)
   {
   for (size_t j = i; j < bsize; j++)
@@ -359,9 +481,9 @@ void create_spda_file (const two_array c_matrix, const struct con_flags flag_pas
   }
 
 
-  con_count++;
+  con_count++;*/
 
-  for (size_t cnum = 0; cnum < F2num; cnum++)
+/*  for (size_t cnum = 0; cnum < F2num; cnum++)
   {
     for (size_t i = 0; i < bsize; i++)
     {
@@ -384,13 +506,13 @@ void create_spda_file (const two_array c_matrix, const struct con_flags flag_pas
     con_count++;
 
   }
-
+*/
 //  print (std::cout, F4_con);
 
 
 //  std::cout << bsize*bsize << std::endl;
 
-  for (size_t i = 2*bsize; i < 2*bsize+bsize*bsize; i++)
+/*  for (size_t i = 2*bsize; i < 2*bsize+bsize*bsize; i++)
   {
   for (size_t j = i; j < 2*bsize+bsize*bsize; j++)
   {
@@ -400,7 +522,7 @@ void create_spda_file (const two_array c_matrix, const struct con_flags flag_pas
   }
   }
 
-
+*/
 
 }
 
@@ -801,17 +923,17 @@ matches the dimensions of the F0 constraint matrix.
 ***************************************************************/
 
 template <typename two_array>
-void init_F1_flag (two_array & F1_con_1, two_array & F1_con)
+void init_F1_flag (two_array & F1_con_1, two_array & F1_con, const size_t bsize)
 {
-  size_t bsize = F1_con_1.size();
-  size_t cmat_extent = F1_con.size();
+
+//  size_t cmat_extent = F1_con.size();
 
   for (size_t i = 0; i < bsize; i++)
   {
     F1_con_1[i][i] = 1.;    
   }
 
-  for (size_t i = 0; i < cmat_extent; i++)
+  for (size_t i = 0; i < bsize; i++)
   {
     if (i < bsize)
       F1_con[i][i] = F1_con_1[i][i];
@@ -835,12 +957,12 @@ F2_con.
 
 
 template <typename three_array, typename one_array, typename four_array>
-void init_F2_flag (four_array & F2_con_1, three_array & F2_con, one_array & F2_val)
+void init_F2_flag (four_array & F2_con_1, three_array & F2_con, one_array & F2_val, const size_t bsize)
 {
 
 
 //  size_t F2num = F2_con.size();           // number of F2 constraint matrices
-  size_t bsize = F2_con_1.size();         // basis size
+//  size_t bsize = F2_con_1.size();         // basis size
 
   for (size_t i = 0; i < bsize; i++)      // loop over ith constraint matrix
   {
@@ -894,13 +1016,20 @@ void init_F2_flag (four_array & F2_con_1, three_array & F2_con, one_array & F2_v
 }
 
 
-template <typename four_array, typename two_array>
-void init_F4_flag (four_array & F4_con_3, two_array & F4_con)
+/***************************************************************
+
+Function to create our F3 constraint matrix to fix the relation
+between the 2RDM partial trace and the 1RDM.
+
+***************************************************************/
+
+template <typename two_array>
+void init_F3_flag (two_array & F3_con, const size_t bsize)
 {
 
 
 //  size_t cmat  = F4_con.size();           // number of F2 constraint matrices
-  size_t bsize = F4_con_3.size();         // basis size
+//  size_t bsize = F4_con_3.size();         // basis size
 
   for (size_t i = 0; i < bsize; i++)      // loop over ith constraint matrix
   {
@@ -911,7 +1040,47 @@ void init_F4_flag (four_array & F4_con_3, two_array & F4_con)
     for (size_t l = 0; l < bsize; l++)    // loop over matrix column
     {
 
-        F4_con_3[i][j][k][l] = ( kron_del(i,k)*kron_del(j,l) );
+        size_t left  = i * bsize + j;
+
+        size_t right = k * bsize + l; 
+
+        left  += 2*bsize;
+        right += 2*bsize;
+
+        F3_con [left][right] = kron_del(i,k) * kron_del(j,l);
+
+    }
+    }
+
+  }
+  }
+
+//  print (std::cout, F4_con);
+
+}
+
+/***************************************************************
+
+Function to create our F4 constraint matrix to fix the 2RDM trace.
+
+***************************************************************/
+
+template <typename two_array>
+void init_F4_flag (two_array & F4_con, const size_t bsize)
+{
+
+
+//  size_t cmat  = F4_con.size();           // number of F2 constraint matrices
+//  size_t bsize = F4_con_3.size();         // basis size
+
+  for (size_t i = 0; i < bsize; i++)      // loop over ith constraint matrix
+  {
+  for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
+  {
+    for (size_t k = 0; k < bsize; k++)    // loop over matrix row
+    {
+    for (size_t l = 0; l < bsize; l++)    // loop over matrix column
+    {
 
         size_t left  = i * bsize + j;
 
@@ -920,7 +1089,7 @@ void init_F4_flag (four_array & F4_con_3, two_array & F4_con)
         left  += 2*bsize;
         right += 2*bsize;
 
-        F4_con [left][right] = F4_con_3[i][j][k][l];
+        F4_con [left][right] = kron_del(i,k) * kron_del(j,l);
 
     }
     }
@@ -948,8 +1117,8 @@ int main ()
 
 
 //  const int mesh_size = input_params.mesh_size;		 // how many points to use for Gauss-Legendre (G-L) quadrature 
-  const int bsize = input_params.s_wave_basis;	   // the size of the HO basis used, ONLY ACTIVE FOR S-WAVE
-  const int particles = input_params.particles;		 // the number of neutrons (particles) in the trap
+  const size_t bsize = input_params.basis;	   // the size of the HO basis used, ONLY ACTIVE FOR S-WAVE
+  const size_t particles = input_params.particles;		 // the number of neutrons (particles) in the trap
 //  const int nodes = input_params.nodes;
 //  const double hc = input_params.hc;					     // hbar * c - given in MeV * fm
 //  const double mass = input_params.mass;			     // Nucleon mass - given in MeV/c^2
@@ -969,11 +1138,16 @@ int main ()
 
   const bool F1_flag = true;
   const bool F2_flag = true;
+  const bool F3_flag = true;
   const bool F4_flag = true;
+  const bool F5_flag = false;
+  const bool F6_flag = false;
 
   const bool two_body_toggle = true;
+  const bool Q_flag = false;
+  const bool G_flag = false;
 
-  if (!two_body_toggle and F4_flag)
+  if (!two_body_toggle and (F4_flag or F5_flag or F6_flag))
   {
   	std::cerr << "ERROR: TWO-BODY AND F CONSTRAINT FLAGS INCOMPATIBLE - GIVING UP" << std::endl;
   	return EXIT_FAILURE;
@@ -986,9 +1160,17 @@ int main ()
 
   flag_pass.F1_flag = F1_flag;
   flag_pass.F2_flag = F2_flag;
+  flag_pass.F3_flag = F3_flag;
   flag_pass.F4_flag = F4_flag;
+  flag_pass.F5_flag = F5_flag;
+  flag_pass.F6_flag = F6_flag;
 
   flag_pass.two_body_toggle = two_body_toggle;
+
+  flag_pass.Q_flag = Q_flag;
+  flag_pass.G_flag = G_flag;
+
+  flag_pass.diag_toggle = true;
 
 
   const size_t F2num = bsize * (bsize + 1)/2;
@@ -1048,17 +1230,22 @@ int main ()
 
   if (F1_flag)
   {
-    init_F1_flag (F1_con_1, F1_con);
+    init_F1_flag (F1_con_1, F1_con, bsize);
   }
 
   if (F2_flag)
   {
-    init_F2_flag (F2_con_1, F2_con, F2_val);
+    init_F2_flag (F2_con_1, F2_con, F2_val, bsize);
   }
+
+//  if (F3_flag)
+//  {
+//    init_F3_flag (F3_con_1, F3_con, F3_val);
+//  }
 
   if (F4_flag)
   {
-    init_F4_flag (F4_con_3, F4_con);
+    init_F4_flag (F4_con, bsize);
   }
 
   fullm_populate_hamiltonian (ref_m, h1_mat, h2_mat, m_ref, m_mat, hw, diag_out, diag_toggle);
@@ -1081,13 +1268,13 @@ int main ()
 
   double q = 0.;
 
-  for (int i = 0; i < bsize; i++)
+  for (size_t i = 0; i < bsize; i++)
   {
-  for (int j = 0; j < bsize; j++)
+  for (size_t j = 0; j < bsize; j++)
   {
-  for (int k = 0; k < bsize; k++)
+  for (size_t k = 0; k < bsize; k++)
   {
-  for (int l = 0; l < bsize; l++)
+  for (size_t l = 0; l < bsize; l++)
   {
     test_h2 [i][j][k][l] = h2_mat [i][j][k][l][0];//q;//h2_mat [i][j][k][l][0];
     q++;    
@@ -1234,7 +1421,7 @@ parameters read_in_inputs ()
 	  ss >> input.mesh_size;
 	
 	if (counter == 2)
-	  ss >> input.s_wave_basis;
+	  ss >> input.basis;
 
 	if (counter == 3)
 	  ss >> input.particles;
