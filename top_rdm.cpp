@@ -360,7 +360,7 @@ void create_spda_file (const two_array c_matrix, const two_array F1_con, const t
 ***************************************************************/
 
 template <typename ref_array>
-void read_in_reference_m_scheme (ref_array & ref_m, const std::string m_ref_file)
+void read_in_reference_m_scheme (ref_array & ref_m, const std::string m_ref_file, std::ofstream & diag_out, const bool diag_toggle)
 {
   const char * m_reference_file = (m_ref_file).c_str();
   // input file stream for m_scheme
@@ -402,7 +402,7 @@ void read_in_reference_m_scheme (ref_array & ref_m, const std::string m_ref_file
 
   ss >> orbit_dummy_1 >> orbit_dummy_2 >> ref_num >> n >> l >> j >> m_j >> tz;  // assign values of the line
 
-  std::cout << ref_num << " " << n << " " << l << " " << j << " " << m_j << " " << tz << "\n";
+//  std::cout << ref_num << " " << n << " " << l << " " << j << " " << m_j << " " << tz << "\n";
 
 
   // only extract neutron-neutron states
@@ -414,7 +414,7 @@ void read_in_reference_m_scheme (ref_array & ref_m, const std::string m_ref_file
     ref_m [ele_in][3] = j * 0.5;    // total angular mom.
     ref_m [ele_in][4] = m_j * 0.5;  // total angular mom. projection
     ref_m [ele_in][5] = tz;         // isospin projection (should all be +1.0)
-    ref_m [ele_in][6] = ele_in;
+    ref_m [ele_in][6] = ele_in;     // new index for sp orbital
     ele_in++;
   }
 
@@ -425,8 +425,12 @@ void read_in_reference_m_scheme (ref_array & ref_m, const std::string m_ref_file
   
   
   
-
-  print(std::cout, ref_m);            // print the resulting matrix
+  if(diag_toggle)
+  {
+    diag_out << "Single particle orbitals pulled from REF file" << std::endl << std::endl;
+    print(diag_out, ref_m);            // print the resulting matrix
+    diag_out << std::endl << std::endl;
+  }
 
 
   
@@ -548,12 +552,12 @@ populate 2-body matrix elements.
 
 
 template <typename two_array, typename five_array>
-void fullm_populate_hamiltonian (two_array & ref_m, two_array & h1_mat, five_array & h2_mat, const std::string reference_file, const std::string matrix_file, const double hw) 
+void fullm_populate_hamiltonian (two_array & ref_m, two_array & h1_mat, five_array & h2_mat, const std::string reference_file, const std::string matrix_file, const double hw, std::ofstream & diag_out, const bool diag_toggle) 
 {
 
   try
   {
-    read_in_reference_m_scheme (ref_m, reference_file);
+    read_in_reference_m_scheme (ref_m, reference_file, diag_out, diag_toggle);
     populate_1body (ref_m, h1_mat, hw);
     read_in_matrix_m_scheme (ref_m, h2_mat, matrix_file);
   }
@@ -573,13 +577,18 @@ void fullm_populate_hamiltonian (two_array & ref_m, two_array & h1_mat, five_arr
 ***************************************************************/
 
 template <typename two_array, typename five_array>
-void compactify_h2 (const two_array & ref_m, two_array & comp_h2, five_array & h2_mat)
+void compactify_h2 (const two_array & ref_m, two_array & comp_h2, five_array & h2_mat, std::ofstream & diag_out, const bool diag_toggle)
 {
   const size_t mat_length = h2_mat.size();
 
   double value;
 
   size_t alpha, beta, gamma, delta;
+
+  if(diag_toggle)
+  {
+    diag_out << "Output of nonzero 2-body ME" << std::endl << std::endl;    
+  }
 
   for (size_t i = 0; i < mat_length; ++i)
   {
@@ -596,41 +605,44 @@ void compactify_h2 (const two_array & ref_m, two_array & comp_h2, five_array & h
             gamma = h2_mat [i][j][k][l][3];
             delta = h2_mat [i][j][k][l][4];
 
-            if (value != 0.)
+            if (diag_toggle)
             {
-            	std::cout << alpha << " " << beta << " " << gamma << " " << delta << " " << value << " \t";
-
-              for (size_t loop = 0; loop < mat_length; loop++)
+              if (value != 0.)
               {
-                if (alpha == ref_m[loop][0])
-                  std::cout << ref_m[loop][2] << "\t";
+              	diag_out << alpha << " " << beta << " " << gamma << " " << delta << " " << value << " \t";
+
+                for (size_t loop = 0; loop < mat_length; loop++)
+                {
+                  if (alpha == ref_m[loop][0])
+                    diag_out << ref_m[loop][6] << "\t";
+                }
+
+
+                for (size_t loop = 0; loop < mat_length; loop++)
+                {
+                  if (beta == ref_m[loop][0])
+                    diag_out << ref_m[loop][6] << "\t";
+                }
+
+
+                for (size_t loop = 0; loop < mat_length; loop++)
+                {
+                  if (gamma == ref_m[loop][0])
+                    diag_out << ref_m[loop][6] << "\t";
+                }
+
+
+                for (size_t loop = 0; loop < mat_length; loop++)
+                {
+                  if (delta == ref_m[loop][0])
+                    diag_out << ref_m[loop][6] << "\n";
+                }
+
               }
-
-
-              for (size_t loop = 0; loop < mat_length; loop++)
-              {
-                if (beta == ref_m[loop][0])
-                  std::cout << ref_m[loop][2] << "\t";
-              }
-
-
-              for (size_t loop = 0; loop < mat_length; loop++)
-              {
-                if (gamma == ref_m[loop][0])
-                  std::cout << ref_m[loop][2] << "\t";
-              }
-
-
-              for (size_t loop = 0; loop < mat_length; loop++)
-              {
-                if (delta == ref_m[loop][0])
-                  std::cout << ref_m[loop][2] << "\n";
-              }
-
             }
 
 
-            size_t left  = j * mat_length + i;
+            size_t left  = i * mat_length + j;
 
             size_t right = k * mat_length + l; 
 
@@ -654,6 +666,9 @@ void compactify_h2 (const two_array & ref_m, two_array & comp_h2, five_array & h
 
 
   }
+
+  if (diag_toggle)
+    diag_out << std::endl << std::endl;
 }
 
 /***************************************************************
@@ -818,10 +833,10 @@ void init_F2_flag (four_array & F2_con_1, three_array & F2_con, one_array & F2_v
   }
   }
 
-  printf("%i", F2num);
-  printf("\n");
-  printf("%i", bsize);
-  printf("\n");
+//  printf("%i", F2num);
+//  printf("\n");
+//  printf("%i", bsize);
+//  printf("\n");
 }
 
 
@@ -861,14 +876,14 @@ int main ()
 
   // define flags for all different combinations of conditions in RDM
 
-  bool F1_flag = true;
-  bool F2_flag = true;
+  const bool F1_flag = true;
+  const bool F2_flag = true;
 
-  bool two_body_toggle = false;
+  const bool two_body_toggle = true;
 
-  bool diag_toggle = true;
+  const bool diag_toggle = true;
 
-  size_t F2num = bsize * (bsize + 1)/2;
+  const size_t F2num = bsize * (bsize + 1)/2;
 
   // turn off or on two-body potential
 
@@ -886,8 +901,8 @@ int main ()
     cmat_extent = 2*bsize;
   }
 
-  std::string diag_file = "diagnostic_out/test_diag.dat";
-  std::string spda_file = "spd_files/test_spd.dat";
+  const std::string diag_file = "diagnostic_out/test_diag.dat";
+  const std::string spda_file = "spd_files/test_spd.dat";
 
   std::ofstream diag_out (diag_file);
   std::ofstream spda_out (spda_file);
@@ -932,15 +947,15 @@ int main ()
   }
 
 
-  fullm_populate_hamiltonian (ref_m, h1_mat, h2_mat, m_ref, m_mat, hw);
+  fullm_populate_hamiltonian (ref_m, h1_mat, h2_mat, m_ref, m_mat, hw, diag_out, diag_toggle);
 
 
 
   two_array comp_h2 (boost::extents[bsize*bsize][bsize*bsize]);
 
-  compactify_h2 (ref_m, comp_h2, h2_mat);
+  compactify_h2 (ref_m, comp_h2, h2_mat, diag_out, diag_toggle);
 
- // print(std::cout, comp_h2);
+  print(std::cout, comp_h2);
 
   two_array c_matrix (boost::extents[cmat_extent][cmat_extent]);
 
@@ -948,10 +963,50 @@ int main ()
 
   create_spda_file (c_matrix, F1_con, F2_con, F2_val, particles, spda_out);
 
+  four_array test_h2 (boost::extents[bsize][bsize][bsize][bsize]);
+
+  double q = 0.;
+
+  for (size_t i = 0; i < bsize; i++)
+  {
+  for (size_t j = 0; j < bsize; j++)
+  {
+  for (size_t k = 0; k < bsize; k++)
+  {
+  for (size_t l = 0; l < bsize; l++)
+  {
+    test_h2 [i][j][k][l] = h2_mat [i][j][k][l][0];//q;//h2_mat [i][j][k][l][0];
+    q++;    
+  }
+  }
+  }
+  }
 
 
   if (diag_toggle)
   {
+
+    diag_out << "1 body Hamiltonian matrix" << std::endl << std::endl;
+
+    print(diag_out, h1_mat); 
+
+    diag_out << std::endl << std::endl;
+
+    if (two_body_toggle)
+    {
+      diag_out << "Original 2 body Hamiltonian matrix" << std::endl << std::endl;
+      print (diag_out, test_h2);
+      diag_out << std::endl << std::endl;
+
+      diag_out << "Compacted 2 body Hamiltonian matrix" << std::endl << std::endl;
+      print (diag_out, comp_h2);
+      diag_out << std::endl << std::endl;
+    }
+
+    else
+      diag_out << "Two-body toggle flag set to false - No 2-body output" << std::endl << std::endl;
+
+
   	diag_out << "1 term - " << "F1 constraint matrix output" << std::endl << std::endl;
 
   	print(diag_out, F1_con);
@@ -969,22 +1024,6 @@ int main ()
   	print(diag_out, F2_val);
 
   	diag_out << std::endl << std::endl;
-
-  	diag_out << "1 body Hamiltonian matrix" << std::endl << std::endl;
-
-  	print(diag_out, h1_mat); 
-
-  	diag_out << std::endl << std::endl;
-
-  	if (two_body_toggle)
-	{
-  		diag_out << "2 body Hamiltonian matrix" << std::endl << std::endl;
-  		print (diag_out, h2_mat);
-  		diag_out << std::endl << std::endl;
-  	}
-
-  	else
-  		diag_out << "Two-body toggle flag set to false - No 2-body output" << std::endl << std::endl;
 
   	diag_out << "F0 Constraint Matrix" << std::endl << std::endl;
 
