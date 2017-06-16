@@ -265,6 +265,15 @@ void populate_2body (four_array & h2_mat, const double x[], const double w[], co
 ///////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////
 
+
+/***************************************************************
+
+ 
+ Function to automate output of constraint matrices.
+
+
+***************************************************************/
+
 template <typename two_array>
 void con_matrix_out (const two_array & m_pass, const size_t con_count, const size_t bsize, const struct con_flags flag_pass, std::ofstream & spda_out)
 {
@@ -334,9 +343,11 @@ void con_matrix_out (const two_array & m_pass, const size_t con_count, const siz
 ***************************************************************/
 
 template <typename one_array, typename two_array, typename three_array>
-void create_spda_file (const two_array c_matrix, const struct con_flags flag_pass, const two_array F1_con, const three_array F2_con, const one_array F2_val, const two_array F4_con, const int particles, const size_t bsize, std::ofstream & spda_out)
+void create_spda_file (const two_array c_matrix, const struct con_flags flag_pass, const two_array F1_con, const three_array F2_con, const one_array F2_val, const three_array F3_con, const one_array F3_val, const two_array F4_con, const three_array F5_con, const one_array F5_val, const int particles, const size_t bsize, std::ofstream & spda_out)
 {
   size_t F2num = F2_con.size();
+  size_t F3num = F3_con.size();
+  size_t F5num = F5_con.size();
 //  size_t cmat_extent = F1_con.size();
 
 
@@ -351,9 +362,14 @@ void create_spda_file (const two_array c_matrix, const struct con_flags flag_pas
 
   if (flag_pass.two_body_toggle)
   {
+    if (flag_pass.F3_flag)
+      num_cons += F3num;
+
   	if (flag_pass.F4_flag)
   		num_cons += 1; // N(N+1)/2 trace constraint
 
+  	if (flag_pass.F5_flag)
+  		num_cons += F5num;
   }
 
   spda_out << num_cons << std::endl;         // output number of constraints
@@ -387,6 +403,12 @@ void create_spda_file (const two_array c_matrix, const struct con_flags flag_pas
   {
     spda_out << bsize*bsize << " ";
 
+    if (flag_pass.Q_flag)
+    	spda_out << "Q SIZE HERE" << " ";
+
+    if (flag_pass.G_flag)
+    	spda_out << "G SIZE HERE" << " ";
+
   }
   
   spda_out << std::endl;	             
@@ -405,8 +427,20 @@ void create_spda_file (const two_array c_matrix, const struct con_flags flag_pas
       spda_out << F2_val[i] << " ";
   }
 
+  if (flag_pass.F3_flag)
+  {
+    for (size_t i = 0; i < F3num; i++)
+      spda_out << F3_val[i] << " ";
+  }
+
   if (flag_pass.F4_flag)
     spda_out << (particles*(particles+1)/2) << " ";
+
+  if (flag_pass.F5_flag)
+  {
+    for (size_t i = 0; i < F5num; i++)
+      spda_out << F5_val[i] << " ";
+  }
 
   spda_out << std::endl;
 
@@ -421,17 +455,45 @@ void create_spda_file (const two_array c_matrix, const struct con_flags flag_pas
 
   con_matrix_out (c_matrix, con_count, bsize, flag_pass, spda_out);
   con_count++;
-  con_matrix_out (F1_con, con_count, bsize, flag_pass, spda_out);
-  con_count++;
 
-  for (size_t cnum = 0; cnum < F2num; cnum++)
+  if (flag_pass.F1_flag)
   {
-    con_matrix_out (F2_con[cnum], con_count, bsize, flag_pass, spda_out);
-    con_count++;
+  	con_matrix_out (F1_con, con_count, bsize, flag_pass, spda_out);
+  	con_count++;
   }
 
-  con_matrix_out (F4_con, con_count, bsize, flag_pass, spda_out);
-  con_count++;
+  if (flag_pass.F2_flag)
+  {
+	for (size_t cnum = 0; cnum < F2num; cnum++)
+	{
+	   con_matrix_out (F2_con[cnum], con_count, bsize, flag_pass, spda_out);
+	   con_count++;
+	}
+  }
+
+  if (flag_pass.F3_flag)
+  {
+	for (size_t cnum = 0; cnum < F3num; cnum++)
+	{
+	   con_matrix_out (F3_con[cnum], con_count, bsize, flag_pass, spda_out);
+	   con_count++;
+	}
+  }
+
+  if (flag_pass.F4_flag)
+  {
+  	con_matrix_out (F4_con, con_count, bsize, flag_pass, spda_out);
+  	con_count++;
+  }
+
+  if (flag_pass.F5_flag)
+  {
+	for (size_t cnum = 0; cnum < F5num; cnum++)
+	{
+	   con_matrix_out (F5_con[cnum], con_count, bsize, flag_pass, spda_out);
+	   con_count++;
+	}
+  }
 
 /*  for (size_t i = 0; i < bsize; i++)
   {
@@ -1023,39 +1085,104 @@ between the 2RDM partial trace and the 1RDM.
 
 ***************************************************************/
 
-template <typename two_array>
-void init_F3_flag (two_array & F3_con, const size_t bsize)
+template <typename one_array, typename three_array, typename four_array, typename six_array>
+void init_F3_flag (four_array & F3_build_1, six_array & F3_build_3, three_array & F3_con, one_array & F3_val, const size_t bsize, const size_t N)
 {
-
-
-//  size_t cmat  = F4_con.size();           // number of F2 constraint matrices
-//  size_t bsize = F4_con_3.size();         // basis size
 
   for (size_t i = 0; i < bsize; i++)      // loop over ith constraint matrix
   {
-  for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
+  for (size_t k = 0; k < bsize; k++)      // loop over jth constraint matrix
   {
-    for (size_t k = 0; k < bsize; k++)    // loop over matrix row
+    for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
     {
-    for (size_t l = 0; l < bsize; l++)    // loop over matrix column
+    for (size_t kp = 0; kp < bsize; kp++)    // loop over matrix row
+    {
+      F3_build_1 [i][k][ip][kp] = -1.0 * (N - 1.0) / 4.0 * (kron_del(i,ip)*kron_del(k,kp) + kron_del(k,ip)*kron_del(i,kp));
+    }
+    }
+  }
+  }
+
+  for (size_t i = 0; i < bsize; i++)      // loop over ith constraint matrix
+  {
+  for (size_t k = 0; k < bsize; k++)      // loop over jth constraint matrix
+  {
+    for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
+    {
+    for (size_t jp = 0; jp < bsize; jp++)      // loop over jth constraint matrix
+    {
+    for (size_t kp = 0; kp < bsize; kp++)    // loop over matrix row
+    {
+    for (size_t lp = 0; lp < bsize; lp++)    // loop over matrix column
+    {
+     F3_build_3 [i][k][ip][jp][kp][lp] = 1./2. * (kron_del(i,ip)*kron_del(k,kp) + kron_del(k,ip)*kron_del(i,kp)) * kron_del(jp,lp);
+    }
+    }
+    }
+    }
+  }
+  }
+
+
+  size_t counter = 0;
+
+  for (size_t i1 = 0; i1 < bsize; i1++)
+  {
+  for (size_t i2 = i1; i2 < bsize; i2++)
+  {
+    for (size_t j = 0; j < bsize; j++)
+    {
+    for (size_t k = 0; k < bsize; k++)
     {
 
-        size_t left  = i * bsize + j;
+      size_t b = counter;
 
-        size_t right = k * bsize + l; 
+      F3_con[b][j][k] = F3_build_1 [i1][i2][j][k];
 
-        left  += 2*bsize;
-        right += 2*bsize;
-
-        F3_con [left][right] = kron_del(i,k) * kron_del(j,l);
 
     }
     }
 
+    counter++;
   }
   }
 
-//  print (std::cout, F4_con);
+
+  counter = 0;
+
+  for (size_t i = 0; i < bsize; i++)      // loop over ith constraint matrix
+  {
+  for (size_t k = i; k < bsize; k++)      // loop over jth constraint matrix
+  {
+    for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
+    {
+    for (size_t jp = 0; jp < bsize; jp++)      // loop over jth constraint matrix
+    {
+    for (size_t kp = 0; kp < bsize; kp++)    // loop over matrix row
+    {
+    for (size_t lp = 0; lp < bsize; lp++)    // loop over matrix column
+    {
+
+      size_t b = counter;
+
+      size_t left  = ip * bsize + jp;
+      size_t right = kp * bsize + lp;
+
+      left  += 2*bsize;
+      right += 2*bsize;
+
+      F3_con[b][left][right] = F3_build_3 [i][k][ip][jp][kp][lp];
+
+    }
+    }
+    }
+    }
+
+    F3_val[counter] = 0.;
+
+    counter++;
+  }
+  }
 
 }
 
@@ -1097,7 +1224,94 @@ void init_F4_flag (two_array & F4_con, const size_t bsize)
   }
   }
 
-//  print (std::cout, F4_con);
+}
+
+/***************************************************************
+
+Function to create our F5 constraint matrix to fix antisymmetry 
+of the 2RDM in the upper two indices.
+
+***************************************************************/
+
+template <typename one_array, typename three_array, typename eight_array>
+void init_F5_flag (eight_array & F5_build_3, three_array & F5_con, one_array & F5_val, const size_t bsize)
+{
+
+
+//  size_t cmat  = F4_con.size();           // number of F2 constraint matrices
+//  size_t bsize = F4_con_3.size();         // basis size
+
+  for (size_t i = 0; i < bsize; i++)      // loop over ith constraint matrix
+  {
+  for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
+  {
+  for (size_t k = 0; k < bsize; k++)    // loop over matrix row
+  {
+  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
+  {
+  	for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
+  	{
+  	for (size_t jp = 0; jp < bsize; jp++)      // loop over jth constraint matrix
+  	{
+  	for (size_t kp = 0; kp < bsize; kp++)    // loop over matrix row
+  	{
+  	for (size_t lp = 0; lp < bsize; lp++)    // loop over matrix column
+  	{
+
+  		F5_build_3 [i][j][k][l][ip][jp][kp][lp] = (1./2.)* (
+  			(kron_del(i,ip)*kron_del(j,jp) + kron_del(i,jp)*kron_del(j,ip)) * kron_del(k,kp)*kron_del(l,lp)
+  			+
+  			(kron_del(i,kp)*kron_del(j,lp) + kron_del(i,lp)*kron_del(j,kp)) * kron_del(k,ip)*kron_del(l,jp)
+  			);
+  	}
+  	}
+  	}
+  	}
+  }
+  }
+  }
+  }
+
+  size_t counter = 0;
+
+  for (size_t i = 0; i < bsize; i++)      // loop over ith constraint matrix
+  {
+  for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
+  {
+  for (size_t k = 0; k < bsize; k++)    // loop over matrix row
+  {
+  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
+  {
+  	for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
+  	{
+  	for (size_t jp = 0; jp < bsize; jp++)      // loop over jth constraint matrix
+  	{
+  	for (size_t kp = 0; kp < bsize; kp++)    // loop over matrix row
+  	{
+  	for (size_t lp = 0; lp < bsize; lp++)    // loop over matrix column
+  	{
+  		size_t b = counter;
+
+  		size_t left  = ip * bsize + jp;
+  		size_t right = kp * bsize + lp;
+
+  		left  += 2*bsize;
+  		right += 2*bsize;
+
+  		F5_con[b][left][right] = F5_build_3 [i][j][k][l][ip][jp][kp][lp];
+  	}
+  	}
+  	}
+  	}
+
+  	F5_val [counter] = 0.;
+
+  	counter++;
+  }
+  }
+  }
+  }
+
 
 }
 
@@ -1139,8 +1353,8 @@ int main ()
   const bool F1_flag = true;
   const bool F2_flag = true;
   const bool F3_flag = true;
-  const bool F4_flag = true;
-  const bool F5_flag = false;
+  const bool F4_flag = false;
+  const bool F5_flag = true;
   const bool F6_flag = false;
 
   const bool two_body_toggle = true;
@@ -1173,7 +1387,11 @@ int main ()
   flag_pass.diag_toggle = true;
 
 
+//  const size_t F2num = bsize*bsize;
   const size_t F2num = bsize * (bsize + 1)/2;
+  const size_t F3num = bsize * (bsize + 1)/2;
+//  const size_t F3num = bsize*bsize;
+  const size_t F5num = bsize*bsize*bsize*bsize;
 
   // turn off or on two-body potential
 
@@ -1211,6 +1429,10 @@ int main ()
   typedef boost::multi_array<double, 3> three_array;
   typedef boost::multi_array<double, 4> four_array;
   typedef boost::multi_array<double, 5> five_array;
+  typedef boost::multi_array<double, 6> six_array;
+  typedef boost::multi_array<double, 7> seven_array;
+  typedef boost::multi_array<double, 8> eight_array;
+
 
   two_array ref_m (boost::extents[bsize][7]);
   two_array h1_mat(boost::extents[bsize][bsize]);
@@ -1220,13 +1442,23 @@ int main ()
 
   two_array  F1_con_1 (boost::extents[bsize][bsize]);
   four_array F2_con_1 (boost::extents[bsize][bsize][bsize][bsize]);
+ 
+  four_array F3_build_1 (boost::extents[bsize][bsize][bsize][bsize]);
+  six_array  F3_build_3 (boost::extents[bsize][bsize][bsize][bsize][bsize][bsize]);
+
   four_array F4_con_3 (boost::extents[bsize][bsize][bsize][bsize]);
+
+  eight_array F5_build_3 (boost::extents[bsize][bsize][bsize][bsize][bsize][bsize][bsize][bsize]);
 
   two_array   F1_con (boost::extents[cmat_extent][cmat_extent]);
   three_array F2_con (boost::extents[F2num][cmat_extent][cmat_extent]);
+  three_array F3_con (boost::extents[F3num][cmat_extent][cmat_extent]);
   two_array	  F4_con (boost::extents[cmat_extent][cmat_extent]);
+  three_array F5_con (boost::extents[F5num][cmat_extent][cmat_extent]);
 
   one_array   F2_val (boost::extents[F2num]);
+  one_array   F3_val (boost::extents[F3num]);
+  one_array	  F5_val (boost::extents[F5num]);
 
   if (F1_flag)
   {
@@ -1238,14 +1470,19 @@ int main ()
     init_F2_flag (F2_con_1, F2_con, F2_val, bsize);
   }
 
-//  if (F3_flag)
-//  {
-//    init_F3_flag (F3_con_1, F3_con, F3_val);
-//  }
+  if (F3_flag)
+  {
+    init_F3_flag (F3_build_1, F3_build_3, F3_con, F3_val, bsize, particles);
+  }
 
   if (F4_flag)
   {
     init_F4_flag (F4_con, bsize);
+  }
+
+  if (F5_flag)
+  {
+    init_F5_flag (F5_build_3, F5_con, F5_val, bsize);
   }
 
   fullm_populate_hamiltonian (ref_m, h1_mat, h2_mat, m_ref, m_mat, hw, diag_out, diag_toggle);
@@ -1262,7 +1499,7 @@ int main ()
 
   create_c_matrix (h1_mat, comp_h2, c_matrix, two_body_toggle);
 
-  create_spda_file (c_matrix, flag_pass, F1_con, F2_con, F2_val, F4_con, particles, bsize, spda_out);
+  create_spda_file (c_matrix, flag_pass, F1_con, F2_con, F2_val, F3_con, F3_val, F4_con, F5_con, F5_val, particles, bsize, spda_out);
 
   four_array test_h2 (boost::extents[bsize][bsize][bsize][bsize]);
 
@@ -1341,11 +1578,46 @@ int main ()
 
 
 
+    diag_out << F3num << " terms - " << "F3 constraint matrix output" << std::endl << std::endl;
+
+    print(diag_out, F3_con);
+    
+    diag_out << std::endl << std::endl;
+
+
+
+    diag_out << "F3 constraint values" << std::endl << std::endl;
+
+    print(diag_out, F3_val);
+
+    diag_out << std::endl << std::endl;
+
+
+
+
   	diag_out << "1 term - " << "F4 constraint matrix output" << std::endl << std::endl;
 
   	print(diag_out, F4_con);
 
   	diag_out << std::endl << std::endl;
+
+
+
+
+    diag_out << F5num << " terms - " << "F5 constraint matrix output" << std::endl << std::endl;
+
+    print(diag_out, F5_con);
+    
+    diag_out << std::endl << std::endl;
+
+
+
+    diag_out << "F5 constraint values" << std::endl << std::endl;
+
+    print(diag_out, F5_val);
+
+    diag_out << std::endl << std::endl;
+
   }
 
 //  print(std::cout, h2_mat);
