@@ -1160,7 +1160,7 @@ void init_F3_flag (four_array & F3_build_1, six_array & F3_build_3, three_array 
 
   for (size_t i = 0; i < bsize; i++)      // loop over ith constraint matrix
   {
-  for (size_t k = 0; k < bsize; k++)      // loop over jth constraint matrix
+  for (size_t k = i; k < bsize; k++)      // loop over jth constraint matrix
   {
     for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
     {
@@ -1176,7 +1176,7 @@ void init_F3_flag (four_array & F3_build_1, six_array & F3_build_3, three_array 
 
   for (size_t i = 0; i < bsize; i++)      // loop over ith constraint matrix
   {
-  for (size_t k = 0; k < bsize; k++)      // loop over jth constraint matrix
+  for (size_t k = i; k < bsize; k++)      // loop over jth constraint matrix
   {
     for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
     {
@@ -1318,9 +1318,9 @@ void init_F5_flag (eight_array & F5_build_3, three_array & F5_con, one_array & F
   {
   for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
   {
-  for (size_t k = 0; k < bsize; k++)    // loop over matrix row
+  for (size_t k = i; k < bsize; k++)    // loop over matrix row
   {
-  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
+  for (size_t l = j; l < bsize; l++)    // loop over matrix column
   {
   	for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
   	{
@@ -1351,9 +1351,9 @@ void init_F5_flag (eight_array & F5_build_3, three_array & F5_con, one_array & F
   {
   for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
   {
-  for (size_t k = 0; k < bsize; k++)    // loop over matrix row
+  for (size_t k = i; k < bsize; k++)    // loop over matrix row
   {
-  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
+  for (size_t l = j; l < bsize; l++)    // loop over matrix column
   {
   	for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
   	{
@@ -1408,9 +1408,9 @@ void init_F6_flag (eight_array & F6_build_3, three_array & F6_con, one_array & F
   {
   for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
   {
-  for (size_t k = 0; k < bsize; k++)    // loop over matrix row
+  for (size_t k = i; k < bsize; k++)    // loop over matrix row
   {
-  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
+  for (size_t l = j; l < bsize; l++)    // loop over matrix column
   {
     for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
     {
@@ -1441,9 +1441,9 @@ void init_F6_flag (eight_array & F6_build_3, three_array & F6_con, one_array & F
   {
   for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
   {
-  for (size_t k = 0; k < bsize; k++)    // loop over matrix row
+  for (size_t k = i; k < bsize; k++)    // loop over matrix row
   {
-  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
+  for (size_t l = j; l < bsize; l++)    // loop over matrix column
   {
     for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
     {
@@ -1496,9 +1496,9 @@ void init_F7_flag (six_array & F7_build_2, eight_array & F7_build_3, eight_array
   {
   for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
   {
-  for (size_t k = 0; k < bsize; k++)    // loop over matrix row
+  for (size_t k = i; k < bsize; k++)    // loop over matrix row
   {
-  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
+  for (size_t l = j; l < bsize; l++)    // loop over matrix column
   {
     for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
     {
@@ -1534,9 +1534,9 @@ void init_F7_flag (six_array & F7_build_2, eight_array & F7_build_3, eight_array
   {
   for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
   {
-  for (size_t k = 0; k < bsize; k++)    // loop over matrix row
+  for (size_t k = i; k < bsize; k++)    // loop over matrix row
   {
-  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
+  for (size_t l = j; l < bsize; l++)    // loop over matrix column
   {
     for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
     {
@@ -1567,9 +1567,9 @@ void init_F7_flag (six_array & F7_build_2, eight_array & F7_build_3, eight_array
   {
   for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
   {
-  for (size_t k = 0; k < bsize; k++)    // loop over matrix row
+  for (size_t k = i; k < bsize; k++)    // loop over matrix row
   {
-  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
+  for (size_t l = j; l < bsize; l++)    // loop over matrix column
   {
     for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
     {
@@ -1602,9 +1602,9 @@ void init_F7_flag (six_array & F7_build_2, eight_array & F7_build_3, eight_array
   {
   for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
   {
-  for (size_t k = 0; k < bsize; k++)    // loop over matrix row
+  for (size_t k = i; k < bsize; k++)    // loop over matrix row
   {
-  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
+  for (size_t l = j; l < bsize; l++)    // loop over matrix column
   {
     for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
     {
@@ -1631,9 +1631,9 @@ void init_F7_flag (six_array & F7_build_2, eight_array & F7_build_3, eight_array
   {
   for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
   {
-  for (size_t k = 0; k < bsize; k++)    // loop over matrix row
+  for (size_t k = i; k < bsize; k++)    // loop over matrix row
   {
-  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
+  for (size_t l = j; l < bsize; l++)    // loop over matrix column
   {
     for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
     {
@@ -1695,9 +1695,9 @@ void init_F8_flag (eight_array & F8_build_3, three_array & F8_con, one_array & F
   {
   for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
   {
-  for (size_t k = 0; k < bsize; k++)    // loop over matrix row
+  for (size_t k = i; k < bsize; k++)    // loop over matrix row
   {
-  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
+  for (size_t l = j; l < bsize; l++)    // loop over matrix column
   {
     for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
     {
@@ -1727,9 +1727,9 @@ void init_F8_flag (eight_array & F8_build_3, three_array & F8_con, one_array & F
   {
   for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
   {
-  for (size_t k = 0; k < bsize; k++)    // loop over matrix row
+  for (size_t k = i; k < bsize; k++)    // loop over matrix row
   {
-  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
+  for (size_t l = j; l < bsize; l++)    // loop over matrix column
   {
     for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
     {
@@ -1785,9 +1785,9 @@ void init_F9_flag (eight_array & F9_build_3, three_array & F9_con, one_array & F
   {
   for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
   {
-  for (size_t k = 0; k < bsize; k++)    // loop over matrix row
+  for (size_t k = i; k < bsize; k++)    // loop over matrix row
   {
-  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
+  for (size_t l = j; l < bsize; l++)    // loop over matrix column
   {
     for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
     {
@@ -1817,9 +1817,9 @@ void init_F9_flag (eight_array & F9_build_3, three_array & F9_con, one_array & F
   {
   for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
   {
-  for (size_t k = 0; k < bsize; k++)    // loop over matrix row
+  for (size_t k = i; k < bsize; k++)    // loop over matrix row
   {
-  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
+  for (size_t l = j; l < bsize; l++)    // loop over matrix column
   {
     for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
     {
@@ -1871,9 +1871,9 @@ void init_F10_flag (six_array & F10_build_1, eight_array & F10_build_3, eight_ar
   {
   for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
   {
-  for (size_t k = 0; k < bsize; k++)    // loop over matrix row
+  for (size_t k = i; k < bsize; k++)    // loop over matrix row
   {
-  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
+  for (size_t l = j; l < bsize; l++)    // loop over matrix column
   {
     for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
     {
@@ -1895,9 +1895,9 @@ void init_F10_flag (six_array & F10_build_1, eight_array & F10_build_3, eight_ar
   {
   for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
   {
-  for (size_t k = 0; k < bsize; k++)    // loop over matrix row
+  for (size_t k = i; k < bsize; k++)    // loop over matrix row
   {
-  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
+  for (size_t l = j; l < bsize; l++)    // loop over matrix column
   {
     for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
     {
@@ -1926,9 +1926,9 @@ void init_F10_flag (six_array & F10_build_1, eight_array & F10_build_3, eight_ar
   {
   for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
   {
-  for (size_t k = 0; k < bsize; k++)    // loop over matrix row
+  for (size_t k = i; k < bsize; k++)    // loop over matrix row
   {
-  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
+  for (size_t l = j; l < bsize; l++)    // loop over matrix column
   {
     for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
     {
@@ -1962,9 +1962,9 @@ void init_F10_flag (six_array & F10_build_1, eight_array & F10_build_3, eight_ar
   {
   for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
   {
-  for (size_t k = 0; k < bsize; k++)    // loop over matrix row
+  for (size_t k = i; k < bsize; k++)    // loop over matrix row
   {
-  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
+  for (size_t l = j; l < bsize; l++)    // loop over matrix column
   {
     for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
     {
@@ -1996,9 +1996,9 @@ void init_F10_flag (six_array & F10_build_1, eight_array & F10_build_3, eight_ar
   {
   for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
   {
-  for (size_t k = 0; k < bsize; k++)    // loop over matrix row
+  for (size_t k = i; k < bsize; k++)    // loop over matrix row
   {
-  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
+  for (size_t l = j; l < bsize; l++)    // loop over matrix column
   {
     for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
     {
@@ -2066,10 +2066,23 @@ int main ()
 
 //  const double l_param = hc / sqrt(mass * hw);		 // the relevant length parameter for the HO
 
-  std::cout << "Building system..." << std::endl;
+  std::cout << ("Building system... ") << std::endl;
 
-//  const char * m_matrix_file = (m_mat_file).c_str();
-  
+  size_t index_num = 0;
+
+  for (size_t i = 0; i < bsize; i++)      // loop over ith constraint matrix
+  {
+  for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
+  {
+  for (size_t k = i; k < bsize; k++)    // loop over matrix row
+  {
+  for (size_t l = j; l < bsize; l++)    // loop over matrix column
+  {
+    index_num++;
+  }
+  }
+  }
+  }
 
 
   // define flags for all different combinations of conditions in RDM
@@ -2138,18 +2151,20 @@ int main ()
 
   flag_pass.diag_toggle = true;
 
+
+
   const size_t F1num = 1;
 //  const size_t F2num = bsize*bsize;
   const size_t F2num = bsize * (bsize + 1)/2;
   const size_t F3num = bsize * (bsize + 1)/2;
 //  const size_t F3num = bsize*bsize;
   const size_t F4num = 1;
-  const size_t F5num = bsize*bsize*bsize*bsize;
-  const size_t F6num = bsize*bsize*bsize*bsize;
-  const size_t F7num = bsize*bsize*bsize*bsize;
-  const size_t F8num = bsize*bsize*bsize*bsize;
-  const size_t F9num = bsize*bsize*bsize*bsize;
-  const size_t F10num = bsize*bsize*bsize*bsize;
+  const size_t F5num = index_num;//bsize*bsize*bsize*bsize;
+  const size_t F6num = index_num;//bsize*bsize*bsize*bsize;
+  const size_t F7num = index_num;//bsize*bsize*bsize*bsize;
+  const size_t F8num = index_num;//bsize*bsize*bsize*bsize;
+  const size_t F9num = index_num;//bsize*bsize*bsize*bsize;
+  const size_t F10num = index_num;//bsize*bsize*bsize*bsize;
   // turn off or on two-body potential
 
 
@@ -2202,29 +2217,6 @@ int main ()
   five_array h2_mat(boost::extents[bsize][bsize][bsize][bsize][5]);
 
 
-  two_array  F1_build_1 (boost::extents[bsize][bsize]);
-  four_array F2_build_1 (boost::extents[bsize][bsize][bsize][bsize]);
- 
-  four_array F3_build_1 (boost::extents[bsize][bsize][bsize][bsize]);
-  six_array  F3_build_3 (boost::extents[bsize][bsize][bsize][bsize][bsize][bsize]);
-
-  four_array F4_build_3 (boost::extents[bsize][bsize][bsize][bsize]);
-
-  eight_array F5_build_3 (boost::extents[bsize][bsize][bsize][bsize][bsize][bsize][bsize][bsize]);
-  eight_array F6_build_3 (boost::extents[bsize][bsize][bsize][bsize][bsize][bsize][bsize][bsize]);
-
-
-  six_array   F7_build_1 (boost::extents[bsize][bsize][bsize][bsize][bsize][bsize]);
-  eight_array F7_build_3 (boost::extents[bsize][bsize][bsize][bsize][bsize][bsize][bsize][bsize]);
-  eight_array F7_build_5 (boost::extents[bsize][bsize][bsize][bsize][bsize][bsize][bsize][bsize]);
-
-  eight_array F8_build_3 (boost::extents[bsize][bsize][bsize][bsize][bsize][bsize][bsize][bsize]);
-
-  eight_array F9_build_3 (boost::extents[bsize][bsize][bsize][bsize][bsize][bsize][bsize][bsize]);
-
-  six_array F10_build_1 (boost::extents[bsize][bsize][bsize][bsize][bsize][bsize]);
-  eight_array F10_build_3 (boost::extents[bsize][bsize][bsize][bsize][bsize][bsize][bsize][bsize]);
-  eight_array F10_build_5 (boost::extents[bsize][bsize][bsize][bsize][bsize][bsize][bsize][bsize]);
 
   three_array F1_con (boost::extents[F1num][cmat_extent][cmat_extent]);
   three_array F2_con (boost::extents[F2num][cmat_extent][cmat_extent]);
@@ -2235,7 +2227,9 @@ int main ()
   three_array F7_con (boost::extents[F7num][cmat_extent][cmat_extent]);
   three_array F8_con (boost::extents[F8num][cmat_extent][cmat_extent]);
   three_array F9_con (boost::extents[F9num][cmat_extent][cmat_extent]);
-  three_array F10_con (boost::extents[F10num][cmat_extent][cmat_extent]);
+  
+  if (G_flag)
+    three_array F10_con (boost::extents[F10num][cmat_extent][cmat_extent]);
 
   one_array   F1_val (boost::extents[F1num]);
   one_array   F2_val (boost::extents[F2num]);
@@ -2248,62 +2242,102 @@ int main ()
   one_array   F9_val (boost::extents[F9num]);
   one_array   F10_val (boost::extents[F10num]);
 
+  F6_con.resize(boost::extents[0][0][0]);
+  F7_con.resize(boost::extents[0][0][0]);
+  F8_con.resize(boost::extents[0][0][0]);
+  F9_con.resize(boost::extents[0][0][0]);
+  F10_con.resize(boost::extents[0][0][0]);
+
   if (F1_flag)
   {
+    two_array  F1_build_1 (boost::extents[bsize][bsize]);
     init_F1_flag (F1_con, F1_val, bsize, particles);
+    F1_build_1.resize(boost::extents[0][0]);
+    std::cout << "FLAG 1 DONE" << std::endl;
   }
+
+
 
   if (F2_flag)
   {
+    four_array F2_build_1 (boost::extents[bsize][bsize][bsize][bsize]);
     init_F2_flag (F2_build_1, F2_con, F2_val, bsize);
+    F2_build_1.resize(boost::extents[0][0][0][0]);
+    std::cout << "FLAG 2 DONE" << std::endl;
   }
 
   if (F3_flag)
   {
+    four_array F3_build_1 (boost::extents[bsize][bsize][bsize][bsize]);
+    six_array  F3_build_3 (boost::extents[bsize][bsize][bsize][bsize][bsize][bsize]);
     init_F3_flag (F3_build_1, F3_build_3, F3_con, F3_val, bsize, particles);
+    F3_build_1.resize(boost::extents[0][0][0][0]);
+    F3_build_3.resize(boost::extents[0][0][0][0][0][0]);
+    std::cout << "FLAG 3 DONE" << std::endl;  
   }
 
   if (F4_flag)
   {
+    four_array F4_build_3 (boost::extents[bsize][bsize][bsize][bsize]);
     init_F4_flag (F4_con, F4_val, bsize, particles);
+    F4_build_3.resize(boost::extents[0][0][0][0]);
+    std::cout << "FLAG 4 DONE" << std::endl;
   }
 
   if (F5_flag)
   {
+    eight_array F5_build_3 (boost::extents[bsize][bsize][bsize][bsize][bsize][bsize][bsize][bsize]);
     init_F5_flag (F5_build_3, F5_con, F5_val, bsize);
+    F5_build_3.resize(boost::extents[0][0][0][0][0][0][0][0]);
+    std::cout << "FLAG 5 DONE" << std::endl;
   }
 
   if (F6_flag)
   {
+    eight_array F6_build_3 (boost::extents[bsize][bsize][bsize][bsize][bsize][bsize][bsize][bsize]);
     init_F6_flag (F6_build_3, F6_con, F6_val, bsize);
+    std::cout << "6 ";
   }
 
   if (F7_flag)
   {
+    six_array   F7_build_1 (boost::extents[bsize][bsize][bsize][bsize][bsize][bsize]);
+    eight_array F7_build_3 (boost::extents[bsize][bsize][bsize][bsize][bsize][bsize][bsize][bsize]);
+    eight_array F7_build_5 (boost::extents[bsize][bsize][bsize][bsize][bsize][bsize][bsize][bsize]);
     init_F7_flag (F7_build_1, F7_build_3, F7_build_5, F7_con, F7_val, bsize);
+    std::cout << "7 ";
   }
 
   if (F8_flag)
   {
+    eight_array F8_build_3 (boost::extents[bsize][bsize][bsize][bsize][bsize][bsize][bsize][bsize]);
     init_F8_flag (F8_build_3, F8_con, F8_val, bsize);
+    std::cout << "8 ";
   }
 
   if (F9_flag)
   {
+    eight_array F9_build_3 (boost::extents[bsize][bsize][bsize][bsize][bsize][bsize][bsize][bsize]);
     init_F9_flag (F9_build_3, F9_con, F9_val, bsize);
+    std::cout << "9 ";
   }
 
   if (F10_flag)
   {
+    six_array F10_build_1 (boost::extents[bsize][bsize][bsize][bsize][bsize][bsize]);
+    eight_array F10_build_3 (boost::extents[bsize][bsize][bsize][bsize][bsize][bsize][bsize][bsize]);
+    eight_array F10_build_5 (boost::extents[bsize][bsize][bsize][bsize][bsize][bsize][bsize][bsize]);
     init_F10_flag (F10_build_1, F10_build_3, F10_build_5, F10_con, F10_val, bsize);
+    std::cout << "10 ";
   }
+
 
   std::cout << "FLAG INITIALIZATION DONE" << std::endl;
 
 
   fullm_populate_hamiltonian (ref_m, h1_mat, h2_mat, m_ref, m_mat, hw, diag_out, diag_toggle);
 
-  std::cout << "HAMILTONIAN POPULATED" << std::endl;
+//  std::cout << "HAMILTONIAN POPULATED" << std::endl;
 
   two_array comp_h2 (boost::extents[bsize*bsize][bsize*bsize]);
 
