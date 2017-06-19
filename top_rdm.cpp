@@ -2093,16 +2093,16 @@ int main ()
   const bool F1_flag = true;  // p START - TRACE CONDITION
   const bool F2_flag = true;  // q START - LINEAR RELATIONS
   const bool F3_flag = true;  // P START - TRACE CONDITION
-  const bool F4_flag = false; // REDUNDNAT - P TRACE CONDITION
+  const bool F4_flag = false; // REDUNDANT - P TRACE CONDITION
   const bool F5_flag = true;  // P ANTI-SYMMETRY
   const bool F6_flag = false; // REDUNDANT - P ANTI-SYMMETRY
-  const bool F7_flag = false;  // Q START - LINEAR RELATIONS
-  const bool F8_flag = false; // Q ANTI-SYMMETRY
+  const bool F7_flag = true;  // Q START - LINEAR RELATIONS
+  const bool F8_flag = true; // Q ANTI-SYMMETRY
   const bool F9_flag = false; // REDUNDANT - Q ANTI-SYMMETRY
-  const bool F10_flag = false; // G START - LINEAR REALTIONS
+  const bool F10_flag = true; // G START - LINEAR REALTIONS
 
-  const bool Q_flag = false;
-  const bool G_flag = false;
+  const bool Q_flag = true;
+  const bool G_flag = true;
 
   if (!two_body_toggle and (F4_flag or F5_flag or F6_flag or F7_flag))
   {
@@ -2217,36 +2217,93 @@ int main ()
   five_array h2_mat(boost::extents[bsize][bsize][bsize][bsize][5]);
 
 
+  three_array F1_con  (boost::extents[0][0][0]);
+  three_array F2_con  (boost::extents[0][0][0]);
+  three_array F3_con  (boost::extents[0][0][0]);
+  three_array F4_con  (boost::extents[0][0][0]);
+  three_array F5_con  (boost::extents[0][0][0]);
+  three_array F6_con  (boost::extents[0][0][0]);
+  three_array F7_con  (boost::extents[0][0][0]);
+  three_array F8_con  (boost::extents[0][0][0]);
+  three_array F9_con  (boost::extents[0][0][0]);
+  three_array F10_con (boost::extents[0][0][0]);
 
-  three_array F1_con (boost::extents[F1num][cmat_extent][cmat_extent]);
-  three_array F2_con (boost::extents[F2num][cmat_extent][cmat_extent]);
-  three_array F3_con (boost::extents[F3num][cmat_extent][cmat_extent]);
-  three_array F4_con (boost::extents[F4num][cmat_extent][cmat_extent]);
-  three_array F5_con (boost::extents[F5num][cmat_extent][cmat_extent]);
-  three_array F6_con (boost::extents[F6num][cmat_extent][cmat_extent]);
-  three_array F7_con (boost::extents[F7num][cmat_extent][cmat_extent]);
-  three_array F8_con (boost::extents[F8num][cmat_extent][cmat_extent]);
-  three_array F9_con (boost::extents[F9num][cmat_extent][cmat_extent]);
-  
-  if (G_flag)
-    three_array F10_con (boost::extents[F10num][cmat_extent][cmat_extent]);
+  one_array   F1_val  (boost::extents[0]);
+  one_array   F2_val  (boost::extents[0]);
+  one_array   F3_val  (boost::extents[0]);
+  one_array   F4_val  (boost::extents[0]);
+  one_array   F5_val  (boost::extents[0]);
+  one_array   F6_val  (boost::extents[0]);
+  one_array   F7_val  (boost::extents[0]);
+  one_array   F8_val  (boost::extents[0]);
+  one_array   F9_val  (boost::extents[0]);
+  one_array   F10_val (boost::extents[0]);
 
-  one_array   F1_val (boost::extents[F1num]);
-  one_array   F2_val (boost::extents[F2num]);
-  one_array   F3_val (boost::extents[F3num]);
-  one_array   F4_val (boost::extents[F4num]);
-  one_array	  F5_val (boost::extents[F5num]);
-  one_array   F6_val (boost::extents[F6num]);
-  one_array   F7_val (boost::extents[F7num]);
-  one_array   F8_val (boost::extents[F8num]);
-  one_array   F9_val (boost::extents[F9num]);
-  one_array   F10_val (boost::extents[F10num]);
 
-  F6_con.resize(boost::extents[0][0][0]);
-  F7_con.resize(boost::extents[0][0][0]);
-  F8_con.resize(boost::extents[0][0][0]);
-  F9_con.resize(boost::extents[0][0][0]);
-  F10_con.resize(boost::extents[0][0][0]);
+
+  if (F1_flag)
+  {
+    F1_con.resize(boost::extents[F1num][cmat_extent][cmat_extent]);
+    F1_val.resize(boost::extents[F1num]);
+  }
+
+  if (F2_flag)
+  {
+    F2_con.resize(boost::extents[F2num][cmat_extent][cmat_extent]);
+    F2_val.resize(boost::extents[F2num]);
+  }
+
+  if (F3_flag)
+  {
+    F3_con.resize(boost::extents[F3num][cmat_extent][cmat_extent]);
+    F3_val.resize(boost::extents[F3num]);
+  }
+
+  if (F4_flag)
+  {
+    F4_con.resize(boost::extents[F4num][cmat_extent][cmat_extent]);
+    F4_val.resize(boost::extents[F4num]);
+  }
+
+  if (F5_flag)
+  {
+    F5_con.resize(boost::extents[F5num][cmat_extent][cmat_extent]);
+    F5_val.resize(boost::extents[F5num]);
+  }
+
+  if (F6_flag)
+  {
+    F6_con.resize(boost::extents[F6num][cmat_extent][cmat_extent]);
+    F6_val.resize(boost::extents[F6num]);
+  }
+
+  if (F7_flag)
+  {
+    F7_con.resize(boost::extents[F7num][cmat_extent][cmat_extent]);
+    F7_val.resize(boost::extents[F7num]);
+  }
+
+  if (F8_flag)
+  {
+    F8_con.resize(boost::extents[F8num][cmat_extent][cmat_extent]);
+    F8_val.resize(boost::extents[F8num]);
+  }
+
+  if (F9_flag)
+  {
+    F9_con.resize(boost::extents[F9num][cmat_extent][cmat_extent]);
+    F9_val.resize(boost::extents[F9num]);
+  }
+
+  if (F10_flag)
+  {
+    F10_con.resize(boost::extents[F10num][cmat_extent][cmat_extent]);
+    F10_val.resize(boost::extents[F10num]);
+  }
+
+
+
+
 
   if (F1_flag)
   {
@@ -2296,7 +2353,8 @@ int main ()
   {
     eight_array F6_build_3 (boost::extents[bsize][bsize][bsize][bsize][bsize][bsize][bsize][bsize]);
     init_F6_flag (F6_build_3, F6_con, F6_val, bsize);
-    std::cout << "6 ";
+    F6_build_3.resize(boost::extents[0][0][0][0][0][0][0][0]);
+    std::cout << "FLAG 6 DONE" << std::endl;
   }
 
   if (F7_flag)
@@ -2305,21 +2363,26 @@ int main ()
     eight_array F7_build_3 (boost::extents[bsize][bsize][bsize][bsize][bsize][bsize][bsize][bsize]);
     eight_array F7_build_5 (boost::extents[bsize][bsize][bsize][bsize][bsize][bsize][bsize][bsize]);
     init_F7_flag (F7_build_1, F7_build_3, F7_build_5, F7_con, F7_val, bsize);
-    std::cout << "7 ";
+    F7_build_1.resize(boost::extents[0][0][0][0][0][0]);
+    F7_build_3.resize(boost::extents[0][0][0][0][0][0][0][0]);
+    F7_build_3.resize(boost::extents[0][0][0][0][0][0][0][0]);
+    std::cout << "FLAG 7 DONE" << std::endl;
   }
 
   if (F8_flag)
   {
     eight_array F8_build_3 (boost::extents[bsize][bsize][bsize][bsize][bsize][bsize][bsize][bsize]);
     init_F8_flag (F8_build_3, F8_con, F8_val, bsize);
-    std::cout << "8 ";
+    F8_build_3.resize(boost::extents[0][0][0][0][0][0][0][0]);
+    std::cout << "FLAG 8 DONE" << std::endl;
   }
 
   if (F9_flag)
   {
     eight_array F9_build_3 (boost::extents[bsize][bsize][bsize][bsize][bsize][bsize][bsize][bsize]);
     init_F9_flag (F9_build_3, F9_con, F9_val, bsize);
-    std::cout << "9 ";
+    F9_build_3.resize(boost::extents[0][0][0][0][0][0][0][0]);
+    std::cout << "FLAG 9 DONE" << std::endl;
   }
 
   if (F10_flag)
@@ -2328,7 +2391,10 @@ int main ()
     eight_array F10_build_3 (boost::extents[bsize][bsize][bsize][bsize][bsize][bsize][bsize][bsize]);
     eight_array F10_build_5 (boost::extents[bsize][bsize][bsize][bsize][bsize][bsize][bsize][bsize]);
     init_F10_flag (F10_build_1, F10_build_3, F10_build_5, F10_con, F10_val, bsize);
-    std::cout << "10 ";
+    F10_build_1.resize(boost::extents[0][0][0][0][0][0]);
+    F10_build_3.resize(boost::extents[0][0][0][0][0][0][0][0]);
+    F10_build_5.resize(boost::extents[0][0][0][0][0][0][0][0]);
+    std::cout << "FLAG 10 DONE" << std::endl;
   }
 
 
