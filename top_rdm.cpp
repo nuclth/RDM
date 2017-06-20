@@ -1318,9 +1318,9 @@ void init_F5_flag (eight_array & F5_build_3, three_array & F5_con, one_array & F
   {
   for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
   {
-  for (size_t k = i; k < bsize; k++)    // loop over matrix row
+  for (size_t k = 0; k < bsize; k++)    // loop over matrix row
   {
-  for (size_t l = j; l < bsize; l++)    // loop over matrix column
+  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
   {
   	for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
   	{
@@ -1351,9 +1351,9 @@ void init_F5_flag (eight_array & F5_build_3, three_array & F5_con, one_array & F
   {
   for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
   {
-  for (size_t k = i; k < bsize; k++)    // loop over matrix row
+  for (size_t k = 0; k < bsize; k++)    // loop over matrix row
   {
-  for (size_t l = j; l < bsize; l++)    // loop over matrix column
+  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
   {
   	for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
   	{
@@ -1408,9 +1408,9 @@ void init_F6_flag (eight_array & F6_build_3, three_array & F6_con, one_array & F
   {
   for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
   {
-  for (size_t k = i; k < bsize; k++)    // loop over matrix row
+  for (size_t k = 0; k < bsize; k++)    // loop over matrix row
   {
-  for (size_t l = j; l < bsize; l++)    // loop over matrix column
+  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
   {
     for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
     {
@@ -1441,9 +1441,9 @@ void init_F6_flag (eight_array & F6_build_3, three_array & F6_con, one_array & F
   {
   for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
   {
-  for (size_t k = i; k < bsize; k++)    // loop over matrix row
+  for (size_t k = 0; k < bsize; k++)    // loop over matrix row
   {
-  for (size_t l = j; l < bsize; l++)    // loop over matrix column
+  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
   {
     for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
     {
@@ -1496,9 +1496,9 @@ void init_F7_flag (six_array & F7_build_2, eight_array & F7_build_3, eight_array
   {
   for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
   {
-  for (size_t k = i; k < bsize; k++)    // loop over matrix row
+  for (size_t k = 0; k < bsize; k++)    // loop over matrix row
   {
-  for (size_t l = j; l < bsize; l++)    // loop over matrix column
+  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
   {
     for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
     {
@@ -1534,9 +1534,9 @@ void init_F7_flag (six_array & F7_build_2, eight_array & F7_build_3, eight_array
   {
   for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
   {
-  for (size_t k = i; k < bsize; k++)    // loop over matrix row
+  for (size_t k = 0; k < bsize; k++)    // loop over matrix row
   {
-  for (size_t l = j; l < bsize; l++)    // loop over matrix column
+  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
   {
     for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
     {
@@ -1567,9 +1567,9 @@ void init_F7_flag (six_array & F7_build_2, eight_array & F7_build_3, eight_array
   {
   for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
   {
-  for (size_t k = i; k < bsize; k++)    // loop over matrix row
+  for (size_t k = 0; k < bsize; k++)    // loop over matrix row
   {
-  for (size_t l = j; l < bsize; l++)    // loop over matrix column
+  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
   {
     for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
     {
@@ -1602,9 +1602,9 @@ void init_F7_flag (six_array & F7_build_2, eight_array & F7_build_3, eight_array
   {
   for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
   {
-  for (size_t k = i; k < bsize; k++)    // loop over matrix row
+  for (size_t k = 0; k < bsize; k++)    // loop over matrix row
   {
-  for (size_t l = j; l < bsize; l++)    // loop over matrix column
+  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
   {
     for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
     {
@@ -1631,9 +1631,9 @@ void init_F7_flag (six_array & F7_build_2, eight_array & F7_build_3, eight_array
   {
   for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
   {
-  for (size_t k = i; k < bsize; k++)    // loop over matrix row
+  for (size_t k = 0; k < bsize; k++)    // loop over matrix row
   {
-  for (size_t l = j; l < bsize; l++)    // loop over matrix column
+  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
   {
     for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
     {
@@ -1695,9 +1695,9 @@ void init_F8_flag (eight_array & F8_build_3, three_array & F8_con, one_array & F
   {
   for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
   {
-  for (size_t k = i; k < bsize; k++)    // loop over matrix row
+  for (size_t k = 0; k < bsize; k++)    // loop over matrix row
   {
-  for (size_t l = j; l < bsize; l++)    // loop over matrix column
+  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
   {
     for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
     {
@@ -1727,9 +1727,9 @@ void init_F8_flag (eight_array & F8_build_3, three_array & F8_con, one_array & F
   {
   for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
   {
-  for (size_t k = i; k < bsize; k++)    // loop over matrix row
+  for (size_t k = 0; k < bsize; k++)    // loop over matrix row
   {
-  for (size_t l = j; l < bsize; l++)    // loop over matrix column
+  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
   {
     for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
     {
@@ -1785,9 +1785,9 @@ void init_F9_flag (eight_array & F9_build_3, three_array & F9_con, one_array & F
   {
   for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
   {
-  for (size_t k = i; k < bsize; k++)    // loop over matrix row
+  for (size_t k = 0; k < bsize; k++)    // loop over matrix row
   {
-  for (size_t l = j; l < bsize; l++)    // loop over matrix column
+  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
   {
     for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
     {
@@ -1817,9 +1817,9 @@ void init_F9_flag (eight_array & F9_build_3, three_array & F9_con, one_array & F
   {
   for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
   {
-  for (size_t k = i; k < bsize; k++)    // loop over matrix row
+  for (size_t k = 0; k < bsize; k++)    // loop over matrix row
   {
-  for (size_t l = j; l < bsize; l++)    // loop over matrix column
+  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
   {
     for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
     {
@@ -1871,9 +1871,9 @@ void init_F10_flag (six_array & F10_build_1, eight_array & F10_build_3, eight_ar
   {
   for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
   {
-  for (size_t k = i; k < bsize; k++)    // loop over matrix row
+  for (size_t k = 0; k < bsize; k++)    // loop over matrix row
   {
-  for (size_t l = j; l < bsize; l++)    // loop over matrix column
+  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
   {
     for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
     {
@@ -1895,9 +1895,9 @@ void init_F10_flag (six_array & F10_build_1, eight_array & F10_build_3, eight_ar
   {
   for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
   {
-  for (size_t k = i; k < bsize; k++)    // loop over matrix row
+  for (size_t k = 0; k < bsize; k++)    // loop over matrix row
   {
-  for (size_t l = j; l < bsize; l++)    // loop over matrix column
+  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
   {
     for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
     {
@@ -1926,9 +1926,9 @@ void init_F10_flag (six_array & F10_build_1, eight_array & F10_build_3, eight_ar
   {
   for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
   {
-  for (size_t k = i; k < bsize; k++)    // loop over matrix row
+  for (size_t k = 0; k < bsize; k++)    // loop over matrix row
   {
-  for (size_t l = j; l < bsize; l++)    // loop over matrix column
+  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
   {
     for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
     {
@@ -1962,9 +1962,9 @@ void init_F10_flag (six_array & F10_build_1, eight_array & F10_build_3, eight_ar
   {
   for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
   {
-  for (size_t k = i; k < bsize; k++)    // loop over matrix row
+  for (size_t k = 0; k < bsize; k++)    // loop over matrix row
   {
-  for (size_t l = j; l < bsize; l++)    // loop over matrix column
+  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
   {
     for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
     {
@@ -1996,9 +1996,9 @@ void init_F10_flag (six_array & F10_build_1, eight_array & F10_build_3, eight_ar
   {
   for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
   {
-  for (size_t k = i; k < bsize; k++)    // loop over matrix row
+  for (size_t k = 0; k < bsize; k++)    // loop over matrix row
   {
-  for (size_t l = j; l < bsize; l++)    // loop over matrix column
+  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
   {
     for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
     {
@@ -2074,9 +2074,9 @@ int main ()
   {
   for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
   {
-  for (size_t k = i; k < bsize; k++)    // loop over matrix row
+  for (size_t k = 0; k < bsize; k++)    // loop over matrix row
   {
-  for (size_t l = j; l < bsize; l++)    // loop over matrix column
+  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
   {
     index_num++;
   }
