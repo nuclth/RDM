@@ -76,6 +76,7 @@ struct con_flags
   bool F10_flag;
 	bool diag_toggle;
 	bool two_body_toggle;
+  bool redundant_check;
   bool Q_flag;
   bool G_flag;
 };
@@ -376,6 +377,52 @@ void con_matrix_out (const two_array & m_pass, const size_t con_count, const siz
 
 }
 
+/***************************************************************
+
+ 
+ Function to look for redundancies in constraint terms.
+
+
+***************************************************************/
+
+template <typename three_array>
+void check_constraints (const three_array & Con, const std::string & label, const bool output)
+{
+
+  std::cout << label << " REDUNDANCY CHECK" << std::endl;
+
+  size_t total = 0;
+
+  const size_t num = Con.size();
+
+  for (size_t b = 0; b < num; b++)
+  {
+  for (size_t q = b; q < num; q++)
+  {
+    if (q == b)
+      continue;
+
+    if (Con[b] == Con[q])
+    {
+
+      total++;
+      if (output)
+      {
+        std::cout << "b " << b << "\t" << "q " << q << std::endl;
+        if (false)
+        {
+          print (std::cout, Con[b]);
+          std::cout << "\n";
+          print (std::cout, Con[q]);
+        }
+      }
+    }
+  }
+  }
+
+  std::cout << "Total redundancies: " << total << std::endl;
+}
+
 
 
 /***************************************************************
@@ -399,7 +446,21 @@ void create_spda_file (const two_array & c_matrix, const struct con_flags flag_p
   const size_t F8num = F8_con.size();
   const size_t F9num = F9_con.size();
   const size_t F10num = F10_con.size();
-//  size_t cmat_extent = F1_con.size();
+  //  size_t cmat_extent = F1_con.size();
+
+  if(flag_pass.redundant_check)
+  { 
+    check_constraints (F1_con, "F1", true);
+    check_constraints (F2_con, "F2", true);
+    check_constraints (F3_con, "F3", true);
+    check_constraints (F4_con, "F4", true);
+    check_constraints (F5_con, "F5", true);
+    check_constraints (F6_con, "F6", true);
+    check_constraints (F7_con, "F7", true);
+    check_constraints (F8_con, "F8", true);
+    check_constraints (F9_con, "F9", true);
+    check_constraints (F10_con, "F10", true);                                
+  }
 
 
   // number of constraints start
@@ -1316,12 +1377,16 @@ void init_F5_flag (eight_array & F5_build_3, three_array & F5_con, one_array & F
 
   for (size_t i = 0; i < bsize; i++)      // loop over ith constraint matrix
   {
-  for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
+  for (size_t j = i; j < bsize; j++)      // loop over jth constraint matrix
   {
   for (size_t k = 0; k < bsize; k++)    // loop over matrix row
   {
   for (size_t l = 0; l < bsize; l++)    // loop over matrix column
   {
+
+    if (i == j && k == l && i > k)
+      continue;
+
   	for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
   	{
   	for (size_t jp = 0; jp < bsize; jp++)      // loop over jth constraint matrix
@@ -1349,12 +1414,16 @@ void init_F5_flag (eight_array & F5_build_3, three_array & F5_con, one_array & F
 
   for (size_t i = 0; i < bsize; i++)      // loop over ith constraint matrix
   {
-  for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
+  for (size_t j = i; j < bsize; j++)      // loop over jth constraint matrix
   {
   for (size_t k = 0; k < bsize; k++)    // loop over matrix row
   {
   for (size_t l = 0; l < bsize; l++)    // loop over matrix column
   {
+
+    if (i == j && k == l && i > k)
+      continue;
+
   	for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
   	{
   	for (size_t jp = 0; jp < bsize; jp++)      // loop over jth constraint matrix
@@ -1372,6 +1441,7 @@ void init_F5_flag (eight_array & F5_build_3, three_array & F5_con, one_array & F
   		size_t right_P = right + 2*bsize;
 
   		F5_con[b][left_P][right_P] = F5_build_3 [i][j][k][l][ip][jp][kp][lp];
+
   	}
   	}
   	}
@@ -1604,8 +1674,12 @@ void init_F7_flag (six_array & F7_build_2, eight_array & F7_build_3, eight_array
   {
   for (size_t k = 0; k < bsize; k++)    // loop over matrix row
   {
-  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
+  for (size_t l = j; l < bsize; l++)    // loop over matrix column
   {
+
+    if (j == l && k < i)
+      continue;
+
     for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
     {
     for (size_t jp = 0; jp < bsize; jp++)      // loop over jth constraint matrix
@@ -1633,8 +1707,11 @@ void init_F7_flag (six_array & F7_build_2, eight_array & F7_build_3, eight_array
   {
   for (size_t k = 0; k < bsize; k++)    // loop over matrix row
   {
-  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
+  for (size_t l = j; l < bsize; l++)    // loop over matrix column
   {
+    if (j == l && k < i)
+      continue;
+
     for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
     {
     for (size_t jp = 0; jp < bsize; jp++)      // loop over jth constraint matrix
@@ -1660,6 +1737,10 @@ void init_F7_flag (six_array & F7_build_2, eight_array & F7_build_3, eight_array
     }
     }
     }
+
+//    if (counter == 1 || counter == 4 || counter == 2 || counter == 8 || counter == 3 || counter == 12 || counter == 6 || counter == 9 || counter == 7 || counter == 13 || counter == 11 || counter == 14)
+//      std::cout << "Counter: " << counter << "\t" << i << " " << j << " " << k << " " << l << std::endl;
+
 
     F7_val [counter] = 
     kron_del(i,k)*kron_del(j,l) - kron_del(i,l)*kron_del(j,k);
@@ -1693,12 +1774,16 @@ void init_F8_flag (eight_array & F8_build_3, three_array & F8_con, one_array & F
 
   for (size_t i = 0; i < bsize; i++)      // loop over ith constraint matrix
   {
-  for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
+  for (size_t j = i; j < bsize; j++)      // loop over jth constraint matrix
   {
   for (size_t k = 0; k < bsize; k++)    // loop over matrix row
   {
   for (size_t l = 0; l < bsize; l++)    // loop over matrix column
   {
+
+    if (i == j && k == l && i > k)
+      continue;
+
     for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
     {
     for (size_t jp = 0; jp < bsize; jp++)      // loop over jth constraint matrix
@@ -1725,12 +1810,16 @@ void init_F8_flag (eight_array & F8_build_3, three_array & F8_con, one_array & F
 
   for (size_t i = 0; i < bsize; i++)      // loop over ith constraint matrix
   {
-  for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
+  for (size_t j = i; j < bsize; j++)      // loop over jth constraint matrix
   {
   for (size_t k = 0; k < bsize; k++)    // loop over matrix row
   {
   for (size_t l = 0; l < bsize; l++)    // loop over matrix column
   {
+
+    if (i == j && k == l && i > k)
+      continue;
+
     for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
     {
     for (size_t jp = 0; jp < bsize; jp++)      // loop over jth constraint matrix
@@ -1964,12 +2053,17 @@ void init_F10_flag (six_array & F10_build_1, eight_array & F10_build_3, eight_ar
   {
   for (size_t k = 0; k < bsize; k++)    // loop over matrix row
   {
-  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
+  for (size_t l = j; l < bsize; l++)    // loop over matrix column
   {
+
+    if (j == l && k < i)
+      continue;
+
     for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
     {
     for (size_t jp = 0; jp < bsize; jp++)      // loop over jth constraint matrix
     {
+
       size_t b = counter;
 
       size_t left_p  = ip;
@@ -1998,8 +2092,12 @@ void init_F10_flag (six_array & F10_build_1, eight_array & F10_build_3, eight_ar
   {
   for (size_t k = 0; k < bsize; k++)    // loop over matrix row
   {
-  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
+  for (size_t l = j; l < bsize; l++)    // loop over matrix column
   {
+    
+    if (j == l && k < i)
+      continue;
+
     for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
     {
     for (size_t jp = 0; jp < bsize; jp++)      // loop over jth constraint matrix
@@ -2068,6 +2166,46 @@ int main ()
 
   std::cout << ("Building system... ") << std::endl;
 
+  size_t anti_num = 0;
+
+  for (size_t i = 0; i < bsize; i++)      // loop over ith constraint matrix
+  {
+  for (size_t j = i; j < bsize; j++)      // loop over jth constraint matrix
+  {
+  for (size_t k = 0; k < bsize; k++)    // loop over matrix row
+  {
+  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
+  {
+    if (l == k && i == j && i < k)
+      continue;
+
+    anti_num++;
+  }
+  }
+  }
+  }
+
+  size_t QG_num = 0;
+
+  for (size_t i = 0; i < bsize; i++)      // loop over ith constraint matrix
+  {
+  for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
+  {
+  for (size_t k = 0; k < bsize; k++)    // loop over matrix row
+  {
+  for (size_t l = j; l < bsize; l++)    // loop over matrix column
+  {
+    if (j == l && k < i)
+      continue;
+
+    QG_num++;
+  }
+  }
+  }
+  }
+
+  std::cout << std::endl;
+
   size_t index_num = 0;
 
   for (size_t i = 0; i < bsize; i++)      // loop over ith constraint matrix
@@ -2084,6 +2222,9 @@ int main ()
   }
   }
 
+  std::cout << index_num << std::endl;
+  std::cout << anti_num << std::endl;
+  std::cout << QG_num << std::endl;
 
   // define flags for all different combinations of conditions in RDM
   const bool two_body_toggle = true;
@@ -2103,6 +2244,8 @@ int main ()
 
   const bool Q_flag = true;
   const bool G_flag = true;
+
+  const bool redundant_check = false;
 
   if (!two_body_toggle and (F4_flag or F5_flag or F6_flag or F7_flag))
   {
@@ -2145,6 +2288,7 @@ int main ()
   flag_pass.F10_flag = F10_flag;
 
   flag_pass.two_body_toggle = two_body_toggle;
+  flag_pass.redundant_check = redundant_check;
 
   flag_pass.Q_flag = Q_flag;
   flag_pass.G_flag = G_flag;
@@ -2153,18 +2297,18 @@ int main ()
 
 
 
-  const size_t F1num = 1;
+  const size_t F1num  = 1;
 //  const size_t F2num = bsize*bsize;
-  const size_t F2num = bsize * (bsize + 1)/2;
-  const size_t F3num = bsize * (bsize + 1)/2;
+  const size_t F2num  = bsize * (bsize + 1)/2;
+  const size_t F3num  = bsize * (bsize + 1)/2;
 //  const size_t F3num = bsize*bsize;
-  const size_t F4num = 1;
-  const size_t F5num = index_num;//bsize*bsize*bsize*bsize;
-  const size_t F6num = index_num;//bsize*bsize*bsize*bsize;
-  const size_t F7num = index_num;//bsize*bsize*bsize*bsize;
-  const size_t F8num = index_num;//bsize*bsize*bsize*bsize;
-  const size_t F9num = index_num;//bsize*bsize*bsize*bsize;
-  const size_t F10num = index_num;//bsize*bsize*bsize*bsize;
+  const size_t F4num  = 1;
+  const size_t F5num  = anti_num;//bsize*bsize*bsize*bsize;
+  const size_t F6num  = index_num;//bsize*bsize*bsize*bsize;
+  const size_t F7num  = QG_num;//bsize*bsize*bsize*bsize;
+  const size_t F8num  = anti_num;//bsize*bsize*bsize*bsize;
+  const size_t F9num  = index_num;//bsize*bsize*bsize*bsize;
+  const size_t F10num = QG_num;//bsize*bsize*bsize*bsize;
   // turn off or on two-body potential
 
 
