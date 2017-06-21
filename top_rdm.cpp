@@ -283,6 +283,8 @@ template <typename two_array>
 void con_matrix_out (const two_array & m_pass, const size_t con_count, const size_t bsize, const struct con_flags flag_pass, std::ofstream & spda_out)
 {
 
+  const size_t PQsize = bsize*(bsize-1)/2;
+
   size_t lower = 0;
   size_t upper = bsize;
 
@@ -314,7 +316,7 @@ void con_matrix_out (const two_array & m_pass, const size_t con_count, const siz
   }
 
   lower += bsize;
-  upper += bsize*bsize;
+  upper += PQsize;
 
   if (flag_pass.two_body_toggle)
   {
@@ -334,8 +336,8 @@ void con_matrix_out (const two_array & m_pass, const size_t con_count, const siz
     if (flag_pass.Q_flag)
     {
 
-      lower += bsize*bsize; 
-      upper += bsize*bsize;
+      lower += PQsize; 
+      upper += PQsize;
 
       for (size_t i = lower; i < upper; i++)
       {
@@ -354,7 +356,7 @@ void con_matrix_out (const two_array & m_pass, const size_t con_count, const siz
     if (flag_pass.G_flag)
     {
 
-      lower += bsize*bsize; 
+      lower += PQsize; 
       upper += bsize*bsize;
 
       for (size_t i = lower; i < upper; i++)
@@ -448,6 +450,8 @@ void create_spda_file (const two_array & c_matrix, const struct con_flags flag_p
   const size_t F10num = F10_con.size();
   //  size_t cmat_extent = F1_con.size();
 
+  const size_t PQsize = bsize*(bsize-1)/2;
+
   if(flag_pass.redundant_check)
   { 
     check_constraints (F1_con, "F1", true);
@@ -511,7 +515,7 @@ void create_spda_file (const two_array & c_matrix, const struct con_flags flag_p
   {
     blocks++;
 
-    if (flag_pass.Q_flag)
+    if (flag_pass.Q_flag and PQsize > 1)
       blocks++;
 
     if (flag_pass.G_flag)
@@ -524,14 +528,29 @@ void create_spda_file (const two_array & c_matrix, const struct con_flags flag_p
 
 
   // block sizes start
-  spda_out << bsize << " " << bsize << " ";     // output block sizes
+  if (flag_pass.F1_flag)
+    spda_out << bsize << " ";
+
+  if (flag_pass.F2_flag)
+    spda_out << bsize << " ";     // output block sizes
   
   if (flag_pass.two_body_toggle)
   {
-    spda_out << bsize*bsize << " ";
+    if (PQsize > 1)
+      spda_out << PQsize << " ";
+
+    if (!flag_pass.Q_flag and PQsize == 1)
+      spda_out << -1 << " ";
 
     if (flag_pass.Q_flag)
-    	spda_out << bsize*bsize << " ";
+    {
+      if (PQsize > 1)
+    	 spda_out << PQsize << " ";
+
+      else
+        spda_out << -2 << " ";
+    }
+
 
     if (flag_pass.G_flag)
     	spda_out << bsize*bsize << " ";
@@ -945,7 +964,7 @@ void fullm_populate_hamiltonian (two_array & ref_m, two_array & h1_mat, five_arr
 template <typename two_array, typename five_array>
 void compactify_h2 (const two_array & ref_m, two_array & comp_h2, five_array & h2_mat, std::ofstream & diag_out, const bool diag_toggle)
 {
-  const size_t mat_length = h2_mat.size();
+  const size_t bsize = h2_mat.size();
 
   double value;
 
@@ -956,14 +975,20 @@ void compactify_h2 (const two_array & ref_m, two_array & comp_h2, five_array & h
     diag_out << "Output of nonzero 2-body ME" << std::endl << std::endl;    
   }
 
-  for (size_t i = 0; i < mat_length; ++i)
+  for (size_t i = 0; i < bsize; ++i)
   {
-    for (size_t j = 0; j < mat_length; ++j)
-    {
-      for (size_t k = 0; k < mat_length; ++k)
-      {
-        for (size_t l = 0; l < mat_length; ++l)
-        {
+  for (size_t j = 0; j < bsize; ++j)
+  {
+    if (i >= j)
+      continue;
+
+  for (size_t k = 0; k < bsize; ++k)
+  {
+  for (size_t l = 0; l < bsize; ++l)
+  {
+    if (k >= l)
+      continue;
+
             value = h2_mat [i][j][k][l][0];
 
             alpha = h2_mat [i][j][k][l][1];
@@ -977,28 +1002,28 @@ void compactify_h2 (const two_array & ref_m, two_array & comp_h2, five_array & h
               {
               	diag_out << alpha << " " << beta << " " << gamma << " " << delta << " " << value << " \t";
 
-                for (size_t loop = 0; loop < mat_length; loop++)
+                for (size_t loop = 0; loop < bsize; loop++)
                 {
                   if (alpha == ref_m[loop][0])
                     diag_out << ref_m[loop][6] << "\t";
                 }
 
 
-                for (size_t loop = 0; loop < mat_length; loop++)
+                for (size_t loop = 0; loop < bsize; loop++)
                 {
                   if (beta == ref_m[loop][0])
                     diag_out << ref_m[loop][6] << "\t";
                 }
 
 
-                for (size_t loop = 0; loop < mat_length; loop++)
+                for (size_t loop = 0; loop < bsize; loop++)
                 {
                   if (gamma == ref_m[loop][0])
                     diag_out << ref_m[loop][6] << "\t";
                 }
 
 
-                for (size_t loop = 0; loop < mat_length; loop++)
+                for (size_t loop = 0; loop < bsize; loop++)
                 {
                   if (delta == ref_m[loop][0])
                     diag_out << ref_m[loop][6] << "\n";
@@ -1007,10 +1032,14 @@ void compactify_h2 (const two_array & ref_m, two_array & comp_h2, five_array & h
               }
             }
 
+            size_t ips = i + 1;
+            size_t jps = j + 1;
+            size_t kps = k + 1;
+            size_t lps = l + 1;
 
-            size_t left  = i * mat_length + j;
+            size_t left  = jps - ips + (2*bsize - ips) * (ips - 1)/2 - 1;
+            size_t right = lps - kps + (2*bsize - kps) * (kps - 1)/2 - 1;
 
-            size_t right = k * mat_length + l; 
 
   /*         if (i == 0 && j == 4 && k == 0)
             {
@@ -1022,15 +1051,14 @@ void compactify_h2 (const two_array & ref_m, two_array & comp_h2, five_array & h
             	std::cout << right << " " << l << " " << k << "\t" << value << "\n"; 
             }
 */
+
+            std::cout << value << std::endl;
+
             comp_h2 [left][right] = value;
 
-        }
-
-      }
-
-    }
-
-
+  }
+  }
+  }
   }
 
   if (diag_toggle)
@@ -1291,21 +1319,39 @@ void init_F3_flag (four_array & F3_build_1, six_array & F3_build_3, three_array 
     {
     for (size_t jp = 0; jp < bsize; jp++)      // loop over jth constraint matrix
     {
+      if (ip >= jp)
+        continue;
+
     for (size_t kp = 0; kp < bsize; kp++)    // loop over matrix row
     {
     for (size_t lp = 0; lp < bsize; lp++)    // loop over matrix column
     {
+      if (kp >= lp)
+        continue;
+
 
       size_t b = counter;
 
-      size_t left  = ip * bsize + jp;
-      size_t right = kp * bsize + lp;
+      size_t ips = ip + 1;
+      size_t jps = jp + 1;
+      size_t kps = kp + 1;
+      size_t lps = lp + 1;
+
+      size_t left  = jps - ips + (2*bsize - ips) * (ips - 1)/2 - 1;
+      size_t right = lps - kps + (2*bsize - kps) * (kps - 1)/2 - 1;
+
+//      std::cout << ips << " " << jps << " " << kps << " " << lps << std::endl;
+
+//      std::cout << left << "\t" << right << std::endl;
 
       size_t left_P  = left  + 2*bsize;
       size_t right_P = right + 2*bsize;
 
+
       F3_con[b][left_P][right_P] = F3_build_3 [i][k][ip][jp][kp][lp];
 
+
+//      std::cout << "SUCCESS" << std::endl;
     }
     }
     }
@@ -1621,34 +1667,6 @@ void init_F7_flag (six_array & F7_build_2, eight_array & F7_build_3, eight_array
       kron_del(i,ip) * kron_del(j,jp)*kron_del(k,kp)*kron_del(l,lp)
       +
       kron_del(i,kp)*kron_del(j,lp)*kron_del(k,ip)*kron_del(l,jp);
-    }
-    }
-    }
-    }
-  }
-  }
-  }
-  }
-
-
-
-
-  for (size_t i = 0; i < bsize; i++)      // loop over ith constraint matrix
-  {
-  for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
-  {
-  for (size_t k = 0; k < bsize; k++)    // loop over matrix row
-  {
-  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
-  {
-    for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
-    {
-    for (size_t jp = 0; jp < bsize; jp++)      // loop over jth constraint matrix
-    {
-    for (size_t kp = 0; kp < bsize; kp++)    // loop over matrix row
-    {
-    for (size_t lp = 0; lp < bsize; lp++)    // loop over matrix column
-    {
 
       F7_build_5 [i][j][k][l][ip][jp][kp][lp] = (-1./2.) * ( 
       kron_del(l,ip) * kron_del(k,jp) * kron_del(j,kp)*kron_del(i,lp)
@@ -1714,22 +1732,27 @@ void init_F7_flag (six_array & F7_build_2, eight_array & F7_build_3, eight_array
 
     for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
     {
-    for (size_t jp = 0; jp < bsize; jp++)      // loop over jth constraint matrix
+    for (size_t jp = ip+1; jp < bsize; jp++)      // loop over jth constraint matrix
     {
     for (size_t kp = 0; kp < bsize; kp++)    // loop over matrix row
     {
-    for (size_t lp = 0; lp < bsize; lp++)    // loop over matrix column
+    for (size_t lp = kp+1; lp < bsize; lp++)    // loop over matrix column
     {
       size_t b = counter;
 
-      size_t left  = ip * bsize + jp;
-      size_t right = kp * bsize + lp;
+      size_t ips = ip + 1;
+      size_t jps = jp + 1;
+      size_t kps = kp + 1;
+      size_t lps = lp + 1;
+
+      size_t left  = jps - ips + (2*bsize - ips) * (ips - 1)/2 - 1;
+      size_t right = lps - kps + (2*bsize - kps) * (kps - 1)/2 - 1;
 
       size_t left_P  = left  + 2*bsize;
       size_t right_P = right + 2*bsize;
 
-      size_t left_Q  = left  + 2*bsize + bsize*bsize;
-      size_t right_Q = right + 2*bsize + bsize*bsize;
+      size_t left_Q  = left  + 2*bsize + bsize*(bsize-1)/2;
+      size_t right_Q = right + 2*bsize + bsize*(bsize-1)/2;
 
       F7_con[b][left_P][right_P] = F7_build_3 [i][j][k][l][ip][jp][kp][lp];
       F7_con[b][left_Q][right_Q] = F7_build_5 [i][j][k][l][ip][jp][kp][lp];
@@ -2166,7 +2189,7 @@ int main ()
 
   std::cout << ("Building system... ") << std::endl;
 
-  size_t anti_num = 0;
+/*  size_t anti_num = 0;
 
   for (size_t i = 0; i < bsize; i++)      // loop over ith constraint matrix
   {
@@ -2225,6 +2248,26 @@ int main ()
   std::cout << index_num << std::endl;
   std::cout << anti_num << std::endl;
   std::cout << QG_num << std::endl;
+*/
+
+  size_t QG_num = 0;
+
+  for (size_t i = 0; i < bsize; i++)      // loop over ith constraint matrix
+  {
+  for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
+  {
+  for (size_t k = 0; k < bsize; k++)    // loop over matrix row
+  {
+  for (size_t l = j; l < bsize; l++)    // loop over matrix column
+  {
+    if (j == l && k < i)
+      continue;
+
+    QG_num++;
+  }
+  }
+  }
+  }
 
   // define flags for all different combinations of conditions in RDM
   const bool two_body_toggle = true;
@@ -2235,15 +2278,15 @@ int main ()
   const bool F2_flag = true;  // q START - LINEAR RELATIONS
   const bool F3_flag = true;  // P START - TRACE CONDITION
   const bool F4_flag = false; // REDUNDANT - P TRACE CONDITION
-  const bool F5_flag = true;  // P ANTI-SYMMETRY
+  const bool F5_flag = false;  // P ANTI-SYMMETRY
   const bool F6_flag = false; // REDUNDANT - P ANTI-SYMMETRY
   const bool F7_flag = true;  // Q START - LINEAR RELATIONS
-  const bool F8_flag = true; // Q ANTI-SYMMETRY
+  const bool F8_flag = false; // Q ANTI-SYMMETRY
   const bool F9_flag = false; // REDUNDANT - Q ANTI-SYMMETRY
-  const bool F10_flag = true; // G START - LINEAR REALTIONS
+  const bool F10_flag = false; // G START - LINEAR REALTIONS
 
   const bool Q_flag = true;
-  const bool G_flag = true;
+  const bool G_flag = false;
 
   const bool redundant_check = false;
 
@@ -2271,7 +2314,7 @@ int main ()
     return EXIT_FAILURE;
   }
 
-  const bool diag_toggle = false;
+  const bool diag_toggle = true;
 
 
   struct con_flags flag_pass;
@@ -2303,12 +2346,12 @@ int main ()
   const size_t F3num  = bsize * (bsize + 1)/2;
 //  const size_t F3num = bsize*bsize;
   const size_t F4num  = 1;
-  const size_t F5num  = anti_num;//bsize*bsize*bsize*bsize;
-  const size_t F6num  = index_num;//bsize*bsize*bsize*bsize;
+  const size_t F5num  = 0;//anti_num;//bsize*bsize*bsize*bsize;
+  const size_t F6num  = 0;//index_num;//bsize*bsize*bsize*bsize;
   const size_t F7num  = QG_num;//bsize*bsize*bsize*bsize;
-  const size_t F8num  = anti_num;//bsize*bsize*bsize*bsize;
-  const size_t F9num  = index_num;//bsize*bsize*bsize*bsize;
-  const size_t F10num = QG_num;//bsize*bsize*bsize*bsize;
+  const size_t F8num  = 0;//anti_num;//bsize*bsize*bsize*bsize;
+  const size_t F9num  = 0;//index_num;//bsize*bsize*bsize*bsize;
+  const size_t F10num = 0;//QG_num;//bsize*bsize*bsize*bsize;
   // turn off or on two-body potential
 
 
@@ -2317,13 +2360,13 @@ int main ()
 
   if (two_body_toggle)
   {
-    cmat_extent = 2*bsize + bsize*bsize;
+      cmat_extent = 2*bsize + bsize * (bsize-1)/2;
 
     if (Q_flag)
-      cmat_extent = 2*bsize + 2 * bsize * bsize;
+      cmat_extent = 2*bsize + 2 * bsize * (bsize-1)/2;
 
     if (G_flag)
-      cmat_extent = 2*bsize + 3 * bsize * bsize;
+      cmat_extent = 2*bsize + 2 * bsize * (bsize-1)/2 + bsize * bsize;
   }
 
   else
@@ -2332,7 +2375,7 @@ int main ()
   }
 
   const std::string diag_file = "diagnostic_out/test_diag.dat";
-  const std::string spda_file = "spd_files/test_spd.dat";
+  const std::string spda_file = "sdp_files/test_spd.dat";
 
   std::ofstream diag_out (diag_file);
   std::ofstream spda_out (spda_file);
@@ -2542,6 +2585,7 @@ int main ()
   }
 
 
+
   std::cout << "FLAG INITIALIZATION DONE" << std::endl;
 
 
@@ -2549,9 +2593,10 @@ int main ()
 
 //  std::cout << "HAMILTONIAN POPULATED" << std::endl;
 
-  two_array comp_h2 (boost::extents[bsize*bsize][bsize*bsize]);
+  two_array comp_h2 (boost::extents[bsize*(bsize-1)/2][bsize*(bsize-1)/2]);
 
   compactify_h2 (ref_m, comp_h2, h2_mat, diag_out, diag_toggle);
+
 
 //  print(std::cout, comp_h2);
 
