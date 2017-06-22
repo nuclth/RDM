@@ -1528,7 +1528,7 @@ void init_F7_flag (six_array & F7_build_2, eight_array & F7_build_3, eight_array
         )
       );
 
-      F7_build_5 [i][j][k][l][ip][jp][kp][lp] = (-1./16.) * ( 
+      F7_build_5 [i][j][k][l][ip][jp][kp][lp] = (-1./8.) * ( 
         (
         kron_del(l,ip) * kron_del(k,jp) * kron_del(j,kp) * kron_del(i,lp)
         +
@@ -1677,88 +1677,6 @@ void init_F8_flag (eight_array & F8_build_3, three_array & F8_con, one_array & F
 {
 
 
-//  size_t cmat  = F4_con.size();           // number of F2 constraint matrices
-//  size_t bsize = F4_con_3.size();         // basis size
-
-  for (size_t i = 0; i < bsize; i++)      // loop over ith constraint matrix
-  {
-  for (size_t j = i; j < bsize; j++)      // loop over jth constraint matrix
-  {
-  for (size_t k = 0; k < bsize; k++)    // loop over matrix row
-  {
-  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
-  {
-
-    if (i == j && k == l && i > k)
-      continue;
-
-    for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
-    {
-    for (size_t jp = 0; jp < bsize; jp++)      // loop over jth constraint matrix
-    {
-    for (size_t kp = 0; kp < bsize; kp++)    // loop over matrix row
-    {
-    for (size_t lp = 0; lp < bsize; lp++)    // loop over matrix column
-    {
-      F8_build_3 [i][j][k][l][ip][jp][kp][lp] = (1./2.)* (
-        (kron_del(i,ip)*kron_del(j,jp) + kron_del(i,jp)*kron_del(j,ip)) * kron_del(k,kp)*kron_del(l,lp)
-        +
-        (kron_del(i,kp)*kron_del(j,lp) + kron_del(i,lp)*kron_del(j,kp)) * kron_del(k,ip)*kron_del(l,jp)
-        );
-    }
-    }
-    }
-    }
-  }
-  }
-  }
-  }
-
-  size_t counter = 0;
-
-  for (size_t i = 0; i < bsize; i++)      // loop over ith constraint matrix
-  {
-  for (size_t j = i; j < bsize; j++)      // loop over jth constraint matrix
-  {
-  for (size_t k = 0; k < bsize; k++)    // loop over matrix row
-  {
-  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
-  {
-
-    if (i == j && k == l && i > k)
-      continue;
-
-    for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
-    {
-    for (size_t jp = 0; jp < bsize; jp++)      // loop over jth constraint matrix
-    {
-    for (size_t kp = 0; kp < bsize; kp++)    // loop over matrix row
-    {
-    for (size_t lp = 0; lp < bsize; lp++)    // loop over matrix column
-    {
-      size_t b = counter;
-
-      size_t left  = ip * bsize + jp;
-      size_t right = kp * bsize + lp;
-
-      size_t left_Q  = left  + 2*bsize + bsize*bsize;
-      size_t right_Q = right + 2*bsize + bsize*bsize;
-
-      F8_con[b][left_Q][right_Q] = F8_build_3 [i][j][k][l][ip][jp][kp][lp];
-    }
-    }
-    }
-    }
-
-    F8_val [counter] = 0.;
-
-    counter++;
-  }
-  }
-  }
-  }
-
-
 }
 
 
@@ -1773,80 +1691,6 @@ of Q in the lower two indices.
 template <typename one_array, typename three_array, typename eight_array>
 void init_F9_flag (eight_array & F9_build_3, three_array & F9_con, one_array & F9_val, const size_t bsize)
 {
-
-
-//  size_t cmat  = F4_con.size();           // number of F2 constraint matrices
-//  size_t bsize = F4_con_3.size();         // basis size
-
-  for (size_t i = 0; i < bsize; i++)      // loop over ith constraint matrix
-  {
-  for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
-  {
-  for (size_t k = 0; k < bsize; k++)    // loop over matrix row
-  {
-  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
-  {
-    for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
-    {
-    for (size_t jp = 0; jp < bsize; jp++)      // loop over jth constraint matrix
-    {
-    for (size_t kp = 0; kp < bsize; kp++)    // loop over matrix row
-    {
-    for (size_t lp = 0; lp < bsize; lp++)    // loop over matrix column
-    {
-      F9_build_3 [i][j][k][l][ip][jp][kp][lp] = (1./2.)* (
-        kron_del(i,ip)*kron_del(j,jp) * (kron_del(k,kp)*kron_del(l,lp) + kron_del(k,lp)*kron_del(l,kp))
-        +
-        kron_del(i,kp)*kron_del(j,lp) * (kron_del(k,ip)*kron_del(l,jp) + kron_del(k,jp)*kron_del(l,ip))
-        );
-    }
-    }
-    }
-    }
-  }
-  }
-  }
-  }
-
-  size_t counter = 0;
-
-  for (size_t i = 0; i < bsize; i++)      // loop over ith constraint matrix
-  {
-  for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
-  {
-  for (size_t k = 0; k < bsize; k++)    // loop over matrix row
-  {
-  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
-  {
-    for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
-    {
-    for (size_t jp = 0; jp < bsize; jp++)      // loop over jth constraint matrix
-    {
-    for (size_t kp = 0; kp < bsize; kp++)    // loop over matrix row
-    {
-    for (size_t lp = 0; lp < bsize; lp++)    // loop over matrix column
-    {
-      size_t b = counter;
-
-      size_t left  = ip * bsize + jp;
-      size_t right = kp * bsize + lp;
-
-      size_t left_Q  = left  + 2*bsize + bsize*bsize;
-      size_t right_Q = right + 2*bsize + bsize*bsize;
-
-      F9_con[b][left_Q][right_Q] = F9_build_3 [i][j][k][l][ip][jp][kp][lp];
-    }
-    }
-    }
-    }
-
-    F9_val [counter] = 0.;
-
-    counter++;
-  }
-  }
-  }
-  }
 
 
 }
