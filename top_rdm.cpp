@@ -1052,7 +1052,7 @@ void compactify_h2 (const two_array & ref_m, two_array & comp_h2, five_array & h
             }
 */
 
-            std::cout << value << std::endl;
+//            std::cout << value << std::endl;
 
             comp_h2 [left][right] = value;
 
@@ -1275,8 +1275,12 @@ void init_F3_flag (four_array & F3_build_1, six_array & F3_build_3, three_array 
     {
     for (size_t lp = 0; lp < bsize; lp++)    // loop over matrix column
     {
-     F3_build_3 [i][k][ip][jp][kp][lp] = 1./2. * 
-      (kron_del(i,ip)*kron_del(k,kp) + kron_del(k,ip)*kron_del(i,kp)) * kron_del(jp,lp);
+     F3_build_3 [i][k][ip][jp][kp][lp] = 1./8. * (
+        (kron_del(i,ip)*kron_del(k,kp) + kron_del(k,ip)*kron_del(i,kp)) * kron_del(jp,lp)
+      - (kron_del(i,jp)*kron_del(k,kp) + kron_del(k,jp)*kron_del(i,kp)) * kron_del(ip,lp)
+      - (kron_del(i,ip)*kron_del(k,lp) + kron_del(k,ip)*kron_del(i,lp)) * kron_del(jp,kp)
+      + (kron_del(i,jp)*kron_del(k,lp) + kron_del(k,jp)*kron_del(i,lp)) * kron_del(ip,kp)
+      );
     }
     }
     }
@@ -1417,91 +1421,6 @@ template <typename one_array, typename three_array, typename eight_array>
 void init_F5_flag (eight_array & F5_build_3, three_array & F5_con, one_array & F5_val, const size_t bsize)
 {
 
-
-//  size_t cmat  = F4_con.size();           // number of F2 constraint matrices
-//  size_t bsize = F4_con_3.size();         // basis size
-
-  for (size_t i = 0; i < bsize; i++)      // loop over ith constraint matrix
-  {
-  for (size_t j = i; j < bsize; j++)      // loop over jth constraint matrix
-  {
-  for (size_t k = 0; k < bsize; k++)    // loop over matrix row
-  {
-  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
-  {
-
-    if (i == j && k == l && i > k)
-      continue;
-
-  	for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
-  	{
-  	for (size_t jp = 0; jp < bsize; jp++)      // loop over jth constraint matrix
-  	{
-  	for (size_t kp = 0; kp < bsize; kp++)    // loop over matrix row
-  	{
-  	for (size_t lp = 0; lp < bsize; lp++)    // loop over matrix column
-  	{
-
-  		F5_build_3 [i][j][k][l][ip][jp][kp][lp] = (1./2.)* (
-  			(kron_del(i,ip)*kron_del(j,jp) + kron_del(i,jp)*kron_del(j,ip)) * kron_del(k,kp)*kron_del(l,lp)
-  			+
-  			(kron_del(i,kp)*kron_del(j,lp) + kron_del(i,lp)*kron_del(j,kp)) * kron_del(k,ip)*kron_del(l,jp)
-  			);
-  	}
-  	}
-  	}
-  	}
-  }
-  }
-  }
-  }
-
-  size_t counter = 0;
-
-  for (size_t i = 0; i < bsize; i++)      // loop over ith constraint matrix
-  {
-  for (size_t j = i; j < bsize; j++)      // loop over jth constraint matrix
-  {
-  for (size_t k = 0; k < bsize; k++)    // loop over matrix row
-  {
-  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
-  {
-
-    if (i == j && k == l && i > k)
-      continue;
-
-  	for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
-  	{
-  	for (size_t jp = 0; jp < bsize; jp++)      // loop over jth constraint matrix
-  	{
-  	for (size_t kp = 0; kp < bsize; kp++)    // loop over matrix row
-  	{
-  	for (size_t lp = 0; lp < bsize; lp++)    // loop over matrix column
-  	{
-  		size_t b = counter;
-
-  		size_t left  = ip * bsize + jp;
-  		size_t right = kp * bsize + lp;
-
-  		size_t left_P  = left  + 2*bsize;
-  		size_t right_P = right + 2*bsize;
-
-  		F5_con[b][left_P][right_P] = F5_build_3 [i][j][k][l][ip][jp][kp][lp];
-
-  	}
-  	}
-  	}
-  	}
-
-  	F5_val [counter] = 0.;
-
-  	counter++;
-  }
-  }
-  }
-  }
-
-
 }
 
 
@@ -1516,84 +1435,7 @@ template <typename one_array, typename three_array, typename eight_array>
 void init_F6_flag (eight_array & F6_build_3, three_array & F6_con, one_array & F6_val, const size_t bsize)
 {
 
-
-//  size_t cmat  = F4_con.size();           // number of F2 constraint matrices
-//  size_t bsize = F4_con_3.size();         // basis size
-
-  for (size_t i = 0; i < bsize; i++)      // loop over ith constraint matrix
-  {
-  for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
-  {
-  for (size_t k = 0; k < bsize; k++)    // loop over matrix row
-  {
-  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
-  {
-    for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
-    {
-    for (size_t jp = 0; jp < bsize; jp++)      // loop over jth constraint matrix
-    {
-    for (size_t kp = 0; kp < bsize; kp++)    // loop over matrix row
-    {
-    for (size_t lp = 0; lp < bsize; lp++)    // loop over matrix column
-    {
-
-      F6_build_3 [i][j][k][l][ip][jp][kp][lp] = (1./2.)* (
-        kron_del(i,ip)*kron_del(j,jp) * (kron_del(k,kp)*kron_del(l,lp) + kron_del(k,lp)*kron_del(l,kp))
-        +
-        kron_del(i,kp)*kron_del(j,lp) * (kron_del(k,ip)*kron_del(l,jp) + kron_del(k,jp)*kron_del(l,ip))
-        );
-    }
-    }
-    }
-    }
-  }
-  }
-  }
-  }
-
-  size_t counter = 0;
-
-  for (size_t i = 0; i < bsize; i++)      // loop over ith constraint matrix
-  {
-  for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
-  {
-  for (size_t k = 0; k < bsize; k++)    // loop over matrix row
-  {
-  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
-  {
-    for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
-    {
-    for (size_t jp = 0; jp < bsize; jp++)      // loop over jth constraint matrix
-    {
-    for (size_t kp = 0; kp < bsize; kp++)    // loop over matrix row
-    {
-    for (size_t lp = 0; lp < bsize; lp++)    // loop over matrix column
-    {
-      size_t b = counter;
-
-      size_t left  = ip * bsize + jp;
-      size_t right = kp * bsize + lp;
-
-      size_t left_P  = left  + 2*bsize;
-      size_t right_P = right + 2*bsize;
-
-      F6_con[b][left_P][right_P] = F6_build_3 [i][j][k][l][ip][jp][kp][lp];
-    }
-    }
-    }
-    }
-
-    F6_val [counter] = 0.;
-
-    counter++;
-  }
-  }
-  }
-  }
-
-
 }
-
 
 
 /***************************************************************
@@ -1663,15 +1505,50 @@ void init_F7_flag (six_array & F7_build_2, eight_array & F7_build_3, eight_array
     for (size_t lp = 0; lp < bsize; lp++)    // loop over matrix column
     {
 
-      F7_build_3 [i][j][k][l][ip][jp][kp][lp] = 
-      kron_del(i,ip) * kron_del(j,jp)*kron_del(k,kp)*kron_del(l,lp)
-      +
-      kron_del(i,kp)*kron_del(j,lp)*kron_del(k,ip)*kron_del(l,jp);
+      F7_build_3 [i][j][k][l][ip][jp][kp][lp] = (1./4.) * (
+        (
+        kron_del(i,ip)*kron_del(j,jp)*kron_del(k,kp)*kron_del(l,lp)
+        +
+        kron_del(i,kp)*kron_del(j,lp)*kron_del(k,ip)*kron_del(l,jp)
+        )
+      - (
+        kron_del(i,jp)*kron_del(j,ip)*kron_del(k,kp)*kron_del(l,lp)
+        +
+        kron_del(i,kp)*kron_del(j,lp)*kron_del(k,jp)*kron_del(l,ip)
+        )
+      - (
+        kron_del(i,ip)*kron_del(j,jp)*kron_del(k,lp)*kron_del(l,kp)
+        +
+        kron_del(i,lp)*kron_del(j,kp)*kron_del(k,ip)*kron_del(l,jp)
+        )
+      + (
+        kron_del(i,jp)*kron_del(j,ip)*kron_del(k,lp)*kron_del(l,kp)
+        +
+        kron_del(i,lp)*kron_del(j,kp)*kron_del(k,jp)*kron_del(l,ip)
+        )
+      );
 
-      F7_build_5 [i][j][k][l][ip][jp][kp][lp] = (-1./2.) * ( 
-      kron_del(l,ip) * kron_del(k,jp) * kron_del(j,kp)*kron_del(i,lp)
-      +
-      kron_del(l,kp) * kron_del(k,lp) * kron_del(j,ip)*kron_del(i,jp)
+      F7_build_5 [i][j][k][l][ip][jp][kp][lp] = (-1./16.) * ( 
+        (
+        kron_del(l,ip) * kron_del(k,jp) * kron_del(j,kp) * kron_del(i,lp)
+        +
+        kron_del(l,kp) * kron_del(k,lp) * kron_del(j,ip) * kron_del(i,jp)
+        )
+      - (
+        kron_del(l,jp) * kron_del(k,ip) * kron_del(j,kp) * kron_del(i,lp)
+        +
+        kron_del(l,kp) * kron_del(k,lp) * kron_del(j,jp) * kron_del(i,ip)
+        )
+      - (
+        kron_del(l,ip) * kron_del(k,jp) * kron_del(j,lp) * kron_del(i,kp)
+        +
+        kron_del(l,lp) * kron_del(k,kp) * kron_del(j,ip) * kron_del(i,jp)
+        )
+      + (
+        kron_del(l,jp) * kron_del(k,ip) * kron_del(j,lp) * kron_del(i,kp)
+        +
+        kron_del(l,lp) * kron_del(k,kp) * kron_del(j,jp) * kron_del(i,ip)
+        )
       );
     }
     }
@@ -1732,12 +1609,18 @@ void init_F7_flag (six_array & F7_build_2, eight_array & F7_build_3, eight_array
 
     for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
     {
-    for (size_t jp = ip+1; jp < bsize; jp++)      // loop over jth constraint matrix
+    for (size_t jp = 0; jp < bsize; jp++)      // loop over jth constraint matrix
     {
+      if (ip >= jp)
+        continue;
+
     for (size_t kp = 0; kp < bsize; kp++)    // loop over matrix row
     {
-    for (size_t lp = kp+1; lp < bsize; lp++)    // loop over matrix column
+    for (size_t lp = 0; lp < bsize; lp++)    // loop over matrix column
     {
+      if (kp >= lp)
+        continue;
+
       size_t b = counter;
 
       size_t ips = ip + 1;
@@ -1756,6 +1639,8 @@ void init_F7_flag (six_array & F7_build_2, eight_array & F7_build_3, eight_array
 
       F7_con[b][left_P][right_P] = F7_build_3 [i][j][k][l][ip][jp][kp][lp];
       F7_con[b][left_Q][right_Q] = F7_build_5 [i][j][k][l][ip][jp][kp][lp];
+
+      print (std::cout, F7_con[b]);
     }
     }
     }
@@ -2280,12 +2165,12 @@ int main ()
   const bool F4_flag = false; // REDUNDANT - P TRACE CONDITION
   const bool F5_flag = false;  // P ANTI-SYMMETRY
   const bool F6_flag = false; // REDUNDANT - P ANTI-SYMMETRY
-  const bool F7_flag = true;  // Q START - LINEAR RELATIONS
+  const bool F7_flag = false;  // Q START - LINEAR RELATIONS
   const bool F8_flag = false; // Q ANTI-SYMMETRY
   const bool F9_flag = false; // REDUNDANT - Q ANTI-SYMMETRY
   const bool F10_flag = false; // G START - LINEAR REALTIONS
 
-  const bool Q_flag = true;
+  const bool Q_flag = false;
   const bool G_flag = false;
 
   const bool redundant_check = false;
