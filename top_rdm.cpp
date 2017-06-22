@@ -436,17 +436,15 @@ void check_constraints (const three_array & Con, const std::string & label, cons
 ***************************************************************/
 
 template <typename one_array, typename two_array, typename three_array>
-void create_spda_file (const two_array & c_matrix, const struct con_flags flag_pass, const three_array & F1_con, const one_array & F1_val, const three_array & F2_con, const one_array & F2_val, const three_array & F3_con, const one_array & F3_val, const three_array & F4_con, const one_array & F4_val, const three_array & F5_con, const one_array & F5_val, const three_array & F6_con, const one_array & F6_val, const three_array & F7_con, const one_array & F7_val, const three_array & F8_con, const one_array & F8_val, const three_array & F9_con, const one_array & F9_val, const three_array & F10_con, const one_array & F10_val, const size_t bsize, std::ofstream & spda_out)
+void create_spda_file (const two_array & c_matrix, const struct con_flags flag_pass, const three_array & F1_con, const one_array & F1_val, const three_array & F2_con, const one_array & F2_val, const three_array & F3_con, const one_array & F3_val, const three_array & F4_con, const one_array & F4_val, const size_t F7num, const three_array & F7_con, const one_array & F7_val, const three_array & F10_con, const one_array & F10_val, const size_t bsize, std::ofstream & spda_out)
 {
   const size_t F1num = F1_con.size();
   const size_t F2num = F2_con.size();
   const size_t F3num = F3_con.size();
   const size_t F4num = F4_con.size();
-  const size_t F5num = F5_con.size();
-  const size_t F6num = F6_con.size();
-  const size_t F7num = F7_con.size();
-  const size_t F8num = F8_con.size();
-  const size_t F9num = F9_con.size();
+
+
+
   const size_t F10num = F10_con.size();
   //  size_t cmat_extent = F1_con.size();
 
@@ -458,11 +456,9 @@ void create_spda_file (const two_array & c_matrix, const struct con_flags flag_p
     check_constraints (F2_con, "F2", true);
     check_constraints (F3_con, "F3", true);
     check_constraints (F4_con, "F4", true);
-    check_constraints (F5_con, "F5", true);
-    check_constraints (F6_con, "F6", true);
+
     check_constraints (F7_con, "F7", true);
-    check_constraints (F8_con, "F8", true);
-    check_constraints (F9_con, "F9", true);
+
     check_constraints (F10_con, "F10", true);                                
   }
 
@@ -484,20 +480,10 @@ void create_spda_file (const two_array & c_matrix, const struct con_flags flag_p
   	if (flag_pass.F4_flag)
   		num_cons += F4num; // N(N+1)/2 trace constraint
 
-  	if (flag_pass.F5_flag)
-  		num_cons += F5num;
-
-    if (flag_pass.F6_flag)
-      num_cons += F6num;
 
     if (flag_pass.F7_flag)
       num_cons += F7num;
 
-    if (flag_pass.F8_flag)
-      num_cons += F8num;
- 
-    if (flag_pass.F9_flag)
-      num_cons += F9num;
 
     if (flag_pass.F10_flag)
       num_cons += F10num;
@@ -589,17 +575,6 @@ void create_spda_file (const two_array & c_matrix, const struct con_flags flag_p
       spda_out << F4_val[i] << " ";
   }
 
-  if (flag_pass.F5_flag)
-  {
-    for (size_t i = 0; i < F5num; i++)
-      spda_out << F5_val[i] << " ";
-  }
-
-  if (flag_pass.F6_flag)
-  {
-    for (size_t i = 0; i < F6num; i++)
-      spda_out << F6_val[i] << " ";
-  }
 
   if (flag_pass.F7_flag)
   {
@@ -607,17 +582,6 @@ void create_spda_file (const two_array & c_matrix, const struct con_flags flag_p
       spda_out << F7_val[i] << " ";
   }
 
-  if (flag_pass.F8_flag)
-  {
-    for (size_t i = 0; i < F8num; i++)
-      spda_out << F8_val[i] << " ";
-  }
-
-  if (flag_pass.F9_flag)
-  {
-    for (size_t i = 0; i < F9num; i++)
-      spda_out << F9_val[i] << " ";
-  }
 
   if (flag_pass.F10_flag)
   {
@@ -678,23 +642,7 @@ void create_spda_file (const two_array & c_matrix, const struct con_flags flag_p
   }
   }
 
-  if (flag_pass.F5_flag)
-  {
-	for (size_t cnum = 0; cnum < F5num; cnum++)
-	{
-	   con_matrix_out (F5_con[cnum], con_count, bsize, flag_pass, spda_out);
-	   con_count++;
-	}
-  }
-
-  if (flag_pass.F6_flag)
-  {
-  for (size_t cnum = 0; cnum < F6num; cnum++)
-  {
-     con_matrix_out (F6_con[cnum], con_count, bsize, flag_pass, spda_out);
-     con_count++;
-  }
-  }
+ 
 
   if (flag_pass.F7_flag)
   {
@@ -705,23 +653,7 @@ void create_spda_file (const two_array & c_matrix, const struct con_flags flag_p
   }
   }
 
-  if (flag_pass.F8_flag)
-  {
-  for (size_t cnum = 0; cnum < F8num; cnum++)
-  {
-     con_matrix_out (F8_con[cnum], con_count, bsize, flag_pass, spda_out);
-     con_count++;
-  }
-  }
-
-  if (flag_pass.F9_flag)
-  {
-  for (size_t cnum = 0; cnum < F9num; cnum++)
-  {
-     con_matrix_out (F9_con[cnum], con_count, bsize, flag_pass, spda_out);
-     con_count++;
-  }
-  }
+ 
 
 
   if (flag_pass.F10_flag)
@@ -1235,6 +1167,12 @@ void init_F2_flag (four_array & F2_con_1, three_array & F2_con, one_array & F2_v
 //  printf("\n");
 }
 
+int F3_3_matrix (const int i, const int k, const int ip, const int jp, const int kp, const int lp)
+{
+  const int value = kron_del (i,ip) * kron_del (k,kp) * kron_del (jp, lp);
+
+  return value;  
+}
 
 /***************************************************************
 
@@ -1276,10 +1214,13 @@ void init_F3_flag (four_array & F3_build_1, six_array & F3_build_3, three_array 
     for (size_t lp = 0; lp < bsize; lp++)    // loop over matrix column
     {
      F3_build_3 [i][k][ip][jp][kp][lp] = 1./8. * (
-        (kron_del(i,ip)*kron_del(k,kp) + kron_del(k,ip)*kron_del(i,kp)) * kron_del(jp,lp)
-      - (kron_del(i,jp)*kron_del(k,kp) + kron_del(k,jp)*kron_del(i,kp)) * kron_del(ip,lp)
-      - (kron_del(i,ip)*kron_del(k,lp) + kron_del(k,ip)*kron_del(i,lp)) * kron_del(jp,kp)
-      + (kron_del(i,jp)*kron_del(k,lp) + kron_del(k,jp)*kron_del(i,lp)) * kron_del(ip,kp)
+        F3_3_matrix (i, k, ip, jp, kp, lp) +  F3_3_matrix (i, k, kp, lp, ip, jp)
+
+      - F3_3_matrix (i, k, jp, ip, kp, lp) -  F3_3_matrix (i, k, kp, lp, jp, ip)
+
+      - F3_3_matrix (i, k, ip, jp, lp, kp) -  F3_3_matrix (i, k, lp, kp, ip, jp)
+
+      + F3_3_matrix (i, k, jp, ip, lp, kp) +  F3_3_matrix (i, k, lp, kp, jp, ip)        
       );
     }
     }
@@ -1437,6 +1378,34 @@ void init_F6_flag (eight_array & F6_build_3, three_array & F6_con, one_array & F
 
 }
 
+int F7_2_matrix (const int i, const int j, const int k, const int l, const int ip, const int jp)
+{
+  const int value = 
+        kron_del(j,l)*kron_del(i,ip)*kron_del(k,jp)
+        -
+        kron_del(j,k)*kron_del(i,ip)*kron_del(l,jp)
+        -
+        kron_del(i,l)*kron_del(j,ip)*kron_del(k,jp)
+        +
+        kron_del(i,k)*kron_del(j,ip)*kron_del(l,jp);
+
+  return value;
+
+}
+
+int F7_3_matrix (const int i, const int j, const int k, const int l, const int ip, const int jp, const int kp, const int lp)
+{
+  const int value = kron_del (i,ip) * kron_del (j,jp) * kron_del (k,kp) * kron_del (l, lp);
+
+  return value;  
+}
+
+int F7_5_matrix (const int i, const int j, const int k, const int l, const int ip, const int jp, const int kp, const int lp)
+{
+  const int value = kron_del (i,ip) * kron_del (j,jp) * kron_del (k,kp) * kron_del (l, lp);
+
+  return value;  
+}
 
 /***************************************************************
 
@@ -1446,7 +1415,7 @@ relations between the 1RDM, q, 2RDM, and Q.
 ***************************************************************/
 
 template <typename one_array, typename three_array, typename six_array, typename eight_array>
-void init_F7_flag (six_array & F7_build_2, eight_array & F7_build_3, eight_array & F7_build_5, three_array & F7_con, one_array & F7_val, const size_t bsize)
+void init_F7_flag (six_array & F7_build_2, eight_array & F7_build_3, eight_array & F7_build_5, three_array & F7_con, one_array & F7_val, const size_t bsize, const size_t cmat_extent, size_t & skip)
 {
 
 
@@ -1462,7 +1431,10 @@ void init_F7_flag (six_array & F7_build_2, eight_array & F7_build_3, eight_array
     {
     for (size_t jp = 0; jp < bsize; jp++)      // loop over jth constraint matrix
     {
-      F7_build_2[i][j][k][l][ip][jp] = (1./2.)*(
+        F7_build_2 [i][j][k][l][ip][jp] = (1./2.) * (
+          F7_2_matrix (i, j, k, l, ip, jp) + F7_2_matrix (i, j, k, l, jp, ip)
+        );
+/*      F7_build_2 [i][j][k][l][ip][jp] = (1./2.)*(
         kron_del(i,k)*kron_del(j,ip)*kron_del(l,jp)
         +
         kron_del(j,l)*kron_del(i,ip)*kron_del(k,jp)
@@ -1479,6 +1451,7 @@ void init_F7_flag (six_array & F7_build_2, eight_array & F7_build_3, eight_array
         -
         kron_del(j,k)*kron_del(i,jp)*kron_del(l,ip)
         );
+*/
     }
     }
    }
@@ -1505,6 +1478,26 @@ void init_F7_flag (six_array & F7_build_2, eight_array & F7_build_3, eight_array
     for (size_t lp = 0; lp < bsize; lp++)    // loop over matrix column
     {
 
+      F7_build_3 [i][j][k][l][ip][jp][kp][lp] = (1./4.) * (
+        F7_3_matrix (i, j, k, l, ip, jp, kp, lp) +  F7_3_matrix (i, j, k, l, kp, lp, ip, jp)
+
+      - F7_3_matrix (i, j, k, l, jp, ip, kp, lp) -  F7_3_matrix (i, j, k, l, kp, lp, jp, ip)
+
+      - F7_3_matrix (i, j, k, l, ip, jp, lp, kp) -  F7_3_matrix (i, j, k, l, lp, kp, ip, jp)
+
+      + F7_3_matrix (i, j, k, l, jp, ip, lp, kp) +  F7_3_matrix (i, j, k, l, lp, kp, jp, ip)
+      );
+
+      F7_build_5 [i][j][k][l][ip][jp][kp][lp] = (1./8.) * (
+        F7_5_matrix (i, j, k, l, ip, jp, kp, lp) +  F7_5_matrix (i, j, k, l, kp, lp, ip, jp)
+
+      - F7_5_matrix (i, j, k, l, jp, ip, kp, lp) -  F7_5_matrix (i, j, k, l, kp, lp, jp, ip)
+
+      - F7_5_matrix (i, j, k, l, ip, jp, lp, kp) -  F7_5_matrix (i, j, k, l, lp, kp, ip, jp)
+
+      + F7_5_matrix (i, j, k, l, jp, ip, lp, kp) +  F7_5_matrix (i, j, k, l, lp, kp, jp, ip)
+      );
+/*
       F7_build_3 [i][j][k][l][ip][jp][kp][lp] = (1./4.) * (
         (
         kron_del(i,ip)*kron_del(j,jp)*kron_del(k,kp)*kron_del(l,lp)
@@ -1550,6 +1543,7 @@ void init_F7_flag (six_array & F7_build_2, eight_array & F7_build_3, eight_array
         kron_del(l,lp) * kron_del(k,kp) * kron_del(j,jp) * kron_del(i,ip)
         )
       );
+*/
     }
     }
     }
@@ -1575,18 +1569,7 @@ void init_F7_flag (six_array & F7_build_2, eight_array & F7_build_3, eight_array
     if (j == l && k < i)
       continue;
 
-    for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
-    {
-    for (size_t jp = 0; jp < bsize; jp++)      // loop over jth constraint matrix
-    {
-      size_t b = counter;
 
-      size_t left_q  = ip + bsize;
-      size_t right_q = jp + bsize;
-
-      F7_con[b][left_q][right_q] = F7_build_2 [i][j][k][l][ip][jp];
-    }
-    }
 
     counter++;
   }
@@ -1640,18 +1623,62 @@ void init_F7_flag (six_array & F7_build_2, eight_array & F7_build_3, eight_array
       F7_con[b][left_P][right_P] = F7_build_3 [i][j][k][l][ip][jp][kp][lp];
       F7_con[b][left_Q][right_Q] = F7_build_5 [i][j][k][l][ip][jp][kp][lp];
 
-      print (std::cout, F7_con[b]);
+
     }
     }
     }
     }
 
-//    if (counter == 1 || counter == 4 || counter == 2 || counter == 8 || counter == 3 || counter == 12 || counter == 6 || counter == 9 || counter == 7 || counter == 13 || counter == 11 || counter == 14)
-//      std::cout << "Counter: " << counter << "\t" << i << " " << j << " " << k << " " << l << std::endl;
+    for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
+    {
+    for (size_t jp = 0; jp < bsize; jp++)      // loop over jth constraint matrix
+    {
+      size_t b = counter;
 
+      size_t left_q  = ip + bsize;
+      size_t right_q = jp + bsize;
+
+      F7_con[b][left_q][right_q] = F7_build_2 [i][j][k][l][ip][jp];
+    }
+    }
 
     F7_val [counter] = 
     kron_del(i,k)*kron_del(j,l) - kron_del(i,l)*kron_del(j,k);
+
+/*    bool mat_used = false;
+    bool val_used = false;
+
+    for (size_t l1 = 0;  l1 < cmat_extent; l1++)
+    {
+    for (size_t l2 = l2; l2 < cmat_extent; l2++)
+    {
+      if (F7_con[counter][l1][l2] != 0.)
+        mat_used = true;
+    }
+    }
+
+    if (F7_val [counter] != 0.)
+      val_used = true;
+
+
+    if (!mat_used and !val_used)
+    {
+      skip++;
+      continue;
+    }
+*/
+
+/*    if (!mat_used and val_used)
+    {
+      std::cout << "ERROR: CONSTRAINT MATRIX ZERO AND VALUE NON-ZERO" << std::endl;
+      print (std::cout, F7_con[counter]);
+      std::cout << F7_val [counter] << std::endl;
+      std::cout << "END ERROR" << std::endl;
+    }
+*/
+    print (std::cout, F7_con[counter]);
+    std::cout << F7_val [counter] << std::endl;
+
 
     counter++;
   }
@@ -2009,12 +2036,12 @@ int main ()
   const bool F4_flag = false; // REDUNDANT - P TRACE CONDITION
   const bool F5_flag = false;  // P ANTI-SYMMETRY
   const bool F6_flag = false; // REDUNDANT - P ANTI-SYMMETRY
-  const bool F7_flag = false;  // Q START - LINEAR RELATIONS
+  const bool F7_flag = true;  // Q START - LINEAR RELATIONS
   const bool F8_flag = false; // Q ANTI-SYMMETRY
   const bool F9_flag = false; // REDUNDANT - Q ANTI-SYMMETRY
   const bool F10_flag = false; // G START - LINEAR REALTIONS
 
-  const bool Q_flag = false;
+  const bool Q_flag = true;
   const bool G_flag = false;
 
   const bool redundant_check = false;
@@ -2156,7 +2183,6 @@ int main ()
   one_array   F10_val (boost::extents[0]);
 
 
-
   if (F1_flag)
   {
     F1_con.resize(boost::extents[F1num][cmat_extent][cmat_extent]);
@@ -2273,12 +2299,16 @@ int main ()
     std::cout << "FLAG 6 DONE" << std::endl;
   }
 
+  size_t modF7num;
+
   if (F7_flag)
   {
+    size_t skip = 0;
     six_array   F7_build_1 (boost::extents[bsize][bsize][bsize][bsize][bsize][bsize]);
     eight_array F7_build_3 (boost::extents[bsize][bsize][bsize][bsize][bsize][bsize][bsize][bsize]);
     eight_array F7_build_5 (boost::extents[bsize][bsize][bsize][bsize][bsize][bsize][bsize][bsize]);
-    init_F7_flag (F7_build_1, F7_build_3, F7_build_5, F7_con, F7_val, bsize);
+    init_F7_flag (F7_build_1, F7_build_3, F7_build_5, F7_con, F7_val, bsize, cmat_extent, skip);
+    modF7num = F7num - skip;
     F7_build_1.resize(boost::extents[0][0][0][0][0][0]);
     F7_build_3.resize(boost::extents[0][0][0][0][0][0][0][0]);
     F7_build_3.resize(boost::extents[0][0][0][0][0][0][0][0]);
@@ -2335,7 +2365,7 @@ int main ()
 
     std::cout << "CREATING SPDA FILE" << std::endl;
 
-  create_spda_file (c_matrix, flag_pass, F1_con, F1_val, F2_con, F2_val, F3_con, F3_val, F4_con, F4_val, F5_con, F5_val, F6_con, F6_val, F7_con, F7_val, F8_con, F8_val, F9_con, F9_val, F10_con, F10_val, bsize, spda_out);
+  create_spda_file (c_matrix, flag_pass, F1_con, F1_val, F2_con, F2_val, F3_con, F3_val, F4_con, F4_val, modF7num, F7_con, F7_val, F10_con, F10_val, bsize, spda_out);
 
   four_array test_h2 (boost::extents[bsize][bsize][bsize][bsize]);
 
