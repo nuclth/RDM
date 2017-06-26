@@ -1395,14 +1395,36 @@ int F7_2_matrix (const int i, const int j, const int k, const int l, const int i
 
 int F7_3_matrix (const int i, const int j, const int k, const int l, const int ip, const int jp, const int kp, const int lp)
 {
-  const int value = kron_del (i,ip) * kron_del (j,jp) * kron_del (k,kp) * kron_del (l, lp);
+  const int value = kron_del (i,ip) * kron_del (j,jp) * kron_del (k,kp) * kron_del (l,lp);
 
   return value;  
 }
 
 int F7_5_matrix (const int i, const int j, const int k, const int l, const int ip, const int jp, const int kp, const int lp)
 {
-  const int value = kron_del (i,ip) * kron_del (j,jp) * kron_del (k,kp) * kron_del (l, lp);
+  const int value = kron_del (l,ip) * kron_del (k,jp) * kron_del (j,kp) * kron_del (i,lp);
+
+  return value;  
+}
+
+int F7_3_matrix_A (const int i, const int j, const int k, const int l, const int ip, const int jp, const int kp, const int lp)
+{
+    const int value =
+	  F7_3_matrix (i, j, k, l, ip, jp, kp, lp) +  F7_3_matrix (i, j, k, l, kp, lp, ip, jp)
+	- F7_3_matrix (i, j, k, l, jp, ip, kp, lp) -  F7_3_matrix (i, j, k, l, kp, lp, jp, ip)
+    - F7_3_matrix (i, j, k, l, ip, jp, lp, kp) -  F7_3_matrix (i, j, k, l, lp, kp, ip, jp)
+    + F7_3_matrix (i, j, k, l, jp, ip, lp, kp) +  F7_3_matrix (i, j, k, l, lp, kp, jp, ip);
+
+	return value;
+}
+
+int F7_5_matrix_A (const int i, const int j, const int k, const int l, const int ip, const int jp, const int kp, const int lp)
+{
+  const int value = 
+        F7_5_matrix (i, j, k, l, ip, jp, kp, lp) +  F7_5_matrix (i, j, k, l, kp, lp, ip, jp)
+      - F7_5_matrix (i, j, k, l, jp, ip, kp, lp) -  F7_5_matrix (i, j, k, l, kp, lp, jp, ip)
+      - F7_5_matrix (i, j, k, l, ip, jp, lp, kp) -  F7_5_matrix (i, j, k, l, lp, kp, ip, jp)
+      + F7_5_matrix (i, j, k, l, jp, ip, lp, kp) +  F7_5_matrix (i, j, k, l, lp, kp, jp, ip);
 
   return value;  
 }
@@ -1434,24 +1456,6 @@ void init_F7_flag (six_array & F7_build_2, eight_array & F7_build_3, eight_array
         F7_build_2 [i][j][k][l][ip][jp] = (1./2.) * (
           F7_2_matrix (i, j, k, l, ip, jp) + F7_2_matrix (i, j, k, l, jp, ip)
         );
-/*      F7_build_2 [i][j][k][l][ip][jp] = (1./2.)*(
-        kron_del(i,k)*kron_del(j,ip)*kron_del(l,jp)
-        +
-        kron_del(j,l)*kron_del(i,ip)*kron_del(k,jp)
-        -
-        kron_del(i,l)*kron_del(j,ip)*kron_del(k,jp)
-        -
-        kron_del(j,k)*kron_del(i,ip)*kron_del(l,jp)
-        +
-        kron_del(i,k)*kron_del(j,jp)*kron_del(l,ip)
-        +
-        kron_del(j,l)*kron_del(i,jp)*kron_del(k,ip)
-        -
-        kron_del(i,l)*kron_del(j,jp)*kron_del(k,ip)
-        -
-        kron_del(j,k)*kron_del(i,jp)*kron_del(l,ip)
-        );
-*/
     }
     }
    }
@@ -1473,85 +1477,140 @@ void init_F7_flag (six_array & F7_build_2, eight_array & F7_build_3, eight_array
     {
     for (size_t jp = 0; jp < bsize; jp++)      // loop over jth constraint matrix
     {
+//    	if (ip >= jp)
+//    		continue;
+
     for (size_t kp = 0; kp < bsize; kp++)    // loop over matrix row
     {
     for (size_t lp = 0; lp < bsize; lp++)    // loop over matrix column
     {
+//    	if (kp >= lp)
+//    		continue;
 
-      F7_build_3 [i][j][k][l][ip][jp][kp][lp] = (1./4.) * (
-        F7_3_matrix (i, j, k, l, ip, jp, kp, lp) +  F7_3_matrix (i, j, k, l, kp, lp, ip, jp)
 
-      - F7_3_matrix (i, j, k, l, jp, ip, kp, lp) -  F7_3_matrix (i, j, k, l, kp, lp, jp, ip)
+    	F7_build_3 [i][j][k][l][ip][jp][kp][lp] = (1./2.) * (
+    	F7_3_matrix (i, j, k, l, ip, jp, kp, lp) + F7_3_matrix (i, j, k, l, kp, lp, ip, jp)
+    	);
+    	F7_build_5 [i][j][k][l][ip][jp][kp][lp] = 
+    	F7_5_matrix (i, j, k, l, ip, jp, kp, lp);
 
-      - F7_3_matrix (i, j, k, l, ip, jp, lp, kp) -  F7_3_matrix (i, j, k, l, lp, kp, ip, jp)
 
-      + F7_3_matrix (i, j, k, l, jp, ip, lp, kp) +  F7_3_matrix (i, j, k, l, lp, kp, jp, ip)
+
+
+//    	if (F7_build_3 [i][j][k][l][ip][jp][kp][lp] != 0)
+//    			std::cout << "ip jp kp lp" << "\t" << ip << " " << jp << " " << kp << " " << lp << std::endl;
+
+//    	F7_build_3 [i][j][k][l][ip][jp][kp][lp] = 
+//    	F7_3_matrix (i, j, k, l, ip, jp, kp, lp) + F7_3_matrix (i, j, k, l, kp, lp, ip, jp);
+
+//    	F7_build_5 [i][j][k][l][ip][jp][kp][lp] = F7_5_matrix (i, j, k, l, ip, jp, kp, lp);
+/*      F7_build_3 [i][j][k][l][ip][jp][kp][lp] = (1./32.) * (
+      	  F7_3_matrix_A (i, j, k, l, ip, jp, kp, lp) + F7_3_matrix_A (k, l, i, j, ip, jp, kp, lp)
+      	- F7_3_matrix_A (j, i, k, l, ip, jp, kp, lp) - F7_3_matrix_A (k, l, j, i, ip, jp, kp, lp)
+      	- F7_3_matrix_A (i, j, l, k, ip, jp, kp, lp) - F7_3_matrix_A (l, k, i, j, ip, jp, kp, lp)
+      	+ F7_3_matrix_A (j, i, l, k, ip, jp, kp, lp) + F7_3_matrix_A (l, k, j, i, ip, jp, kp, lp)
       );
 
-      F7_build_5 [i][j][k][l][ip][jp][kp][lp] = (1./8.) * (
-        F7_5_matrix (i, j, k, l, ip, jp, kp, lp) +  F7_5_matrix (i, j, k, l, kp, lp, ip, jp)
-
-      - F7_5_matrix (i, j, k, l, jp, ip, kp, lp) -  F7_5_matrix (i, j, k, l, kp, lp, jp, ip)
-
-      - F7_5_matrix (i, j, k, l, ip, jp, lp, kp) -  F7_5_matrix (i, j, k, l, lp, kp, ip, jp)
-
-      + F7_5_matrix (i, j, k, l, jp, ip, lp, kp) +  F7_5_matrix (i, j, k, l, lp, kp, jp, ip)
-      );
-/*
-      F7_build_3 [i][j][k][l][ip][jp][kp][lp] = (1./4.) * (
-        (
-        kron_del(i,ip)*kron_del(j,jp)*kron_del(k,kp)*kron_del(l,lp)
-        +
-        kron_del(i,kp)*kron_del(j,lp)*kron_del(k,ip)*kron_del(l,jp)
-        )
-      - (
-        kron_del(i,jp)*kron_del(j,ip)*kron_del(k,kp)*kron_del(l,lp)
-        +
-        kron_del(i,kp)*kron_del(j,lp)*kron_del(k,jp)*kron_del(l,ip)
-        )
-      - (
-        kron_del(i,ip)*kron_del(j,jp)*kron_del(k,lp)*kron_del(l,kp)
-        +
-        kron_del(i,lp)*kron_del(j,kp)*kron_del(k,ip)*kron_del(l,jp)
-        )
-      + (
-        kron_del(i,jp)*kron_del(j,ip)*kron_del(k,lp)*kron_del(l,kp)
-        +
-        kron_del(i,lp)*kron_del(j,kp)*kron_del(k,jp)*kron_del(l,ip)
-        )
-      );
-
-      F7_build_5 [i][j][k][l][ip][jp][kp][lp] = (-1./8.) * ( 
-        (
-        kron_del(l,ip) * kron_del(k,jp) * kron_del(j,kp) * kron_del(i,lp)
-        +
-        kron_del(l,kp) * kron_del(k,lp) * kron_del(j,ip) * kron_del(i,jp)
-        )
-      - (
-        kron_del(l,jp) * kron_del(k,ip) * kron_del(j,kp) * kron_del(i,lp)
-        +
-        kron_del(l,kp) * kron_del(k,lp) * kron_del(j,jp) * kron_del(i,ip)
-        )
-      - (
-        kron_del(l,ip) * kron_del(k,jp) * kron_del(j,lp) * kron_del(i,kp)
-        +
-        kron_del(l,lp) * kron_del(k,kp) * kron_del(j,ip) * kron_del(i,jp)
-        )
-      + (
-        kron_del(l,jp) * kron_del(k,ip) * kron_del(j,lp) * kron_del(i,kp)
-        +
-        kron_del(l,lp) * kron_del(k,kp) * kron_del(j,jp) * kron_del(i,ip)
-        )
+      F7_build_5 [i][j][k][l][ip][jp][kp][lp] = (1./64.) * (
+      	  F7_5_matrix_A (i, j, k, l, ip, jp, kp, lp) + F7_5_matrix_A (k, l, i, j, ip, jp, kp, lp)
+      	- F7_5_matrix_A (j, i, k, l, ip, jp, kp, lp) - F7_5_matrix_A (k, l, j, i, ip, jp, kp, lp)
+      	- F7_5_matrix_A (i, j, l, k, ip, jp, kp, lp) - F7_5_matrix_A (l, k, i, j, ip, jp, kp, lp)
+      	+ F7_5_matrix_A (j, i, l, k, ip, jp, kp, lp) + F7_5_matrix_A (l, k, j, i, ip, jp, kp, lp)
       );
 */
     }
     }
     }
     }
+
+//    std::cout << "i j k l" << "\t" << i << " " << j << " " << k << " " << l << std::endl;
+//    print (std::cout, F7_build_3[i][j][k][l]);
+//    std::cout << std::endl;
+
   }
   }
   }
   }
+
+
+  for (size_t i = 0; i < bsize; i++)      // loop over ith constraint matrix
+  {
+  for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
+  {
+  for (size_t k = 0; k < bsize; k++)    // loop over matrix row
+  {
+  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
+  {
+
+    std::cout << "i j k l" << "\t" << i << " " << j << " " << k << " " << l << std::endl;
+
+    for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
+    {
+    for (size_t jp = 0; jp < bsize; jp++)      // loop over jth constraint matrix
+    {
+    for (size_t kp = 0; kp < bsize; kp++)    // loop over matrix row
+    {
+    for (size_t lp = kp; lp < bsize; lp++)    // loop over matrix column
+    {
+
+
+    	if (kp == lp)
+    		F7_build_3 [i][j][k][l][ip][jp][kp][lp] = 0.;
+
+    	else
+			F7_build_3 [i][j][k][l][ip][jp][kp][lp] -= F7_build_3 [i][j][k][l][ip][jp][lp][kp];
+
+
+
+    	if (F7_build_3 [i][j][k][l][ip][jp][kp][lp] != 0)
+    			std::cout << "ip jp kp lp" << "\t" << ip << " " << jp << " " << kp << " " << lp << std::endl;
+
+//    	F7_build_3 [i][j][k][l][ip][jp][kp][lp] = 
+//    	F7_3_matrix (i, j, k, l, ip, jp, kp, lp) + F7_3_matrix (i, j, k, l, kp, lp, ip, jp);
+
+//    	F7_build_5 [i][j][k][l][ip][jp][kp][lp] = F7_5_matrix (i, j, k, l, ip, jp, kp, lp);
+/*      F7_build_3 [i][j][k][l][ip][jp][kp][lp] = (1./32.) * (
+      	  F7_3_matrix_A (i, j, k, l, ip, jp, kp, lp) + F7_3_matrix_A (k, l, i, j, ip, jp, kp, lp)
+      	- F7_3_matrix_A (j, i, k, l, ip, jp, kp, lp) - F7_3_matrix_A (k, l, j, i, ip, jp, kp, lp)
+      	- F7_3_matrix_A (i, j, l, k, ip, jp, kp, lp) - F7_3_matrix_A (l, k, i, j, ip, jp, kp, lp)
+      	+ F7_3_matrix_A (j, i, l, k, ip, jp, kp, lp) + F7_3_matrix_A (l, k, j, i, ip, jp, kp, lp)
+      );
+
+      F7_build_5 [i][j][k][l][ip][jp][kp][lp] = (1./64.) * (
+      	  F7_5_matrix_A (i, j, k, l, ip, jp, kp, lp) + F7_5_matrix_A (k, l, i, j, ip, jp, kp, lp)
+      	- F7_5_matrix_A (j, i, k, l, ip, jp, kp, lp) - F7_5_matrix_A (k, l, j, i, ip, jp, kp, lp)
+      	- F7_5_matrix_A (i, j, l, k, ip, jp, kp, lp) - F7_5_matrix_A (l, k, i, j, ip, jp, kp, lp)
+      	+ F7_5_matrix_A (j, i, l, k, ip, jp, kp, lp) + F7_5_matrix_A (l, k, j, i, ip, jp, kp, lp)
+      );
+*/
+    }
+    }
+    }
+    }
+
+    print (std::cout, F7_build_3[i][j][k][l]);
+    std::cout << std::endl;
+
+  }
+  }
+  }
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1563,32 +1622,10 @@ void init_F7_flag (six_array & F7_build_2, eight_array & F7_build_3, eight_array
   {
   for (size_t k = 0; k < bsize; k++)    // loop over matrix row
   {
-  for (size_t l = j; l < bsize; l++)    // loop over matrix column
+  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
   {
-
-    if (j == l && k < i)
-      continue;
-
-
-
-    counter++;
-  }
-  }
-  }
-  }
-
-  counter = 0;
-
-  for (size_t i = 0; i < bsize; i++)      // loop over ith constraint matrix
-  {
-  for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
-  {
-  for (size_t k = 0; k < bsize; k++)    // loop over matrix row
-  {
-  for (size_t l = j; l < bsize; l++)    // loop over matrix column
-  {
-    if (j == l && k < i)
-      continue;
+//    if (j == l && k < i)
+//      continue;
 
     for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
     {
@@ -2014,10 +2051,10 @@ int main ()
   {
   for (size_t k = 0; k < bsize; k++)    // loop over matrix row
   {
-  for (size_t l = j; l < bsize; l++)    // loop over matrix column
+  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
   {
-    if (j == l && k < i)
-      continue;
+//    if (j == l && k < i)
+//      continue;
 
     QG_num++;
   }
@@ -2044,7 +2081,7 @@ int main ()
   const bool Q_flag = true;
   const bool G_flag = false;
 
-  const bool redundant_check = false;
+  const bool redundant_check = true;
 
   if (!two_body_toggle and (F4_flag or F5_flag or F6_flag or F7_flag))
   {
