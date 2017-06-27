@@ -1489,7 +1489,7 @@ void init_F7_flag (six_array & F7_build_2, eight_array & F7_build_3, eight_array
    } 
 
 
-  std::cout << std::endl << std::endl;
+//  std::cout << std::endl << std::endl;
 
   for (size_t i = 0; i < bsize; i++)      // loop over ith constraint matrix
   {
@@ -2032,7 +2032,7 @@ int main ()
   const bool Q_flag = true;
   const bool G_flag = false;
 
-  const bool redundant_check = true;
+  const bool redundant_check = false;
 
   if (!two_body_toggle and (F4_flag or F5_flag or F6_flag or F7_flag))
   {
