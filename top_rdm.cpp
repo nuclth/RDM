@@ -1726,6 +1726,43 @@ void init_F9_flag (eight_array & F9_build_3, three_array & F9_con, one_array & F
 
 }
 
+
+int F10_1_matrix (const int i, const int j, const int k, const int l, const int ip, const int kp)
+{
+  const int value = kron_del(j,l) * kron_del(i,ip)*kron_del(k,kp);
+
+  return value;
+
+}
+
+int F10_3_matrix (const int i, const int j, const int k, const int l, const int ip, const int jp, const int kp, const int lp)
+{
+  const int value = 
+        kron_del(i,ip) * kron_del(l,jp) * kron_del(k,kp) * kron_del(j,lp);
+
+  return value;
+}
+
+int F10_5_matrix (const int i, const int j, const int k, const int l, const int ip, const int jp, const int kp, const int lp)
+{
+  const int value = 
+        kron_del(i,ip) * kron_del(j,jp) * kron_del(k,kp) * kron_del(l,lp);
+
+  return value;
+}
+
+
+int F10_3_matrix_A (const int i, const int j, const int k, const int l, const int ip, const int jp, const int kp, const int lp)
+{
+    const int value =
+      F10_3_matrix (i, j, k, l, ip, jp, kp, lp) +  F10_3_matrix (i, j, k, l, kp, lp, ip, jp)
+    - F10_3_matrix (i, j, k, l, jp, ip, kp, lp) -  F10_3_matrix (i, j, k, l, kp, lp, jp, ip)
+    - F10_3_matrix (i, j, k, l, ip, jp, lp, kp) -  F10_3_matrix (i, j, k, l, lp, kp, ip, jp)
+    + F10_3_matrix (i, j, k, l, jp, ip, lp, kp) +  F10_3_matrix (i, j, k, l, lp, kp, jp, ip);
+
+  return value;
+}
+
 /***************************************************************
 
 Function to create our F10 constraint matrix to fix the G linear
@@ -1745,15 +1782,20 @@ void init_F10_flag (six_array & F10_build_1, eight_array & F10_build_3, eight_ar
   {
   for (size_t k = 0; k < bsize; k++)    // loop over matrix row
   {
-  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
+  for (size_t l = j; l < bsize; l++)    // loop over matrix column
   {
+    
+    if (j == l && k < i)
+      continue;
+
     for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
     {
     for (size_t kp = 0; kp < bsize; kp++)      // loop over jth constraint matrix
     {
 
-      F10_build_1 [i][j][k][l][ip][kp] =  (-1./2.) * kron_del(j,l) * 
-      ( kron_del(i,ip)*kron_del(k,kp) + kron_del(i,kp)*kron_del(k,ip) );
+      F10_build_1 [i][j][k][l][ip][kp] =  (-1./2.) * (
+        F10_1_matrix (i, j, k, l, ip, kp) + F10_1_matrix (i, j, k, l, kp, ip)
+        );
   
     }
     }
@@ -1769,8 +1811,12 @@ void init_F10_flag (six_array & F10_build_1, eight_array & F10_build_3, eight_ar
   {
   for (size_t k = 0; k < bsize; k++)    // loop over matrix row
   {
-  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
+  for (size_t l = j; l < bsize; l++)    // loop over matrix column
   {
+    
+    if (j == l && k < i)
+      continue;
+
     for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
     {
     for (size_t jp = 0; jp < bsize; jp++)      // loop over jth constraint matrix
@@ -1779,41 +1825,10 @@ void init_F10_flag (six_array & F10_build_1, eight_array & F10_build_3, eight_ar
     {
     for (size_t lp = 0; lp < bsize; lp++)    // loop over matrix column
     {
-      F10_build_3 [i][j][k][l][ip][jp][kp][lp] =  (
-        kron_del(i,ip)*kron_del(j,lp)*kron_del(k,kp)*kron_del(l,jp)
-        +
-        kron_del(i,kp)*kron_del(j,jp)*kron_del(k,ip)*kron_del(l,lp)
-        );
-    }
-    }
-    }
-    }
-  }
-  }
-  }
-  }
+      F10_build_3 [i][j][k][l][ip][jp][kp][lp] =  (1./4.) * F10_3_matrix_A (i, j, k, l, ip, jp, kp, lp);
 
-
-  for (size_t i = 0; i < bsize; i++)      // loop over ith constraint matrix
-  {
-  for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
-  {
-  for (size_t k = 0; k < bsize; k++)    // loop over matrix row
-  {
-  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
-  {
-    for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
-    {
-    for (size_t jp = 0; jp < bsize; jp++)      // loop over jth constraint matrix
-    {
-    for (size_t kp = 0; kp < bsize; kp++)    // loop over matrix row
-    {
-    for (size_t lp = 0; lp < bsize; lp++)    // loop over matrix column
-    {
       F10_build_5 [i][j][k][l][ip][jp][kp][lp] =  (1./2.) * (
-        kron_del(i,ip)*kron_del(j,jp)*kron_del(k,kp)*kron_del(l,lp)
-        +
-        kron_del(i,kp)*kron_del(j,lp)*kron_del(k,ip)*kron_del(l,jp)
+        F10_5_matrix (i, j, k, l, ip, jp, kp, lp) + F10_5_matrix (i, j, k, l, kp, lp, ip, jp)
         );
     }
     }
@@ -1823,7 +1838,6 @@ void init_F10_flag (six_array & F10_build_1, eight_array & F10_build_3, eight_ar
   }
   }
   }
-
 
 
 
@@ -1891,18 +1905,39 @@ void init_F10_flag (six_array & F10_build_1, eight_array & F10_build_3, eight_ar
     {
       size_t b = counter;
 
-      size_t left  = ip * bsize + jp;
-      size_t right = kp * bsize + lp;
+      size_t ips = ip + 1;
+      size_t jps = jp + 1;
+      size_t kps = kp + 1;
+      size_t lps = lp + 1;
+
+      size_t left  = jps - ips + (2*bsize - ips) * (ips - 1)/2 - 1;
+      size_t right = lps - kps + (2*bsize - kps) * (kps - 1)/2 - 1;
 
       size_t left_P  = left  + 2*bsize;
       size_t right_P = right + 2*bsize;
 
-      size_t left_G  = left  + 2*bsize + 2*bsize*bsize;
-      size_t right_G = right + 2*bsize + 2*bsize*bsize;
+      size_t lG = ip * bsize + jp;
+      size_t rG = kp * bsize + lp;
 
-      F10_con[b][left_P][right_P] = F10_build_3 [i][j][k][l][ip][jp][kp][lp];
+      size_t left_G  = lG + 2*bsize + 2*bsize*(bsize-1)/2;
+      size_t right_G = rG + 2*bsize + 2*bsize*(bsize-1)/2;
+
+      if (jp > ip and lp > kp)
+        F10_con[b][left_P][right_P] = F10_build_3 [i][j][k][l][ip][jp][kp][lp];
+      
 
       F10_con[b][left_G][right_G] = F10_build_5 [i][j][k][l][ip][jp][kp][lp];
+
+
+
+
+
+
+
+
+
+
+
     }
     }
     }
@@ -1910,12 +1945,17 @@ void init_F10_flag (six_array & F10_build_1, eight_array & F10_build_3, eight_ar
 
     F10_val [counter] = 0.;
 
+//    std::cout << "i j k l" << "\t" << i << " " << j << " " << k << " " << l << std::endl;
+//    print (std::cout, F10_con[counter]);
+//    std::cout << F10_val [counter] << std::endl;
+
     counter++;
   }
   }
   }
   }
 
+  std::cout << "COUNTER = " << counter << std::endl;
 
 }
 
@@ -2010,7 +2050,7 @@ int main ()
   std::cout << QG_num << std::endl;
 */
 
-  size_t QG_num = 0;
+  size_t Q_num = 0;
 
   for (size_t i = 0; i < bsize; i++)      // loop over ith constraint matrix
   {
@@ -2023,7 +2063,27 @@ int main ()
     if (j < l && k <= i)
       continue;
 
-    QG_num++;
+    Q_num++;
+  }
+  }
+  }
+  }
+
+  size_t G_num = 0;
+
+  for (size_t i = 0; i < bsize; i++)      // loop over ith constraint matrix
+  {
+  for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
+  {
+  for (size_t k = 0; k < bsize; k++)    // loop over matrix row
+  {
+  for (size_t l = j; l < bsize; l++)    // loop over matrix column
+  {
+    
+    if (j == l && k < i)
+      continue;
+
+    G_num++;
   }
   }
   }
@@ -2043,10 +2103,10 @@ int main ()
   const bool F7_flag = true;  // Q START - LINEAR RELATIONS
   const bool F8_flag = false; // Q ANTI-SYMMETRY
   const bool F9_flag = false; // REDUNDANT - Q ANTI-SYMMETRY
-  const bool F10_flag = false; // G START - LINEAR REALTIONS
+  const bool F10_flag = true; // G START - LINEAR REALTIONS
 
   const bool Q_flag = true;
-  const bool G_flag = false;
+  const bool G_flag = true;
 
   const bool redundant_check = false;
 
@@ -2074,7 +2134,7 @@ int main ()
     return EXIT_FAILURE;
   }
 
-  const bool diag_toggle = true;
+  const bool diag_toggle = false;
 
 
   struct con_flags flag_pass;
@@ -2108,10 +2168,10 @@ int main ()
   const size_t F4num  = 1;
   const size_t F5num  = 0;//anti_num;//bsize*bsize*bsize*bsize;
   const size_t F6num  = 0;//index_num;//bsize*bsize*bsize*bsize;
-  const size_t F7num  = QG_num;//bsize*bsize*bsize*bsize;
+  const size_t F7num  = Q_num;//bsize*bsize*bsize*bsize;
   const size_t F8num  = 0;//anti_num;//bsize*bsize*bsize*bsize;
   const size_t F9num  = 0;//index_num;//bsize*bsize*bsize*bsize;
-  const size_t F10num = 0;//QG_num;//bsize*bsize*bsize*bsize;
+  const size_t F10num = G_num;//bsize*bsize*bsize*bsize;
   // turn off or on two-body potential
 
 
