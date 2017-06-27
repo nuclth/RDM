@@ -470,7 +470,7 @@ void create_spda_file (const two_array & c_matrix, const struct con_flags flag_p
     check_constraints (F3_con, "F3", true, F3num, cmat_extent);
     check_constraints (F4_con, "F4", true, F4num, cmat_extent);
 
-    check_constraints (F7_con, "F7", true, F7num, cmat_extent);
+    check_constraints (F7_con, "F7", false, F7num, cmat_extent);
 
     check_constraints (F10_con, "F10", true, F10num, cmat_extent);                                
   }
@@ -1427,8 +1427,8 @@ int F7_5_matrix (const int i, const int j, const int k, const int l, const int i
 int F7_3_matrix_A (const int i, const int j, const int k, const int l, const int ip, const int jp, const int kp, const int lp)
 {
     const int value =
-	  F7_3_matrix (i, j, k, l, ip, jp, kp, lp) +  F7_3_matrix (i, j, k, l, kp, lp, ip, jp)
-	- F7_3_matrix (i, j, k, l, jp, ip, kp, lp) -  F7_3_matrix (i, j, k, l, kp, lp, jp, ip)
+	    F7_3_matrix (i, j, k, l, ip, jp, kp, lp) +  F7_3_matrix (i, j, k, l, kp, lp, ip, jp)
+  	- F7_3_matrix (i, j, k, l, jp, ip, kp, lp) -  F7_3_matrix (i, j, k, l, kp, lp, jp, ip)
     - F7_3_matrix (i, j, k, l, ip, jp, lp, kp) -  F7_3_matrix (i, j, k, l, lp, kp, ip, jp)
     + F7_3_matrix (i, j, k, l, jp, ip, lp, kp) +  F7_3_matrix (i, j, k, l, lp, kp, jp, ip);
 
@@ -1460,12 +1460,15 @@ void init_F7_flag (six_array & F7_build_2, eight_array & F7_build_3, eight_array
 
   for (size_t i = 0; i < bsize; i++)      // loop over ith constraint matrix
   {
-  for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
+  for (size_t j = i+1; j < bsize; j++)      // loop over jth constraint matrix
   {
-  for (size_t k = 0; k < bsize; k++)    // loop over matrix row
+  for (size_t k = i; k < bsize; k++)    // loop over matrix row
   {
-  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
+  for (size_t l = k+1; l < bsize; l++)    // loop over matrix column
   {
+    if (j < l && k <= i)
+      continue;
+
     for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
     {
     for (size_t jp = 0; jp < bsize; jp++)      // loop over jth constraint matrix
@@ -1493,12 +1496,15 @@ void init_F7_flag (six_array & F7_build_2, eight_array & F7_build_3, eight_array
 
   for (size_t i = 0; i < bsize; i++)      // loop over ith constraint matrix
   {
-  for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
+  for (size_t j = i+1; j < bsize; j++)      // loop over jth constraint matrix
   {
-  for (size_t k = 0; k < bsize; k++)    // loop over matrix row
+  for (size_t k = i; k < bsize; k++)    // loop over matrix row
   {
-  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
+  for (size_t l = k+1; l < bsize; l++)    // loop over matrix column
   {
+    if (j < l && k <= i)
+      continue;
+
     for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
     {
     for (size_t jp = 0; jp < bsize; jp++)      // loop over jth constraint matrix
@@ -1568,15 +1574,24 @@ void init_F7_flag (six_array & F7_build_2, eight_array & F7_build_3, eight_array
 
   for (size_t i = 0; i < bsize; i++)      // loop over ith constraint matrix
   {
-  for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
+  for (size_t j = i+1; j < bsize; j++)      // loop over jth constraint matrix
   {
-  for (size_t k = 0; k < bsize; k++)    // loop over matrix row
+  for (size_t k = i; k < bsize; k++)    // loop over matrix row
   {
-  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
+  for (size_t l = k+1; l < bsize; l++)    // loop over matrix column
   {
-//    if (j == l && k < i)
-//      continue;
+    if (j < l && k <= i)
+      continue;
+/*
+    if (j == l && k < i)
+      continue;
 
+    if (i == k && l < j)
+      continue;
+
+    if (i > k and j > l)
+      continue;
+*/
     for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
     {
     for (size_t jp = 0; jp < bsize; jp++)      // loop over jth constraint matrix
@@ -1663,6 +1678,7 @@ void init_F7_flag (six_array & F7_build_2, eight_array & F7_build_3, eight_array
       std::cout << "END ERROR" << std::endl;
     }
 
+//    std::cout << "i j k l" << "\t" << i << " " << j << " " << k << " " << l << std::endl;
 //    print (std::cout, F7_con[counter]);
 //    std::cout << F7_val [counter] << std::endl;
 
@@ -1998,14 +2014,14 @@ int main ()
 
   for (size_t i = 0; i < bsize; i++)      // loop over ith constraint matrix
   {
-  for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
+  for (size_t j = i+1; j < bsize; j++)      // loop over jth constraint matrix
   {
-  for (size_t k = 0; k < bsize; k++)    // loop over matrix row
+  for (size_t k = i; k < bsize; k++)    // loop over matrix row
   {
-  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
+  for (size_t l = k+1; l < bsize; l++)    // loop over matrix column
   {
-//    if (j == l && k < i)
-//      continue;
+    if (j < l && k <= i)
+      continue;
 
     QG_num++;
   }
