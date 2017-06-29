@@ -872,6 +872,159 @@ void read_in_matrix_m_scheme (const ref_array & ref_m, five_array & h2_mat, cons
 
 }
 
+
+
+/***************************************************************
+
+Function for M projection and parity blocks.
+
+***************************************************************/
+
+template <typename two_array>
+size_t block_list (const two_array & ref_m, two_array & block_mat, two_array & bcopy)
+{
+	size_t num 	= 0;
+
+
+	const size_t orbital_number = ref_m.size();
+
+	for (size_t i = 0;   i < orbital_number; i++)
+	{
+	for (size_t j = i+1; j < orbital_number; j++)
+	{
+		bool unique = true;
+
+
+		double P = -1.;
+
+		const size_t l1 = ref_m[i][2];
+		const double m1 = ref_m[i][4];
+
+		const size_t l2 = ref_m[j][2];
+		const double m2 = ref_m[j][4];
+
+		if ((l1 + l2) % 2 == 0)
+           	P = 0.;
+
+        else if ((l1 + l2) % 2 == 1)
+           	P = 1.;
+
+		const double mtot = m1 + m2;
+
+		for (size_t k = 0; k < num; k++)
+		{
+			const double taken_M = block_mat [k][0];
+			const double taken_P = block_mat [k][1];
+
+			if (taken_M == mtot and taken_P == P)
+				unique = false;
+
+		}
+
+		if (unique)
+		{
+			block_mat [num][0] = mtot;
+			block_mat [num][1] = P;
+
+			bcopy     [num][0] = mtot;
+			bcopy     [num][1] = P;
+			num++;
+
+		}
+	}
+	}
+
+//	std::cout << num << std::endl;
+
+	//print (std::cout, bcopy);
+
+	size_t even = 0;
+
+	for (size_t i = 0; i < num; i++)
+	{
+		bool check = false;
+
+		double M_start = bcopy [i][0];
+		double P_start = bcopy [i][1];
+
+//		std::cout << M_start << " " << P_start << std::endl;
+
+		size_t mark = i;
+
+//		std::cout << M_start << " " << P_start << std::endl;
+
+		for (size_t j = 0; j < num; j++)
+		{
+			double M_loop = bcopy [j][0];
+			double P_loop = bcopy [j][1];
+
+			if (M_loop <= M_start and P_loop == 0.)
+			{
+				M_start = M_loop;
+				P_start = P_loop;
+				mark = j;
+				check = true;
+			}
+		}
+
+//		std::cout << M_start << " " << P_start << std::endl << std::endl;
+		if (check)
+		{
+			block_mat [even][0] = M_start;
+			block_mat [even][1] = P_start;
+
+			bcopy [mark][1] = 2.;
+
+//		print (std::cout, bcopy);
+
+			even++;
+		}
+	}
+
+	size_t odd = even;
+
+//	print (std::cout, bcopy);
+//	print (std::cout, block_mat);
+
+
+	for (size_t i = 0; i < num; i++)
+	{
+		bool check = false;
+
+		double M_start = bcopy [i][0];
+		double P_start = bcopy [i][1];
+
+		size_t mark = i;
+
+		for (size_t j = 0; j < num; j++)
+		{
+			double M_loop = bcopy [j][0];
+			double P_loop = bcopy [j][1];
+
+
+			if (M_loop <= M_start and P_loop == 1.)
+			{
+				M_start = M_loop;
+				P_start = P_loop;
+				mark = j;
+				check = true;
+			}
+		}
+
+		if (check)
+		{
+			block_mat [odd][0] = M_start;
+			block_mat [odd][1] = P_start;
+
+			bcopy [mark][1] = 2.;
+
+			odd++;
+		}
+	}
+
+	return num;
+}
+
 /***************************************************************
 
 Wrapper function to read in single-particle m scheme reference 
@@ -882,7 +1035,7 @@ populate 2-body matrix elements.
 
 
 template <typename two_array, typename five_array>
-void fullm_populate_hamiltonian (two_array & ref_m, two_array & h1_mat, five_array & h2_mat, const std::string reference_file, const std::string matrix_file, const double hw, std::ofstream & diag_out, const bool diag_toggle) 
+void fullm_populate_hamiltonian (two_array & ref_m, two_array & h1_mat, five_array & h2_mat, const std::string reference_file, const std::string matrix_file, const double hw, std::ofstream & diag_out, const bool diag_toggle, two_array & block_mat) 
 {
 
   try
@@ -897,6 +1050,7 @@ void fullm_populate_hamiltonian (two_array & ref_m, two_array & h1_mat, five_arr
     std::cerr << msg << std::endl;  
   }
  
+
 }
 
 
@@ -915,6 +1069,10 @@ void compactify_h2 (const two_array & ref_m, two_array & comp_h2, five_array & h
 
   size_t alpha, beta, gamma, delta;
 
+  size_t l1, l2, l3, l4;
+  double m1, m2, m3, m4;
+  double mleft, mright;
+
   if(diag_toggle)
   {
     diag_out << "Output of nonzero 2-body ME" << std::endl << std::endl;    
@@ -922,17 +1080,16 @@ void compactify_h2 (const two_array & ref_m, two_array & comp_h2, five_array & h
 
   for (size_t i = 0; i < bsize; ++i)
   {
-  for (size_t j = 0; j < bsize; ++j)
+  for (size_t j = i+1; j < bsize; ++j)
   {
-    if (i >= j)
-      continue;
 
   for (size_t k = 0; k < bsize; ++k)
   {
-  for (size_t l = 0; l < bsize; ++l)
+  for (size_t l = k+1; l < bsize; ++l)
   {
-    if (k >= l)
-      continue;
+
+//  	if (j < l && k <= i)
+//      continue;
 
             value = h2_mat [i][j][k][l][0];
 
@@ -945,36 +1102,79 @@ void compactify_h2 (const two_array & ref_m, two_array & comp_h2, five_array & h
             {
               if (value != 0.)
               {
-              	diag_out << alpha << " " << beta << " " << gamma << " " << delta << " " << value << " \t";
+              	diag_out << alpha << " " << beta << "\t" << gamma << " " << delta << " " << value << " \t\t";
 
                 for (size_t loop = 0; loop < bsize; loop++)
                 {
                   if (alpha == ref_m[loop][0])
+                  {
                     diag_out << ref_m[loop][6] << "\t";
+                    l1 = ref_m[loop][2];
+                    m1 = ref_m[loop][4];
+                  }
                 }
 
 
                 for (size_t loop = 0; loop < bsize; loop++)
                 {
                   if (beta == ref_m[loop][0])
+                  {
                     diag_out << ref_m[loop][6] << "\t";
+                    l2 = ref_m[loop][2];
+                    m2 = ref_m[loop][4];
+                  }
                 }
 
 
                 for (size_t loop = 0; loop < bsize; loop++)
                 {
                   if (gamma == ref_m[loop][0])
+                  {
                     diag_out << ref_m[loop][6] << "\t";
+                    l3 = ref_m[loop][2];
+                    m3 = ref_m[loop][4];
+                  }
                 }
 
 
                 for (size_t loop = 0; loop < bsize; loop++)
                 {
                   if (delta == ref_m[loop][0])
-                    diag_out << ref_m[loop][6] << "\n";
+                  {
+                    diag_out << ref_m[loop][6] << "\t";
+                    l4 = ref_m[loop][2];
+                    m4 = ref_m[loop][4];
+                  }
                 }
 
+                char P1 = 'W';
+
+                if ((l1 + l2) % 2 == 0)
+                	P1 = 'E';
+
+                else if ((l1 + l2) % 2 == 1)
+                	P1 = 'O';
+
+
+                char P2 = 'W';
+
+                if ((l3 + l4) % 2 == 0)
+                	P2 = 'E';
+
+                else if ((l3 + l4) % 2 == 1)
+                	P2 = 'O';
+
+                mleft  = m1 + m2;
+
+                mright = m3 + m4;
+
+                diag_out << mleft << " " << mright;
+                diag_out << "\t" << P1 << " " << P2;
+
+                diag_out << "\n";
               }
+
+
             }
 
             size_t ips = i + 1;
@@ -2089,6 +2289,8 @@ int main ()
   }
   }
 
+  std::cout << Q_num << std::endl;
+
   // define flags for all different combinations of conditions in RDM
   const bool two_body_toggle = true;
 
@@ -2100,13 +2302,13 @@ int main ()
   const bool F4_flag = false; // REDUNDANT - P TRACE CONDITION
   const bool F5_flag = false;  // P ANTI-SYMMETRY
   const bool F6_flag = false; // REDUNDANT - P ANTI-SYMMETRY
-  const bool F7_flag = true;  // Q START - LINEAR RELATIONS
+  const bool F7_flag = false;  // Q START - LINEAR RELATIONS
   const bool F8_flag = false; // Q ANTI-SYMMETRY
   const bool F9_flag = false; // REDUNDANT - Q ANTI-SYMMETRY
-  const bool F10_flag = true; // G START - LINEAR REALTIONS
+  const bool F10_flag = false; // G START - LINEAR REALTIONS
 
-  const bool Q_flag = true;
-  const bool G_flag = true;
+  const bool Q_flag = false;
+  const bool G_flag = false;
 
   const bool redundant_check = false;
 
@@ -2134,7 +2336,7 @@ int main ()
     return EXIT_FAILURE;
   }
 
-  const bool diag_toggle = false;
+  const bool diag_toggle = true;
 
 
   struct con_flags flag_pass;
@@ -2219,10 +2421,12 @@ int main ()
   typedef boost::multi_array<double, 8> eight_array;
 
 
-  two_array ref_m (boost::extents[bsize][7]);
-  two_array h1_mat(boost::extents[bsize][bsize]);
-  five_array h2_mat(boost::extents[bsize][bsize][bsize][bsize][5]);
+  two_array ref_m     (boost::extents[bsize][7]);
+  two_array h1_mat    (boost::extents[bsize][bsize]);
+  five_array h2_mat   (boost::extents[bsize][bsize][bsize][bsize][5]);
 
+  two_array block_mat (boost::extents[15][2]);
+  two_array bcopy     (boost::extents[15][2]);
 
   three_array F1_con  (boost::extents[0][0][0]);
   three_array F2_con  (boost::extents[0][0][0]);
@@ -2412,7 +2616,15 @@ int main ()
   std::cout << "FLAG INITIALIZATION DONE" << std::endl;
 
 
-  fullm_populate_hamiltonian (ref_m, h1_mat, h2_mat, m_ref, m_mat, hw, diag_out, diag_toggle);
+  fullm_populate_hamiltonian (ref_m, h1_mat, h2_mat, m_ref, m_mat, hw, diag_out, diag_toggle, block_mat);
+
+  size_t p_subblocks = block_list (ref_m, block_mat, bcopy);
+
+  block_mat.resize(boost::extents[p_subblocks][2]);
+  bcopy.resize(boost::extents[0][0]);
+
+  print (std::cout, block_mat);
+
 
 //  std::cout << "HAMILTONIAN POPULATED" << std::endl;
 
