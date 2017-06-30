@@ -279,12 +279,13 @@ void populate_2body (four_array & h2_mat, const double x[], const double w[], co
 
 ***************************************************************/
 
-template <typename two_array>
-void con_matrix_out (const two_array & m_pass, const size_t con_count, const size_t bsize, const struct con_flags flag_pass, std::ofstream & spda_out)
+template <typename one_array, typename two_array>
+void con_matrix_out (const two_array & m_pass, size_t con_count, size_t bsize, struct con_flags flag_pass, std::ofstream & spda_out, const one_array & block_mat)
 {
 
   const size_t PQsize = bsize*(bsize-1)/2;
 
+  size_t block = 1;
   size_t lower = 0;
   size_t upper = bsize;
 
@@ -296,9 +297,11 @@ void con_matrix_out (const two_array & m_pass, const size_t con_count, const siz
     size_t l = j + 1 - lower;
 
     if (m_pass[i][j] != 0.0)
-      spda_out << con_count << " " << 1 << " " << k << " " << l << " " << m_pass[i][j] << std::endl;
+      spda_out << con_count << " " << block << " " << k << " " << l << " " << m_pass[i][j] << std::endl;
   }
   }
+
+  block++;
 
   lower += bsize;
   upper += bsize;
@@ -311,24 +314,45 @@ void con_matrix_out (const two_array & m_pass, const size_t con_count, const siz
     size_t l = j + 1 - lower;
 
     if (m_pass[i][j] != 0.0)
-      spda_out << con_count << " " << 2 << " " << k << " " << l << " " << m_pass[i][j] << std::endl;
+      spda_out << con_count << " " << block << " " << k << " " << l << " " << m_pass[i][j] << std::endl;
   }
   }
+
+  block++;
 
   lower += bsize;
   upper += PQsize;
 
   if (flag_pass.two_body_toggle)
   {
+
+  	size_t a = 0;
+  	size_t offset = 0;
+
     for (size_t i = lower; i < upper; i++)
     {
     for (size_t j = i;     j < upper; j++)
     {
-      size_t k = i + 1 - lower;
-      size_t l = j + 1 - lower;
+//      size_t k = i + 1 - lower;
+//      size_t l = j + 1 - lower;
+    
+      size_t k = i - lower - offset + 1;
+      size_t l = j - lower - offset + 1;
+
+      int sub = (int) abs(block_mat[a]);
+
+      if (abs(k-1) > sub)
+      {
+      	offset += sub;
+      	block++;
+      	a++;
+      }
+
 
       if (m_pass[i][j] != 0.0)
-        spda_out << con_count << " " << 3 << " " << k << " " << l << " " << m_pass[i][j] << std::endl;
+        spda_out << con_count << " " << block << " " << k << " " << l << " " << m_pass[i][j] << std::endl;
+
+
     }
     }
 
@@ -438,6 +462,72 @@ void check_constraints (const three_array & Con, const std::string & label, cons
   std::cout << "Total redundancies: " << total << std::endl;
 }
 
+/***************************************************************
+
+ 
+ Function to output the two-body M scheme sub blocks in the correct
+ SPDA format. 
+
+
+***************************************************************/
+
+
+template <typename two_array>
+void blockdiag_spdaout (const size_t sub_blocks, const two_array & block_mat, std::ofstream & spda_out)
+{
+
+
+	for (size_t a = 0; a < sub_blocks; a++)
+	{
+		int sub = block_mat [a][3];
+
+		if (sub != 0)
+			spda_out << sub << " "; 
+
+	}
+
+/*
+	size_t t = 0;
+
+	for (size_t a = 0; a < sub_blocks; a++)
+		{
+
+	  		const size_t sub_term = (size_t) block_mat[a][2];
+
+
+	  		if (sub_term == 1)
+	  		{
+	  			bool diag_check = true;
+
+	  			double num = 1;
+
+
+	  			while (diag_check and (a+1) < sub_blocks)
+	  			{
+					const size_t b = a + 1;
+
+	  				if((size_t)block_mat[b][2] == 1)
+	  				{
+	  					num++;
+	  					a++;
+	  				}
+
+	  				else 
+	  					diag_check = false;
+
+	  			}
+
+
+	  			spda_out << (int)(-1 * num) << " "; 
+
+	  		}
+
+	  		else 
+	  			spda_out << sub_term << " "; 
+	  		
+		}
+*/
+}
 
 
 /***************************************************************
@@ -449,19 +539,21 @@ void check_constraints (const three_array & Con, const std::string & label, cons
 ***************************************************************/
 
 template <typename one_array, typename two_array, typename three_array>
-void create_spda_file (const two_array & c_matrix, const struct con_flags flag_pass, const three_array & F1_con, const one_array & F1_val, const three_array & F2_con, const one_array & F2_val, const three_array & F3_con, const one_array & F3_val, const three_array & F4_con, const one_array & F4_val, const size_t F7num, const three_array & F7_con, const one_array & F7_val, const three_array & F10_con, const one_array & F10_val, const size_t bsize, const size_t cmat_extent, std::ofstream & spda_out)
+void create_spda_file (const two_array & block_mat, const one_array & oned_blocks, const two_array & c_matrix, const struct con_flags flag_pass, const three_array & F1_con, const one_array & F1_val, const three_array & F2_con, const one_array & F2_val, const three_array & F3_con, const one_array & F3_val, const three_array & F4_con, const one_array & F4_val, const three_array & F7_con, const one_array & F7_val, const three_array & F10_con, const one_array & F10_val, const size_t bsize, const size_t cmat_extent, std::ofstream & spda_out)
 {
   const size_t F1num = F1_con.size();
   const size_t F2num = F2_con.size();
   const size_t F3num = F3_con.size();
   const size_t F4num = F4_con.size();
-
+  const size_t F7num = F7_con.size();
 
 
   const size_t F10num = F10_con.size();
   //  size_t cmat_extent = F1_con.size();
 
   const size_t PQsize = bsize*(bsize-1)/2;
+
+  const size_t sub_blocks = block_mat.size();
 
   if(flag_pass.redundant_check)
   { 
@@ -491,7 +583,7 @@ void create_spda_file (const two_array & c_matrix, const struct con_flags flag_p
       num_cons += F3num;
 
   	if (flag_pass.F4_flag)
-  		num_cons += F4num; // N(N+1)/2 trace constraint
+  	  num_cons += F4num; // N(N+1)/2 trace constraint
 
 
     if (flag_pass.F7_flag)
@@ -512,18 +604,17 @@ void create_spda_file (const two_array & c_matrix, const struct con_flags flag_p
 
   if (flag_pass.two_body_toggle)
   {
-    blocks++;
+    blocks += sub_blocks;
 
-    if (flag_pass.Q_flag and PQsize > 1)
-      blocks++;
+    if (flag_pass.Q_flag)
+      blocks += sub_blocks;
 
     if (flag_pass.G_flag)
-      blocks++;
+      blocks += sub_blocks;
   }
 
   spda_out << blocks << std::endl; 						 // output number of blocks in X
  
-
 
 
   // block sizes start
@@ -535,30 +626,20 @@ void create_spda_file (const two_array & c_matrix, const struct con_flags flag_p
   
   if (flag_pass.two_body_toggle)
   {
-    if (PQsize > 1)
-      spda_out << PQsize << " ";
+  	
+  	blockdiag_spdaout (sub_blocks, block_mat, spda_out);
 
-    if (!flag_pass.Q_flag and PQsize == 1)
-      spda_out << -1 << " ";
 
     if (flag_pass.Q_flag)
-    {
-      if (PQsize > 1)
-    	 spda_out << PQsize << " ";
-
-      else
-        spda_out << -2 << " ";
-    }
+       	blockdiag_spdaout (sub_blocks, block_mat, spda_out);
 
 
     if (flag_pass.G_flag)
-    	spda_out << bsize*bsize << " ";
+    	blockdiag_spdaout (sub_blocks, block_mat, spda_out);
 
   }
   
   spda_out << std::endl;	             
-
-
 
 
   // constraint values start
@@ -614,8 +695,7 @@ void create_spda_file (const two_array & c_matrix, const struct con_flags flag_p
   size_t con_count = 0;
 
 
-
-  con_matrix_out (c_matrix, con_count, bsize, flag_pass, spda_out);
+  con_matrix_out (c_matrix, con_count, bsize, flag_pass, spda_out, oned_blocks);
   con_count++;
 
 
@@ -623,7 +703,7 @@ void create_spda_file (const two_array & c_matrix, const struct con_flags flag_p
   {
   for (size_t cnum = 0; cnum < F1num; cnum++)
   {
-     con_matrix_out (F1_con[cnum], con_count, bsize, flag_pass, spda_out);
+     con_matrix_out (F1_con[cnum], con_count, bsize, flag_pass, spda_out, oned_blocks);
      con_count++;
   }
   }
@@ -632,7 +712,7 @@ void create_spda_file (const two_array & c_matrix, const struct con_flags flag_p
   {
 	for (size_t cnum = 0; cnum < F2num; cnum++)
 	{
-	   con_matrix_out (F2_con[cnum], con_count, bsize, flag_pass, spda_out);
+	   con_matrix_out (F2_con[cnum], con_count, bsize, flag_pass, spda_out, oned_blocks);
 	   con_count++;
 	}
   }
@@ -641,7 +721,7 @@ void create_spda_file (const two_array & c_matrix, const struct con_flags flag_p
   {
 	for (size_t cnum = 0; cnum < F3num; cnum++)
 	{
-	   con_matrix_out (F3_con[cnum], con_count, bsize, flag_pass, spda_out);
+	   con_matrix_out (F3_con[cnum], con_count, bsize, flag_pass, spda_out, oned_blocks);
 	   con_count++;
 	}
   }
@@ -650,7 +730,7 @@ void create_spda_file (const two_array & c_matrix, const struct con_flags flag_p
   {
   for (size_t cnum = 0; cnum < F4num; cnum++)
   {
-     con_matrix_out (F4_con[cnum], con_count, bsize, flag_pass, spda_out);
+     con_matrix_out (F4_con[cnum], con_count, bsize, flag_pass, spda_out, oned_blocks);
      con_count++;
   }
   }
@@ -661,7 +741,7 @@ void create_spda_file (const two_array & c_matrix, const struct con_flags flag_p
   {
   for (size_t cnum = 0; cnum < F7num; cnum++)
   {
-     con_matrix_out (F7_con[cnum], con_count, bsize, flag_pass, spda_out);
+     con_matrix_out (F7_con[cnum], con_count, bsize, flag_pass, spda_out, oned_blocks);
      con_count++;
   }
   }
@@ -673,7 +753,7 @@ void create_spda_file (const two_array & c_matrix, const struct con_flags flag_p
   {
   for (size_t cnum = 0; cnum < F10num; cnum++)
   {
-     con_matrix_out (F10_con[cnum], con_count, bsize, flag_pass, spda_out);
+     con_matrix_out (F10_con[cnum], con_count, bsize, flag_pass, spda_out, oned_blocks);
      con_count++;
   }
   }
@@ -947,6 +1027,7 @@ size_t block_list (const two_array & ref_m, two_array & block_mat, two_array & b
 		double M_start = bcopy [i][0];
 		double P_start = bcopy [i][1];
 
+
 //		std::cout << M_start << " " << P_start << std::endl;
 
 		size_t mark = i;
@@ -1022,8 +1103,137 @@ size_t block_list (const two_array & ref_m, two_array & block_mat, two_array & b
 		}
 	}
 
+
+
+
+
+	for (size_t a = 0; a < odd; a++)
+	{
+
+	double N = 0.;
+
+	for (size_t i = 0;   i < orbital_number; i++)
+	{
+	for (size_t j = i+1; j < orbital_number; j++)
+	{
+
+	for (size_t k = i; 	 k < orbital_number; k++)
+	{
+	for (size_t l = k+1; l < orbital_number; l++)
+	{
+
+		if (j < l && k <= i)
+      		continue;
+
+		double P1 = -1.;
+
+		const size_t l1 = ref_m[i][2];
+		const double m1 = ref_m[i][4];
+
+		const size_t l2 = ref_m[j][2];
+		const double m2 = ref_m[j][4];
+
+		if ((l1 + l2) % 2 == 0)
+           	P1 = 0.;
+
+        else if ((l1 + l2) % 2 == 1)
+           	P1 = 1.;
+
+		const double mleft = m1 + m2;
+
+
+
+		double P2 = -1.;
+
+		const size_t l3 = ref_m[k][2];
+		const double m3 = ref_m[k][4];
+
+		const size_t l4 = ref_m[l][2];
+		const double m4 = ref_m[l][4];
+
+		if ((l3 + l4) % 2 == 0)
+           	P2 = 0.;
+
+        else if ((l3 + l4) % 2 == 1)
+           	P2 = 1.;
+
+		const double mright = m3 + m4;
+
+		if (mleft == mright and P1 == P2)
+		{
+
+			if (block_mat[a][0] == mleft and block_mat[a][1] == P1)
+				N++;
+		}
+
+	}
+	}
+
+	}
+	}
+
+	double r = (sqrt(1. + 8. * N) - 1.) / 2;
+
+	block_mat [a][2] = r;
+
+	}
+
+
+
+	size_t t = 0;
+
+
+	for (size_t a = 0; a < odd; a++)
+	{
+		const double sub_term = block_mat[a][2];
+
+
+	  	if (sub_term == 1.)
+	  	{
+	  		bool diag_check = true;
+
+  			double sub_loop = 1.;
+
+
+			while (diag_check and (a+1) < odd)
+			{
+				const size_t b = a + 1;
+
+	  			if(block_mat[b][2] == 1.)
+	  			{
+	  				sub_loop++;
+	  				a++;
+	  			}
+
+	  			else 
+	  				diag_check = false;
+
+	  		}
+
+	  		block_mat[t][3] = (-1. * sub_loop);
+	  		t++;
+
+	  	}
+
+	  	else 
+	  	{
+  			block_mat[t][3] = sub_term;
+  			t++;
+  		}
+	}
+
 	return num;
 }
+
+
+template <typename one_array, typename two_array>
+void fill_oned_blocks (const size_t sub_blocks, one_array & oned_blocks, const two_array & block_mat)
+{
+	for (size_t a = 0; a < sub_blocks; a++)
+		oned_blocks [a] = block_mat[a][3];
+
+}
+
 
 /***************************************************************
 
@@ -1056,7 +1266,7 @@ void fullm_populate_hamiltonian (two_array & ref_m, two_array & h1_mat, five_arr
 
 /***************************************************************
 
-
+Function to put the potential in two index form. 
 
 ***************************************************************/
 
@@ -1208,6 +1418,197 @@ void compactify_h2 (const two_array & ref_m, two_array & comp_h2, five_array & h
 
   if (diag_toggle)
     diag_out << std::endl << std::endl;
+}
+
+
+
+
+
+/***************************************************************
+
+Function to put the potential in two index form with block 
+diagonlization. 
+
+***************************************************************/
+
+template <typename two_array, typename five_array>
+void blockdiag_h2 (const two_array & ref_m, two_array & block_h2, five_array & h2_mat, std::ofstream & diag_out, const bool diag_toggle, const two_array & block_mat)
+{
+  const size_t bsize = h2_mat.size();
+
+  const size_t sub_blocks = block_mat.size();
+
+  double value;
+
+  size_t alpha, beta, gamma, delta;
+
+  size_t l1, l2, l3, l4;
+  double m1, m2, m3, m4;
+  double mleft, mright;
+
+//  if(diag_toggle)
+//  {
+//    diag_out << "Output of nonzero 2-body ME" << std::endl << std::endl;    
+//  }
+
+  size_t offset = 0;
+
+
+  for (size_t a = 0; a < sub_blocks; a++)
+  {
+
+  	size_t left  = 0;
+  	size_t right = 0;
+
+
+  for (size_t i = 0;   i < bsize; ++i)
+  {
+  for (size_t j = i+1; j < bsize; ++j)
+  {
+
+  for (size_t k = 0;   k < bsize; ++k)
+  {
+  for (size_t l = k+1; l < bsize; ++l)
+  {
+
+//  	if (j < l && k <= i)
+//      continue;
+
+            value = h2_mat [i][j][k][l][0];
+
+            alpha = h2_mat [i][j][k][l][1];
+            beta  = h2_mat [i][j][k][l][2];
+            gamma = h2_mat [i][j][k][l][3];
+            delta = h2_mat [i][j][k][l][4];
+
+//              	diag_out << alpha << " " << beta << "\t" << gamma << " " << delta << " " << value << " \t\t";
+
+            for (size_t loop = 0; loop < bsize; loop++)
+            {
+                if (alpha == ref_m[loop][0])
+                {
+//                    diag_out << ref_m[loop][6] << "\t";
+                    l1 = ref_m[loop][2];
+                    m1 = ref_m[loop][4];
+                }
+            }
+
+
+            for (size_t loop = 0; loop < bsize; loop++)
+            {
+                if (beta == ref_m[loop][0])
+                {
+//                    diag_out << ref_m[loop][6] << "\t";
+                    l2 = ref_m[loop][2];
+                    m2 = ref_m[loop][4];
+                }
+            }
+
+
+            for (size_t loop = 0; loop < bsize; loop++)
+            {
+                if (gamma == ref_m[loop][0])
+                {
+//                    diag_out << ref_m[loop][6] << "\t";
+                    l3 = ref_m[loop][2];
+                    m3 = ref_m[loop][4];
+                }
+            }
+
+
+            for (size_t loop = 0; loop < bsize; loop++)
+            {
+                if (delta == ref_m[loop][0])
+                {
+//                    diag_out << ref_m[loop][6] << "\t";
+                    l4 = ref_m[loop][2];
+                    m4 = ref_m[loop][4];
+                }
+            }
+
+
+            double P1 = 2;
+
+            if ((l1 + l2) % 2 == 0)
+                P1 = 0;
+
+            else if ((l1 + l2) % 2 == 1)
+               	P1 = 1;
+
+
+            double P2 = 2;
+
+            if ((l3 + l4) % 2 == 0)
+                P2 = 0;
+
+            else if ((l3 + l4) % 2 == 1)
+               	P2 = 1;
+
+
+            mleft  = m1 + m2;
+
+            mright = m3 + m4;
+
+                //diag_out << mleft << " " << mright;
+                //diag_out << "\t" << P1 << " " << P2;
+
+                //diag_out << "\n";
+
+
+            if (mleft == mright and mleft == block_mat[a][0] and P1 == P2 and P1 == block_mat[a][1] and alpha != 0)
+            {
+
+            	block_h2 [left + offset][right + offset] = value;
+
+            	right++;
+
+            	if (right >= block_mat [a][2])
+            	{
+            		left++;
+            		right = 0;
+            	}
+//            	std::cout << mleft << " " << P1 << std::endl;
+//            	std::cout << alpha << " " << beta << "\t" << gamma << " " << delta << "\t";
+//            	std::cout << value << std::endl << std::endl;
+
+            }
+
+/*            size_t ips = i + 1;
+            size_t jps = j + 1;
+            size_t kps = k + 1;
+            size_t lps = l + 1;
+
+            size_t left  = jps - ips + (2*bsize - ips) * (ips - 1)/2 - 1;
+            size_t right = lps - kps + (2*bsize - kps) * (kps - 1)/2 - 1;
+*/
+
+  /*         if (i == 0 && j == 4 && k == 0)
+            {
+            	std::cout << ref_m[l][1] << "\t" << ref_m[l][2] << "\n";
+            }
+
+           if (i == 0 && j == 1)
+            {
+            	std::cout << right << " " << l << " " << k << "\t" << value << "\n"; 
+            }
+*/
+
+//            std::cout << value << std::endl;
+
+//            comp_h2 [left][right] = value;
+
+  }
+  }
+  }
+  }
+
+  offset += block_mat [a][2];
+
+  }
+
+  print (std::cout, block_h2);
+//  if (diag_toggle)
+//    diag_out << std::endl << std::endl;
 }
 
 /***************************************************************
@@ -2310,9 +2711,11 @@ int main ()
   const bool Q_flag = false;
   const bool G_flag = false;
 
+  const bool diag_toggle = true;
+
   const bool redundant_check = false;
 
-  if (!two_body_toggle and (F4_flag or F5_flag or F6_flag or F7_flag))
+  if (!two_body_toggle and (F3_flag or F4_flag or F5_flag or F6_flag or F7_flag))
   {
   	std::cerr << "ERROR: TWO-BODY TOGGLE AND F CONSTRAINT FLAGS INCOMPATIBLE - GIVING UP" << std::endl;
   	return EXIT_FAILURE;
@@ -2336,7 +2739,6 @@ int main ()
     return EXIT_FAILURE;
   }
 
-  const bool diag_toggle = true;
 
 
   struct con_flags flag_pass;
@@ -2425,8 +2827,9 @@ int main ()
   two_array h1_mat    (boost::extents[bsize][bsize]);
   five_array h2_mat   (boost::extents[bsize][bsize][bsize][bsize][5]);
 
-  two_array block_mat (boost::extents[15][2]);
-  two_array bcopy     (boost::extents[15][2]);
+
+  two_array block_mat (boost::extents[15][4]);
+  two_array bcopy     (boost::extents[15][4]);
 
   three_array F1_con  (boost::extents[0][0][0]);
   three_array F2_con  (boost::extents[0][0][0]);
@@ -2567,7 +2970,6 @@ int main ()
     std::cout << "FLAG 6 DONE" << std::endl;
   }
 
-  size_t modF7num;
 
   if (F7_flag)
   {
@@ -2576,10 +2978,9 @@ int main ()
     eight_array F7_build_3 (boost::extents[bsize][bsize][bsize][bsize][bsize][bsize][bsize][bsize]);
     eight_array F7_build_5 (boost::extents[bsize][bsize][bsize][bsize][bsize][bsize][bsize][bsize]);
     init_F7_flag (F7_build_1, F7_build_3, F7_build_5, F7_con, F7_val, bsize, cmat_extent, skip);
-    modF7num = F7num - skip;
     F7_build_1.resize(boost::extents[0][0][0][0][0][0]);
     F7_build_3.resize(boost::extents[0][0][0][0][0][0][0][0]);
-    F7_build_3.resize(boost::extents[0][0][0][0][0][0][0][0]);
+    F7_build_5.resize(boost::extents[0][0][0][0][0][0][0][0]);
     std::cout << "FLAG 7 DONE" << std::endl;
   }
 
@@ -2620,28 +3021,34 @@ int main ()
 
   size_t p_subblocks = block_list (ref_m, block_mat, bcopy);
 
-  block_mat.resize(boost::extents[p_subblocks][2]);
+  block_mat.resize(boost::extents[p_subblocks][4]);
   bcopy.resize(boost::extents[0][0]);
 
   print (std::cout, block_mat);
 
+  one_array oned_blocks (boost::extents[p_subblocks]);
+
+  fill_oned_blocks (p_subblocks, oned_blocks, block_mat);
 
 //  std::cout << "HAMILTONIAN POPULATED" << std::endl;
 
-  two_array comp_h2 (boost::extents[bsize*(bsize-1)/2][bsize*(bsize-1)/2]);
+  two_array comp_h2  (boost::extents[bsize*(bsize-1)/2][bsize*(bsize-1)/2]);
+  two_array block_h2 (boost::extents[bsize*(bsize-1)/2][bsize*(bsize-1)/2]);
 
-  compactify_h2 (ref_m, comp_h2, h2_mat, diag_out, diag_toggle);
+  compactify_h2 (ref_m, comp_h2,  h2_mat, diag_out, diag_toggle);
+
+  blockdiag_h2  (ref_m, block_h2, h2_mat, diag_out, diag_toggle, block_mat);
 
 
 //  print(std::cout, comp_h2);
 
   two_array c_matrix (boost::extents[cmat_extent][cmat_extent]);
 
-  create_c_matrix (h1_mat, comp_h2, c_matrix, two_body_toggle);
+  create_c_matrix (h1_mat, block_h2, c_matrix, two_body_toggle);
 
     std::cout << "CREATING SPDA FILE" << std::endl;
 
-  create_spda_file (c_matrix, flag_pass, F1_con, F1_val, F2_con, F2_val, F3_con, F3_val, F4_con, F4_val, modF7num, F7_con, F7_val, F10_con, F10_val, bsize, cmat_extent, spda_out);
+  create_spda_file (block_mat, oned_blocks, c_matrix, flag_pass, F1_con, F1_val, F2_con, F2_val, F3_con, F3_val, F4_con, F4_val, F7_con, F7_val, F10_con, F10_val, bsize, cmat_extent, spda_out);
 
   four_array test_h2 (boost::extents[bsize][bsize][bsize][bsize]);
 
