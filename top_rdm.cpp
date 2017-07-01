@@ -336,22 +336,25 @@ void con_matrix_out (const two_array & m_pass, size_t con_count, size_t bsize, s
 //      size_t k = i + 1 - lower;
 //      size_t l = j + 1 - lower;
     
-      size_t k = i - lower - offset + 1;
-      size_t l = j - lower - offset + 1;
+      size_t k = i - lower;
+      size_t l = j - lower;
 
-      int sub = (int) abs(block_mat[a]);
+      int m = k - offset + 1;
+      int n = l - offset + 1;
 
-      if (abs(k-1) > sub)
-      {
-      	offset += sub;
-      	block++;
-      	a++;
-      }
+      size_t sub = (size_t) abs(block_mat[a]);
 
 
       if (m_pass[i][j] != 0.0)
-        spda_out << con_count << " " << block << " " << k << " " << l << " " << m_pass[i][j] << std::endl;
+        spda_out << con_count << " " << block << " " << m << " " << n << " " << m_pass[i][j] << std::endl;
 
+
+      if (m >= sub and a != block_mat.size() - 1)
+      {
+        offset += sub;
+        block++;
+        a++;
+      }
 
     }
     }
@@ -529,6 +532,32 @@ void blockdiag_spdaout (const size_t sub_blocks, const two_array & block_mat, st
 */
 }
 
+/***************************************************************
+ 
+ Function to output the number of two-body sub-blocks. 
+
+***************************************************************/
+
+
+template <typename two_array>
+size_t num_sub_blocks (size_t sub_blocks, const two_array & block_mat)
+{
+
+  size_t number = 0;
+
+  for (size_t a = 0; a < sub_blocks; a++)
+  {
+    double sub = block_mat [a][3];
+
+    if (sub != 0.)
+    {
+      number++;
+    }
+
+  }
+
+  return number;
+}
 
 /***************************************************************
 
@@ -551,7 +580,7 @@ void create_spda_file (const two_array & block_mat, const one_array & oned_block
   const size_t F10num = F10_con.size();
   //  size_t cmat_extent = F1_con.size();
 
-  const size_t PQsize = bsize*(bsize-1)/2;
+//  const size_t PQsize = bsize*(bsize-1)/2;
 
   const size_t sub_blocks = block_mat.size();
 
@@ -604,13 +633,13 @@ void create_spda_file (const two_array & block_mat, const one_array & oned_block
 
   if (flag_pass.two_body_toggle)
   {
-    blocks += sub_blocks;
+    blocks += num_sub_blocks (sub_blocks, block_mat);
 
     if (flag_pass.Q_flag)
-      blocks += sub_blocks;
+      blocks += num_sub_blocks (sub_blocks, block_mat);
 
     if (flag_pass.G_flag)
-      blocks += sub_blocks;
+      blocks += num_sub_blocks (sub_blocks, block_mat);
   }
 
   spda_out << blocks << std::endl; 						 // output number of blocks in X
@@ -2699,7 +2728,7 @@ int main ()
 
   const bool F1_flag = true;  // p START - TRACE CONDITION
   const bool F2_flag = true;  // q START - LINEAR RELATIONS
-  const bool F3_flag = true;  // P START - TRACE CONDITION
+  const bool F3_flag = false;  // P START - TRACE CONDITION
   const bool F4_flag = false; // REDUNDANT - P TRACE CONDITION
   const bool F5_flag = false;  // P ANTI-SYMMETRY
   const bool F6_flag = false; // REDUNDANT - P ANTI-SYMMETRY
@@ -2715,7 +2744,7 @@ int main ()
 
   const bool redundant_check = false;
 
-  if (!two_body_toggle and (F3_flag or F4_flag or F5_flag or F6_flag or F7_flag))
+  if (!two_body_toggle and (F4_flag or F5_flag or F6_flag or F7_flag))
   {
   	std::cerr << "ERROR: TWO-BODY TOGGLE AND F CONSTRAINT FLAGS INCOMPATIBLE - GIVING UP" << std::endl;
   	return EXIT_FAILURE;
