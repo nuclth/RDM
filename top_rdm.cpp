@@ -349,7 +349,7 @@ void con_matrix_out (const two_array & m_pass, size_t con_count, size_t bsize, s
       size_t sub = (size_t) abs(block_mat[a]);
 
 
-      if (m_pass[i][j] != 0.0)
+      if (m_pass[i][j] != 0.0 and abs(m) < abs(sub) and abs (n) < abs(sub))
         spda_out << con_count << " " << block << " " << m << " " << n << " " << m_pass[i][j] << std::endl;
 
 
