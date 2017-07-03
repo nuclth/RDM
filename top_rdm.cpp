@@ -31,7 +31,10 @@ for the system.
 #include "boost/cstdlib.hpp"
 #include <gsl/gsl_sf_laguerre.h>
 #include <gsl/gsl_sf_gamma.h>
+#include <gsl/gsl_math.h>
+#include <gsl/gsl_eigen.h>
 #include <cstdio>
+#include <iomanip>
 #include <armadillo>
 #include <cmath>
 #include <cstdlib>
@@ -349,7 +352,7 @@ void con_matrix_out (const two_array & m_pass, size_t con_count, size_t bsize, s
         spda_out << con_count << " " << block << " " << m << " " << n << " " << m_pass[i][j] << std::endl;
 
 
-      if (m >= sub and a != block_mat.size() - 1)
+      if (abs(m) >= abs(sub) and a != block_mat.size() - 1)
       {
         offset += sub;
         block++;
@@ -1635,10 +1638,120 @@ void blockdiag_h2 (const two_array & ref_m, two_array & block_h2, five_array & h
 
   }
 
-  print (std::cout, block_h2);
+//  print (std::cout, block_h2);
 //  if (diag_toggle)
 //    diag_out << std::endl << std::endl;
 }
+
+
+/***************************************************************
+
+***************************************************************/
+template <typename two_array>
+void create_transformation (const two_array & co_h2, const two_array & bd_h2, two_array & trans)
+{
+	size_t extent = co_h2.size();
+
+	double compact [extent*extent];
+	double block   [extent*extent];
+
+	size_t q = 0;
+
+	for (size_t i = 0; i < extent; i++)
+	{
+	for (size_t j = 0; j < extent; j++)
+	{
+		compact [q] = co_h2 [i][j];
+		block   [q] = bd_h2 [i][j];
+		q++;
+	}
+	}
+
+	gsl_matrix_view c = gsl_matrix_view_array (compact, extent, extent);	
+	gsl_matrix_view d = gsl_matrix_view_array (block, extent, extent);
+
+	gsl_vector *evalc = gsl_vector_alloc (extent);
+	gsl_vector *evald = gsl_vector_alloc (extent);
+
+	gsl_matrix *evecc = gsl_matrix_alloc (extent, extent);
+	gsl_matrix *evecd = gsl_matrix_alloc (extent, extent);
+
+	gsl_eigen_symmv_workspace * w = gsl_eigen_symmv_alloc (extent);
+
+	gsl_eigen_symmv (&c.matrix, evalc, evecc, w);
+	gsl_eigen_symmv (&d.matrix, evald, evecd, w);
+
+	gsl_eigen_symmv_free (w);
+
+	gsl_eigen_symmv_sort (evalc, evecc, GSL_EIGEN_SORT_ABS_ASC);
+    gsl_eigen_symmv_sort (evald, evecd, GSL_EIGEN_SORT_ABS_ASC);
+
+	std::cout << "START COMPACT" << std::endl << std::endl;
+
+	for (size_t i = 0; i < extent; i++)
+	{
+        gsl_vector_view evec_c = gsl_matrix_column (evecc, i);
+
+        double val = gsl_vector_get (evalc, i);
+
+        std::cout << std::setprecision(16) << val << std::endl;
+
+/*        for (size_t j = 0; j < extent; j++)
+        {
+        	double down = gsl_vector_get (&evec_c.vector, j);
+        	std::cout << down << " ";
+        }
+*/
+//        std::cout << std::endl << std::endl;
+	}
+
+
+	std::cout << std::endl << "START BLOCK" << std::endl << std::endl;
+
+	for (size_t i = 0; i < extent; i++)
+	{
+        gsl_vector_view evec_d = gsl_matrix_column (evecd, i);
+
+        double val = gsl_vector_get (evald, i);
+
+        std::cout << val << std::endl;
+/*
+        for (size_t j = 0; j < extent; j++)
+        {
+        	double down = gsl_vector_get (&evec_d.vector, j);
+        	std::cout << down << " ";
+        }
+*/
+//        std::cout << std::endl << std::endl;
+	}
+
+
+	gsl_matrix_transpose (evecd);
+
+	gsl_matrix_mul_elements (evecd, evecc);
+
+	for (size_t i = 0; i < extent; i++)
+	{
+        gsl_vector_view evec_d = gsl_matrix_column (evecd, i);
+
+        for (size_t j = 0; j < extent; j++)
+        {
+        	double down = gsl_vector_get (&evec_d.vector, j);
+        	trans[i][j] = down;
+        }
+
+	}
+
+//	print (std::cout, trans);
+
+
+	gsl_vector_free (evalc);
+	gsl_vector_free (evald);
+
+	gsl_matrix_free (evecc);
+	gsl_matrix_free (evecd);
+}
+
 
 /***************************************************************
 
@@ -2728,7 +2841,7 @@ int main ()
 
   const bool F1_flag = true;  // p START - TRACE CONDITION
   const bool F2_flag = true;  // q START - LINEAR RELATIONS
-  const bool F3_flag = false;  // P START - TRACE CONDITION
+  const bool F3_flag = true;  // P START - TRACE CONDITION
   const bool F4_flag = false; // REDUNDANT - P TRACE CONDITION
   const bool F5_flag = false;  // P ANTI-SYMMETRY
   const bool F6_flag = false; // REDUNDANT - P ANTI-SYMMETRY
@@ -3053,7 +3166,7 @@ int main ()
   block_mat.resize(boost::extents[p_subblocks][4]);
   bcopy.resize(boost::extents[0][0]);
 
-  print (std::cout, block_mat);
+//  print (std::cout, block_mat);
 
   one_array oned_blocks (boost::extents[p_subblocks]);
 
@@ -3063,11 +3176,14 @@ int main ()
 
   two_array comp_h2  (boost::extents[bsize*(bsize-1)/2][bsize*(bsize-1)/2]);
   two_array block_h2 (boost::extents[bsize*(bsize-1)/2][bsize*(bsize-1)/2]);
+  two_array trans_h2 (boost::extents[bsize*(bsize-1)/2][bsize*(bsize-1)/2]);
 
   compactify_h2 (ref_m, comp_h2,  h2_mat, diag_out, diag_toggle);
 
   blockdiag_h2  (ref_m, block_h2, h2_mat, diag_out, diag_toggle, block_mat);
 
+
+  create_transformation (comp_h2, block_h2, trans_h2);
 
 //  print(std::cout, comp_h2);
 
@@ -3112,12 +3228,20 @@ int main ()
 
     if (two_body_toggle)
     {
-      diag_out << "Original 2 body Hamiltonian matrix" << std::endl << std::endl;
-      print (diag_out, test_h2);
-      diag_out << std::endl << std::endl;
+//      diag_out << "Original 2 body Hamiltonian matrix" << std::endl << std::endl;
+//      print (diag_out, test_h2);
+//      diag_out << std::endl << std::endl;
 
       diag_out << "Compacted 2 body Hamiltonian matrix" << std::endl << std::endl;
       print (diag_out, comp_h2);
+      diag_out << std::endl << std::endl;
+
+      diag_out << "Block diagonal 2 body Hamiltonian matrix" << std::endl << std::endl;
+      print (diag_out, block_h2);
+      diag_out << std::endl << std::endl;
+
+      diag_out << "Transformation matrix: Compact to block" << std::endl << std::endl;
+      print (diag_out, trans_h2);
       diag_out << std::endl << std::endl;
     }
 
