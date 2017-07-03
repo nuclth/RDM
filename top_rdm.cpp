@@ -1464,7 +1464,7 @@ diagonlization.
 ***************************************************************/
 
 template <typename two_array, typename five_array>
-void blockdiag_h2 (const two_array & ref_m, two_array & block_h2, five_array & h2_mat, std::ofstream & diag_out, const bool diag_toggle, const two_array & block_mat)
+void blockdiag_h2 (const two_array & ref_m, two_array & block_h2, five_array & h2_mat, std::ofstream & diag_out, const bool diag_toggle, const two_array & block_mat, two_array & basis_ref)
 {
   const size_t bsize = h2_mat.size();
 
@@ -1485,6 +1485,7 @@ void blockdiag_h2 (const two_array & ref_m, two_array & block_h2, five_array & h
 
   size_t offset = 0;
 
+  size_t z = 0;
 
   for (size_t a = 0; a < sub_blocks; a++)
   {
@@ -1587,12 +1588,20 @@ void blockdiag_h2 (const two_array & ref_m, two_array & block_h2, five_array & h
                 //diag_out << "\n";
 
 
+
             if (mleft == mright and mleft == block_mat[a][0] and P1 == P2 and P1 == block_mat[a][1] and alpha != 0)
             {
 
             	block_h2 [left + offset][right + offset] = value;
 
             	right++;
+
+            	if (left == 0)
+            	{
+            	    basis_ref [z][0] = gamma;
+            		basis_ref [z][1] = delta;
+            		z++;
+            	}
 
             	if (right >= block_mat [a][2])
             	{
@@ -1637,6 +1646,8 @@ void blockdiag_h2 (const two_array & ref_m, two_array & block_h2, five_array & h
   offset += block_mat [a][2];
 
   }
+
+  print (std::cout, basis_ref);
 
 //  print (std::cout, block_h2);
 //  if (diag_toggle)
@@ -3178,9 +3189,12 @@ int main ()
   two_array block_h2 (boost::extents[bsize*(bsize-1)/2][bsize*(bsize-1)/2]);
   two_array trans_h2 (boost::extents[bsize*(bsize-1)/2][bsize*(bsize-1)/2]);
 
+  two_array comp_basis_ref  (boost::extents[bsize*(bsize-1)/2][2]);
+  two_array block_basis_ref (boost::extents[bsize*(bsize-1)/2][2]);
+
   compactify_h2 (ref_m, comp_h2,  h2_mat, diag_out, diag_toggle);
 
-  blockdiag_h2  (ref_m, block_h2, h2_mat, diag_out, diag_toggle, block_mat);
+  blockdiag_h2  (ref_m, block_h2, h2_mat, diag_out, diag_toggle, block_mat, block_basis_ref);
 
 
   create_transformation (comp_h2, block_h2, trans_h2);
@@ -3240,7 +3254,7 @@ int main ()
       print (diag_out, block_h2);
       diag_out << std::endl << std::endl;
 
-      diag_out << "Transformation matrix: Compact to block" << std::endl << std::endl;
+      diag_out << "Permutation matrix: Compact to block" << std::endl << std::endl;
       print (diag_out, trans_h2);
       diag_out << std::endl << std::endl;
     }
