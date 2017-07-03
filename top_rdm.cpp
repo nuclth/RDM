@@ -33,6 +33,7 @@ for the system.
 #include <gsl/gsl_sf_gamma.h>
 #include <gsl/gsl_math.h>
 #include <gsl/gsl_eigen.h>
+#include <gsl/gsl_blas.h>
 #include <cstdio>
 #include <iomanip>
 #include <armadillo>
@@ -1303,9 +1304,11 @@ Function to put the potential in two index form.
 ***************************************************************/
 
 template <typename two_array, typename five_array>
-void compactify_h2 (const two_array & ref_m, two_array & comp_h2, five_array & h2_mat, std::ofstream & diag_out, const bool diag_toggle)
+void compactify_h2 (const two_array & ref_m, two_array & comp_h2, five_array & h2_mat, std::ofstream & diag_out, const bool diag_toggle, two_array & basis_ref)
 {
   const size_t bsize = h2_mat.size();
+
+  size_t z = 0;
 
   double value;
 
@@ -1339,6 +1342,8 @@ void compactify_h2 (const two_array & ref_m, two_array & comp_h2, five_array & h
             beta  = h2_mat [i][j][k][l][2];
             gamma = h2_mat [i][j][k][l][3];
             delta = h2_mat [i][j][k][l][4];
+
+//            std::cout << alpha << " " << beta << "\t" << gamma << " " << delta << " " << value << "\n";
 
             if (diag_toggle)
             {
@@ -1443,10 +1448,38 @@ void compactify_h2 (const two_array & ref_m, two_array & comp_h2, five_array & h
 
             comp_h2 [left][right] = value;
 
+            if (alpha != 0 and gamma != 0 and beta != 0 and delta != 0)
+            {
+
+            	bool new_val = true;
+
+            	for (size_t q = 0; q < basis_ref.size(); q++)
+            	{
+            		if (basis_ref [q][0] == alpha and basis_ref [q][1] == beta)
+            			new_val = false;
+
+            		if (basis_ref [q][1] == alpha and basis_ref [q][0] == beta)
+            			new_val = false;            		
+            		
+            	}
+
+
+            	if (new_val)
+	            {
+	            	basis_ref [z][0] = alpha;
+    	        	basis_ref [z][1] = beta;
+        	    	z++;
+//        	    	std::cout << "HIT" << std::endl;
+        	    }
+            }
+
   }
   }
   }
   }
+
+
+//  print (std::cout, basis_ref);
 
   if (diag_toggle)
     diag_out << std::endl << std::endl;
@@ -1647,7 +1680,7 @@ void blockdiag_h2 (const two_array & ref_m, two_array & block_h2, five_array & h
 
   }
 
-  print (std::cout, basis_ref);
+//  print (std::cout, basis_ref);
 
 //  print (std::cout, block_h2);
 //  if (diag_toggle)
@@ -1658,13 +1691,47 @@ void blockdiag_h2 (const two_array & ref_m, two_array & block_h2, five_array & h
 /***************************************************************
 
 ***************************************************************/
-template <typename two_array>
-void create_transformation (const two_array & co_h2, const two_array & bd_h2, two_array & trans)
-{
-	size_t extent = co_h2.size();
 
-	double compact [extent*extent];
-	double block   [extent*extent];
+template <typename two_array>
+void create_transformation (const two_array & compact_ref, const two_array & block_ref, two_array & trans_h2, size_t extent)
+{
+	for (size_t i = 0; i < extent; i++)
+	{
+		size_t com_a = compact_ref [i][0];
+		size_t com_b = compact_ref [i][1];
+
+	for (size_t j = 0; j < extent; j++)
+	{
+		size_t blo_a = block_ref [j][0];
+		size_t blo_b = block_ref [j][1];
+
+		if (blo_a == com_a and blo_b == com_b)
+			trans_h2 [i][j] = 1.0;
+	}
+	}
+
+//	print (std::cout, trans_h2);
+}
+
+template <typename two_array>
+void verify_tranformation  (const two_array & comp_h2, const two_array & block_h2, const two_array & trans_h2)
+{
+	const size_t extent = comp_h2.size();
+
+	double perm_data  [extent*extent];
+	double comp_data  [extent*extent];
+	double zero1_data [extent*extent];
+	double zero2_data [extent*extent];
+/*
+
+	gsl_matrix * p  = gsl_matrix_alloc (extent, extent);
+	gsl_matrix * pt = gsl_matrix_alloc (extent, extent);
+	gsl_matrix * c  = gsl_matrix_alloc (extent, extent);
+
+	gsl_matrix * inter  = gsl_matrix_alloc (extent, extent);
+	gsl_matrix * answer = gsl_matrix_alloc (extent, extent);
+
+*/
 
 	size_t q = 0;
 
@@ -1672,97 +1739,115 @@ void create_transformation (const two_array & co_h2, const two_array & bd_h2, tw
 	{
 	for (size_t j = 0; j < extent; j++)
 	{
-		compact [q] = co_h2 [i][j];
-		block   [q] = bd_h2 [i][j];
+
+		perm_data  [q] = trans_h2 [i][j];
+		comp_data  [q] = comp_h2  [i][j];
+		zero1_data [q] = 0.0;
+		zero2_data [q] = 0.0;
 		q++;
+//		gsl_matrix_set (p,  i, j, trans_h2 [i][j]);
+//		gsl_matrix_set (pt, i, j, trans_h2 [i][j]);
+//		gsl_matrix_set (c,  i, j, comp_h2  [i][j]);
+
 	}
 	}
 
-	gsl_matrix_view c = gsl_matrix_view_array (compact, extent, extent);	
-	gsl_matrix_view d = gsl_matrix_view_array (block, extent, extent);
+	gsl_matrix_view p  = gsl_matrix_view_array (perm_data, extent, extent);
+	gsl_matrix_view c  = gsl_matrix_view_array (comp_data, extent, extent);
 
-	gsl_vector *evalc = gsl_vector_alloc (extent);
-	gsl_vector *evald = gsl_vector_alloc (extent);
-
-	gsl_matrix *evecc = gsl_matrix_alloc (extent, extent);
-	gsl_matrix *evecd = gsl_matrix_alloc (extent, extent);
-
-	gsl_eigen_symmv_workspace * w = gsl_eigen_symmv_alloc (extent);
-
-	gsl_eigen_symmv (&c.matrix, evalc, evecc, w);
-	gsl_eigen_symmv (&d.matrix, evald, evecd, w);
-
-	gsl_eigen_symmv_free (w);
-
-	gsl_eigen_symmv_sort (evalc, evecc, GSL_EIGEN_SORT_ABS_ASC);
-    gsl_eigen_symmv_sort (evald, evecd, GSL_EIGEN_SORT_ABS_ASC);
-
-	std::cout << "START COMPACT" << std::endl << std::endl;
-
-	for (size_t i = 0; i < extent; i++)
-	{
-        gsl_vector_view evec_c = gsl_matrix_column (evecc, i);
-
-        double val = gsl_vector_get (evalc, i);
-
-        std::cout << std::setprecision(16) << val << std::endl;
-
-/*        for (size_t j = 0; j < extent; j++)
-        {
-        	double down = gsl_vector_get (&evec_c.vector, j);
-        	std::cout << down << " ";
-        }
-*/
-//        std::cout << std::endl << std::endl;
-	}
+	gsl_matrix_view inter  = gsl_matrix_view_array (zero1_data, extent, extent);
+	gsl_matrix_view answer = gsl_matrix_view_array (zero2_data, extent, extent);
 
 
-	std::cout << std::endl << "START BLOCK" << std::endl << std::endl;
+  gsl_blas_dgemm (CblasTrans,   CblasNoTrans, 1.0, &p.matrix, &c.matrix, 0.0, &inter.matrix);
+  gsl_blas_dgemm (CblasNoTrans, CblasNoTrans, 1.0, &inter.matrix, &p.matrix, 0.0, &answer.matrix);
 
-	for (size_t i = 0; i < extent; i++)
-	{
-        gsl_vector_view evec_d = gsl_matrix_column (evecd, i);
-
-        double val = gsl_vector_get (evald, i);
-
-        std::cout << val << std::endl;
 /*
-        for (size_t j = 0; j < extent; j++)
-        {
-        	double down = gsl_vector_get (&evec_d.vector, j);
-        	std::cout << down << " ";
-        }
-*/
-//        std::cout << std::endl << std::endl;
-	}
+	for (size_t i = 0; i < extent; i++)
+	{
+	gsl_vector_view col_i = gsl_matrix_row (pt.matrix, i);
 
+		for (size_t j = 0; j < extent; j++)
+		{
+			double value = gsl_vector_get(&col_i.vector, j);
 
-	gsl_matrix_transpose (evecd);
+			std::cout << value << " ";
 
-	gsl_matrix_mul_elements (evecd, evecc);
+		}
+
+	std::cout << std::endl;
+	} 
 
 	for (size_t i = 0; i < extent; i++)
 	{
-        gsl_vector_view evec_d = gsl_matrix_column (evecd, i);
+	gsl_vector_view col_i = gsl_matrix_row (c.matrix, i);
 
-        for (size_t j = 0; j < extent; j++)
-        {
-        	double down = gsl_vector_get (&evec_d.vector, j);
-        	trans[i][j] = down;
-        }
+		for (size_t j = 0; j < extent; j++)
+		{
+			double value = gsl_vector_get(&col_i.vector, j);
 
+			std::cout << value << " ";
+
+		}
+
+	std::cout << std::endl;
+	} 
+
+
+	for (size_t i = 0; i < extent; i++)
+	{
+	gsl_vector_view col_i = gsl_matrix_row (pt.matrix, i);
+
+		for (size_t j = 0; j < extent; j++)
+		{
+			double value = gsl_vector_get(&col_i.vector, j);
+
+			std::cout << value << " ";
+
+		}
+
+	std::cout << std::endl;
+	} 
+
+
+
+
+	for (size_t i = 0; i < extent; i++)
+	{
+	gsl_vector_view col_i = gsl_matrix_row (pt.matrix, i);
+
+		for (size_t j = 0; j < extent; j++)
+		{
+			double value = gsl_vector_get(&col_i.vector, j);
+
+			std::cout << value << " ";
+
+		}
+
+	std::cout << std::endl;
+	} 
+
+*/
+
+
+  	q = 0;
+
+	for (size_t i = 0; i < extent; i++)
+	{
+	for (size_t j = 0; j < extent; j++)
+	{
+		double value = zero2_data [q];
+		q++;
+
+		if (value != block_h2 [i][j])
+		{
+//			std::cout << value << " " << block_h2 [i][j] << std::endl;
+			std::cerr << "ERROR IN VERIFICATION: TRANSFORMATION DOES NOT REPRODUCE BLOCK" << std::endl;
+		}
 	}
+	} 
 
-//	print (std::cout, trans);
-
-
-	gsl_vector_free (evalc);
-	gsl_vector_free (evald);
-
-	gsl_matrix_free (evecc);
-	gsl_matrix_free (evecd);
 }
-
 
 /***************************************************************
 
@@ -1948,8 +2033,8 @@ between the 2RDM partial trace and the 1RDM.
 
 ***************************************************************/
 
-template <typename one_array, typename three_array, typename four_array, typename six_array>
-void init_F3_flag (four_array & F3_build_1, six_array & F3_build_3, three_array & F3_con, one_array & F3_val, const size_t bsize, const size_t N)
+template <typename one_array, typename two_array, typename three_array, typename four_array, typename six_array>
+void init_F3_flag (four_array & F3_build_1, six_array & F3_build_3, three_array & F3_con, one_array & F3_val, const size_t bsize, const size_t N, const two_array trans_h2)
 {
 
   for (size_t i = 0; i < bsize; i++)      // loop over ith constraint matrix
@@ -2077,6 +2162,64 @@ void init_F3_flag (four_array & F3_build_1, six_array & F3_build_3, three_array 
 
     counter++;
   }
+  }
+
+
+
+  for (size_t a = 0; a < counter; a++)
+  {
+	  const size_t extent = bsize * (bsize-1) / 2;
+	  double perm_data   [extent*extent];
+	  double flag_data   [extent*extent];
+	  double inter_data  [extent*extent];
+	  double answer_data [extent*extent];
+
+	  size_t q = 0;
+
+	  for (size_t i = 0; i < extent; i++)
+	  {
+	  for (size_t j = 0; j < extent; j++)
+	  {
+
+	  		size_t l = i + 2 * bsize;
+	  		size_t r = j + 2 * bsize;
+
+			perm_data   [q] = trans_h2 [i][j];
+			flag_data   [q] = F3_con[a][l][r];
+			inter_data  [q] = 0.0;
+			answer_data [q] = 0.0;
+			q++;
+	  }
+	  }
+
+	  gsl_matrix_view p  = gsl_matrix_view_array (perm_data, extent, extent);
+	  gsl_matrix_view f  = gsl_matrix_view_array (flag_data, extent, extent);
+
+	  gsl_matrix_view inter  = gsl_matrix_view_array (inter_data,  extent, extent);
+	  gsl_matrix_view answer = gsl_matrix_view_array (answer_data, extent, extent);
+
+
+	  gsl_blas_dgemm (CblasTrans,   CblasNoTrans, 1.0, &p.matrix, &f.matrix, 0.0, &inter.matrix);
+	  gsl_blas_dgemm (CblasNoTrans, CblasNoTrans, 1.0, &inter.matrix, &p.matrix, 0.0, &answer.matrix);
+
+
+
+
+	  q = 0;
+
+	  for (size_t i = 0; i < extent; i++)
+	  {
+	  for (size_t j = 0; j < extent; j++)
+	  {
+			double value = answer_data [q];
+			q++;
+
+	  		size_t l = i + 2 * bsize;
+	  		size_t r = j + 2 * bsize;
+
+			F3_con[a][l][r] = value;
+	  }
+	  } 
   }
 
 }
@@ -3007,6 +3150,73 @@ int main ()
   one_array   F10_val (boost::extents[0]);
 
 
+
+
+
+
+
+
+
+
+
+
+  fullm_populate_hamiltonian (ref_m, h1_mat, h2_mat, m_ref, m_mat, hw, diag_out, diag_toggle, block_mat);
+
+  size_t p_subblocks = block_list (ref_m, block_mat, bcopy);
+
+  block_mat.resize(boost::extents[p_subblocks][4]);
+  bcopy.resize(boost::extents[0][0]);
+
+//  print (std::cout, block_mat);
+
+  one_array oned_blocks (boost::extents[p_subblocks]);
+
+  fill_oned_blocks (p_subblocks, oned_blocks, block_mat);
+
+//  std::cout << "HAMILTONIAN POPULATED" << std::endl;
+
+  two_array comp_h2  (boost::extents[bsize*(bsize-1)/2][bsize*(bsize-1)/2]);
+  two_array block_h2 (boost::extents[bsize*(bsize-1)/2][bsize*(bsize-1)/2]);
+  two_array trans_h2 (boost::extents[bsize*(bsize-1)/2][bsize*(bsize-1)/2]);
+
+  two_array comp_basis_ref  (boost::extents[bsize*(bsize-1)/2][2]);
+  two_array block_basis_ref (boost::extents[bsize*(bsize-1)/2][2]);
+
+  compactify_h2 (ref_m, comp_h2,  h2_mat, diag_out, diag_toggle, comp_basis_ref);
+
+  blockdiag_h2  (ref_m, block_h2, h2_mat, diag_out, diag_toggle, block_mat, block_basis_ref);
+
+
+  create_transformation (comp_basis_ref, block_basis_ref, trans_h2, bsize*(bsize-1)/2);
+
+  verify_tranformation  (comp_h2, block_h2, trans_h2);
+
+//  print(std::cout, comp_h2);
+
+  two_array c_matrix (boost::extents[cmat_extent][cmat_extent]);
+
+  create_c_matrix (h1_mat, block_h2, c_matrix, two_body_toggle);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   if (F1_flag)
   {
     F1_con.resize(boost::extents[F1num][cmat_extent][cmat_extent]);
@@ -3093,7 +3303,7 @@ int main ()
   {
     four_array F3_build_1 (boost::extents[bsize][bsize][bsize][bsize]);
     six_array  F3_build_3 (boost::extents[bsize][bsize][bsize][bsize][bsize][bsize]);
-    init_F3_flag (F3_build_1, F3_build_3, F3_con, F3_val, bsize, particles);
+    init_F3_flag (F3_build_1, F3_build_3, F3_con, F3_val, bsize, particles, trans_h2);
     F3_build_1.resize(boost::extents[0][0][0][0]);
     F3_build_3.resize(boost::extents[0][0][0][0][0][0]);
     std::cout << "FLAG 3 DONE" << std::endl;  
@@ -3170,42 +3380,7 @@ int main ()
   std::cout << "FLAG INITIALIZATION DONE" << std::endl;
 
 
-  fullm_populate_hamiltonian (ref_m, h1_mat, h2_mat, m_ref, m_mat, hw, diag_out, diag_toggle, block_mat);
-
-  size_t p_subblocks = block_list (ref_m, block_mat, bcopy);
-
-  block_mat.resize(boost::extents[p_subblocks][4]);
-  bcopy.resize(boost::extents[0][0]);
-
-//  print (std::cout, block_mat);
-
-  one_array oned_blocks (boost::extents[p_subblocks]);
-
-  fill_oned_blocks (p_subblocks, oned_blocks, block_mat);
-
-//  std::cout << "HAMILTONIAN POPULATED" << std::endl;
-
-  two_array comp_h2  (boost::extents[bsize*(bsize-1)/2][bsize*(bsize-1)/2]);
-  two_array block_h2 (boost::extents[bsize*(bsize-1)/2][bsize*(bsize-1)/2]);
-  two_array trans_h2 (boost::extents[bsize*(bsize-1)/2][bsize*(bsize-1)/2]);
-
-  two_array comp_basis_ref  (boost::extents[bsize*(bsize-1)/2][2]);
-  two_array block_basis_ref (boost::extents[bsize*(bsize-1)/2][2]);
-
-  compactify_h2 (ref_m, comp_h2,  h2_mat, diag_out, diag_toggle);
-
-  blockdiag_h2  (ref_m, block_h2, h2_mat, diag_out, diag_toggle, block_mat, block_basis_ref);
-
-
-  create_transformation (comp_h2, block_h2, trans_h2);
-
-//  print(std::cout, comp_h2);
-
-  two_array c_matrix (boost::extents[cmat_extent][cmat_extent]);
-
-  create_c_matrix (h1_mat, block_h2, c_matrix, two_body_toggle);
-
-    std::cout << "CREATING SPDA FILE" << std::endl;
+  std::cout << "CREATING SPDA FILE" << std::endl;
 
   create_spda_file (block_mat, oned_blocks, c_matrix, flag_pass, F1_con, F1_val, F2_con, F2_val, F3_con, F3_val, F4_con, F4_val, F7_con, F7_val, F10_con, F10_val, bsize, cmat_extent, spda_out);
 
@@ -3252,6 +3427,14 @@ int main ()
 
       diag_out << "Block diagonal 2 body Hamiltonian matrix" << std::endl << std::endl;
       print (diag_out, block_h2);
+      diag_out << std::endl << std::endl;
+
+      diag_out << "Compact basis reference" << std::endl << std::endl;
+      print (diag_out, comp_basis_ref);
+      diag_out << std::endl << std::endl;
+
+      diag_out << "Block basis reference" << std::endl << std::endl;
+      print (diag_out, block_basis_ref);
       diag_out << std::endl << std::endl;
 
       diag_out << "Permutation matrix: Compact to block" << std::endl << std::endl;
