@@ -2235,6 +2235,7 @@ void init_F3_flag (four_array & F3_build_1, six_array & F3_build_3, three_array 
 			F3_con[a][l][r] = value;
 	  }
 	  } 
+    
   }
 
 }
