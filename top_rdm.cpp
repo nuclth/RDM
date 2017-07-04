@@ -349,16 +349,23 @@ void con_matrix_out (const two_array & m_pass, size_t con_count, size_t bsize, s
       size_t sub = (size_t) abs(block_mat[a]);
 
 
-      if (m_pass[i][j] != 0.0 and abs(m) < abs(sub) and abs (n) < abs(sub))
+      if (abs(m) > abs(sub) and a < block_mat.size())
+      {
+        offset += abs(sub);
+        block++;
+        a++;
+
+        m -= abs(sub);
+        n -= abs(sub);
+      }
+
+
+
+      if (m_pass[i][j] != 0.0 and abs(m) <= abs(sub) and abs (n) <= abs(sub))
         spda_out << con_count << " " << block << " " << m << " " << n << " " << m_pass[i][j] << std::endl;
 
 
-      if (abs(m) >= abs(sub) and a != block_mat.size() - 1)
-      {
-        offset += sub;
-        block++;
-        a++;
-      }
+
 
     }
     }
@@ -629,7 +636,7 @@ void create_spda_file (const two_array & block_mat, const one_array & oned_block
 
   spda_out << num_cons << std::endl;         // output number of constraints
 
-
+print (std::cout, oned_blocks);
 
 
   // number of blocks start
@@ -1260,11 +1267,19 @@ size_t block_list (const two_array & ref_m, two_array & block_mat, two_array & b
 
 
 template <typename one_array, typename two_array>
-void fill_oned_blocks (const size_t sub_blocks, one_array & oned_blocks, const two_array & block_mat)
+size_t fill_oned_blocks (const size_t sub_blocks, one_array & oned_blocks, const two_array & block_mat)
 {
-	for (size_t a = 0; a < sub_blocks; a++)
-		oned_blocks [a] = block_mat[a][3];
+  size_t num = 0; 
 
+	for (size_t a = 0; a < sub_blocks; a++)
+	{
+  	oned_blocks [a] = block_mat[a][3];
+
+    if (block_mat[a][3] != 0.)
+      num++;
+  }
+
+  return num;
 }
 
 
@@ -3171,7 +3186,9 @@ int main ()
 
   one_array oned_blocks (boost::extents[p_subblocks]);
 
-  fill_oned_blocks (p_subblocks, oned_blocks, block_mat);
+  size_t block_num = fill_oned_blocks (p_subblocks, oned_blocks, block_mat);
+
+  oned_blocks.resize(boost::extents[block_num]);
 
 //  std::cout << "HAMILTONIAN POPULATED" << std::endl;
 
