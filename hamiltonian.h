@@ -14,7 +14,7 @@ void read_in_reference_m_scheme (two_array & ref_m, const std::string m_ref_file
 
 void read_in_matrix_m_scheme (const two_array & ref_m, five_array & h2_mat, const std::string m_mat_file);
 
-void block_list (const size_t bsize, const two_array & ref_m, two_array & block_mat);
+void block_list (const size_t bsize, const two_array & ref_m, two_array & block_mat, std::ofstream & diag_out, const bool diag_toggle);
 
 void fill_oned_blocks (one_array & oned_blocks, const two_array & block_mat);
 

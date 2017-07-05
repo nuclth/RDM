@@ -39,15 +39,12 @@ void fullm_populate_hamiltonian
     populate_1body (ref_m, h1_mat, hw, diag_out, diag_toggle);
     read_in_matrix_m_scheme (ref_m, h2_mat, matrix_file);
 
-
-
-    block_list (bsize, ref_m, block_mat);
+    block_list (bsize, ref_m, block_mat, diag_out, diag_toggle);
 
     fill_oned_blocks (oned_blocks, block_mat);
 
     compactify_h2 (ref_m, comp_h2,  h2_mat, comp_basis_ref, diag_out, diag_toggle);
     blockdiag_h2  (ref_m, block_h2, h2_mat, block_mat, block_basis_ref, diag_out, diag_toggle);
-
 
     create_transformation (comp_basis_ref, block_basis_ref, trans_h2, bsize*(bsize-1)/2, diag_out, diag_toggle);
     verify_tranformation  (comp_h2, block_h2, trans_h2);
@@ -301,7 +298,7 @@ Function for M projection and parity blocks.
 ***************************************************************/
 
 
-void block_list (const size_t bsize, const two_array & ref_m, two_array & block_mat)
+void block_list (const size_t bsize, const two_array & ref_m, two_array & block_mat, std::ofstream & diag_out, const bool diag_toggle)
 {
   two_array bcopy (boost::extents[2*bsize][4]);
 
@@ -565,6 +562,13 @@ void block_list (const size_t bsize, const two_array & ref_m, two_array & block_
 	}
 
 	block_mat.resize(boost::extents[num][4]);
+
+  if (diag_toggle)
+  {
+    diag_out << "Block Matrix Info" << std::endl << std::endl;
+    print (diag_out, block_mat);
+    diag_out << std::endl << std::endl;
+  }
 }
 
 /***************************************************************

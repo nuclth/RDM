@@ -5,7 +5,7 @@
 2
 
 # value for hbar * omega of the Harmonic oscillator
-20
+10
 
 # input reference file for m-scheme
 test-spM.dat
