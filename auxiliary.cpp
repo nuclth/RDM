@@ -52,9 +52,7 @@ parameters read_in_inputs ()
 
 /***************************************************************
 
-
  Function to print out an arbitrary array
-
 
 ***************************************************************/
 
@@ -94,52 +92,19 @@ template<> void print<int>(std::ostream& os, const int & x)
 }
 
 
+/***************************************************************
+
+ Function to output the constraint matrices to output.
+
+***************************************************************/
 
 
-
-void diag_format (std::ofstream & diag_out, const two_array & h1_mat, const two_array & comp_h2, const two_array & block_h2, const two_array & comp_basis_ref, const two_array & block_basis_ref, const two_array & trans_h2, const two_array & c_matrix, const size_t N_num, const three_array & N_con, const one_array & N_val, const size_t O_num, const three_array & O_con, const one_array & O_val, const size_t P_num, const three_array & P_con, const one_array & P_val, const size_t Q_num, const three_array & Q_con, const one_array & Q_val, const size_t G_num, const three_array & G_con, const one_array & G_val, const con_flags flag_pass)
+void diag_format (std::ofstream & diag_out, const two_array & c_matrix, const size_t N_num, const three_array & N_con, const one_array & N_val, const size_t O_num, const three_array & O_con, const one_array & O_val, const size_t P_num, const three_array & P_con, const one_array & P_val, const size_t Q_num, const three_array & Q_con, const one_array & Q_val, const size_t G_num, const three_array & G_con, const one_array & G_val, const con_flags flag_pass)
 {
 
 
-    diag_out << "1 body Hamiltonian matrix" << std::endl << std::endl;
 
-    print(diag_out, h1_mat); 
-
-    diag_out << std::endl << std::endl;
-
-    if (flag_pass.two_body_toggle)
-    {
-//      diag_out << "Original 2 body Hamiltonian matrix" << std::endl << std::endl;
-//      print (diag_out, test_h2);
-//      diag_out << std::endl << std::endl;
-
-      diag_out << "Compacted 2 body Hamiltonian matrix" << std::endl << std::endl;
-      print (diag_out, comp_h2);
-      diag_out << std::endl << std::endl;
-
-      diag_out << "Block diagonal 2 body Hamiltonian matrix" << std::endl << std::endl;
-      print (diag_out, block_h2);
-      diag_out << std::endl << std::endl;
-
-      diag_out << "Compact basis reference" << std::endl << std::endl;
-      print (diag_out, comp_basis_ref);
-      diag_out << std::endl << std::endl;
-
-      diag_out << "Block basis reference" << std::endl << std::endl;
-      print (diag_out, block_basis_ref);
-      diag_out << std::endl << std::endl;
-
-      diag_out << "Permutation matrix: Compact to block" << std::endl << std::endl;
-      print (diag_out, trans_h2);
-      diag_out << std::endl << std::endl;
-    }
-
-    else
-      diag_out << "Two-body toggle flag set to false - No 2-body output" << std::endl << std::endl;
-
-
-
-    diag_out << "F0 Constraint Matrix" << std::endl << std::endl;
+    diag_out << "H Constraint Matrix" << std::endl << std::endl;
 
     print(diag_out, c_matrix);
 
@@ -238,8 +203,31 @@ void diag_format (std::ofstream & diag_out, const two_array & h1_mat, const two_
 
       diag_out << std::endl << std::endl;
     }
+ 
+}
 
 
+/***************************************************************
 
-  
+ Function to determine the size of each matrix in the problem.
+
+***************************************************************/
+
+size_t full_matrix_extent (const size_t bsize, const con_flags flag_pass)
+{
+
+  size_t cmat = 2 * bsize;
+
+  if (flag_pass.two_body_toggle)
+  {
+      cmat = 2*bsize + bsize * (bsize-1)/2;
+
+    if (flag_pass.Q_flag)
+      cmat = 2*bsize + 2 * bsize * (bsize-1)/2;
+
+    if (flag_pass.G_flag)
+      cmat = 2*bsize + 2 * bsize * (bsize-1)/2 + bsize * bsize;
+  }
+
+  return cmat;
 }

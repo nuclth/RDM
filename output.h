@@ -1,5 +1,5 @@
-#ifndef spd_h
-#define spd_h
+#ifndef output_h
+#define output_h
 
 #include <cstdio>
 #include <fstream>

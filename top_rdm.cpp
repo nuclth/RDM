@@ -5,30 +5,15 @@ Programmer: Alex Dyhdalo
 
 *****************************************************************************/
 
-// necessary definitions
-#include "boost/multi_array.hpp"
-#include "boost/array.hpp"
-#include "boost/cstdlib.hpp"
-#include <gsl/gsl_sf_laguerre.h>
-#include <gsl/gsl_sf_gamma.h>
-#include <gsl/gsl_math.h>
-#include <gsl/gsl_eigen.h>
-#include <gsl/gsl_blas.h>
+// necessary inclusion files
 #include <cstdio>
-#include <iomanip>
-#include <armadillo>
-#include <cmath>
-#include <cstdlib>
 #include <string>
 #include <iostream>
-#include <sstream>
 #include <fstream>
 #include "flags.h"
 #include "auxiliary.h"
 #include "hamiltonian.h"
-#include "spd.h"
-
-
+#include "output.h"
 
 
 
@@ -153,18 +138,10 @@ int main ()
 
 
 
-  size_t cmat_extent = 2 * bsize;
+  size_t cmat_extent = full_matrix_extent (bsize, flag_pass);
 
-  if (two_body_toggle)
-  {
-      cmat_extent = 2*bsize + bsize * (bsize-1)/2;
 
-    if (Q_flag)
-      cmat_extent = 2*bsize + 2 * bsize * (bsize-1)/2;
 
-    if (G_flag)
-      cmat_extent = 2*bsize + 2 * bsize * (bsize-1)/2 + bsize * bsize;
-  }
 
 
   const std::string diag_file = "diagnostic_out/test_diag.dat";
@@ -176,53 +153,16 @@ int main ()
  
 
 
-  two_array ref_m     (boost::extents[bsize][7]);
-  two_array h1_mat    (boost::extents[bsize][bsize]);
-  five_array h2_mat   (boost::extents[bsize][bsize][bsize][bsize][5]);
+
+  two_array h1_mat      (boost::extents[bsize][bsize]);
+  two_array block_h2    (boost::extents[bsize*(bsize-1)/2][bsize*(bsize-1)/2]);
+  two_array trans_h2    (boost::extents[bsize*(bsize-1)/2][bsize*(bsize-1)/2]);
+  two_array block_mat   (boost::extents[2*bsize][4]);
+  one_array oned_blocks (boost::extents[2*bsize]);
+
+  fullm_populate_hamiltonian (bsize, h1_mat, block_h2, trans_h2, block_mat, oned_blocks, m_ref, m_mat, hw, diag_out, diag_toggle);
 
 
-  two_array block_mat (boost::extents[15][4]);
-  two_array bcopy     (boost::extents[15][4]);
-
-  two_array comp_h2  (boost::extents[bsize*(bsize-1)/2][bsize*(bsize-1)/2]);
-  two_array block_h2 (boost::extents[bsize*(bsize-1)/2][bsize*(bsize-1)/2]);
-  two_array trans_h2 (boost::extents[bsize*(bsize-1)/2][bsize*(bsize-1)/2]);
-
-  two_array comp_basis_ref  (boost::extents[bsize*(bsize-1)/2][2]);
-  two_array block_basis_ref (boost::extents[bsize*(bsize-1)/2][2]);
-
-
-
-
-  fullm_populate_hamiltonian (ref_m, h1_mat, h2_mat, m_ref, m_mat, hw, diag_out, diag_toggle, block_mat);
-
-  size_t p_subblocks = block_list (ref_m, block_mat, bcopy);
-
-  block_mat.resize(boost::extents[p_subblocks][4]);
-  bcopy.resize(boost::extents[0][0]);
-
-//  print (std::cout, block_mat);
-
-  one_array oned_blocks (boost::extents[p_subblocks]);
-
-  size_t block_num = fill_oned_blocks (p_subblocks, oned_blocks, block_mat);
-
-  oned_blocks.resize(boost::extents[block_num]);
-
-//  std::cout << "HAMILTONIAN POPULATED" << std::endl;
-
-
-
-  compactify_h2 (ref_m, comp_h2,  h2_mat, diag_out, diag_toggle, comp_basis_ref);
-
-  blockdiag_h2  (ref_m, block_h2, h2_mat, diag_out, diag_toggle, block_mat, block_basis_ref);
-
-
-  create_transformation (comp_basis_ref, block_basis_ref, trans_h2, bsize*(bsize-1)/2);
-
-  verify_tranformation  (comp_h2, block_h2, trans_h2);
-
-//  print(std::cout, comp_h2);
 
 
 
@@ -350,7 +290,7 @@ int main ()
 
   if (diag_toggle)
   {
-  	diag_format (diag_out, h1_mat, comp_h2, block_h2, comp_basis_ref, block_basis_ref, trans_h2, c_matrix, N_num, N_con, N_val, O_num, O_con, O_val, P_num, P_con, P_val, Q_num, Q_con, Q_val, G_num, G_con, G_val, flag_pass);
+  	diag_format (diag_out, c_matrix, N_num, N_con, N_val, O_num, O_con, O_val, P_num, P_con, P_val, Q_num, Q_con, Q_val, G_num, G_con, G_val, flag_pass);
   }
  
   return EXIT_SUCCESS;

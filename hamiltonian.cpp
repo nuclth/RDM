@@ -5,32 +5,66 @@
 
 
 
-
-
 /***************************************************************
 
+Wrapper function to handle the population of the Hamiltonian matrix
+into arrays and subsequent formatting. 
 
- Function to populate the 1-body part of the Hamiltonian. 
- The 1-body part here is T + U for kinetic energy T and external potential U
-
+The steps here are to:
+  1. Read in the m scheme reference file. 
+  2. Populate the 1-body hamiltonian matrix with values.
+  3. Read in the 2-body ME in m scheme basis.
+  4. 
+ read in single-particle m scheme reference 
+file, populate 1-body Hamiltonian matrix elements, and then 
+populate 2-body matrix elements.
 
 ***************************************************************/
 
 
-void populate_1body (const two_array & ref_m, two_array & h1_mat, const double hw)
+
+void fullm_populate_hamiltonian 
+(const size_t bsize, two_array & h1_mat, two_array & block_h2, two_array & trans_h2, two_array & block_mat, one_array & oned_blocks, const std::string reference_file, const std::string matrix_file, const double hw, std::ofstream & diag_out, const bool diag_toggle)
 {
 
-  size_t mat_length = h1_mat.size();
+  two_array ref_m           (boost::extents[bsize][7]);
+  five_array h2_mat         (boost::extents[bsize][bsize][bsize][bsize][5]);
+  two_array comp_h2         (boost::extents[bsize*(bsize-1)/2][bsize*(bsize-1)/2]);
+  two_array comp_basis_ref  (boost::extents[bsize*(bsize-1)/2][2]);
+  two_array block_basis_ref (boost::extents[bsize*(bsize-1)/2][2]);
 
-
-  for (size_t i = 0; i < mat_length; ++i)
+  try
   {
-    double n = ref_m [i][1];
-    double l = ref_m [i][2];
+    read_in_reference_m_scheme (ref_m, reference_file, diag_out, diag_toggle);
+    populate_1body (ref_m, h1_mat, hw, diag_out, diag_toggle);
+    read_in_matrix_m_scheme (ref_m, h2_mat, matrix_file);
 
-    h1_mat[i][i] = (2.*n + l + 1.5) * hw;
+
+
+    block_list (bsize, ref_m, block_mat);
+
+    fill_oned_blocks (oned_blocks, block_mat);
+
+    compactify_h2 (ref_m, comp_h2,  h2_mat, comp_basis_ref, diag_out, diag_toggle);
+    blockdiag_h2  (ref_m, block_h2, h2_mat, block_mat, block_basis_ref, diag_out, diag_toggle);
+
+
+    create_transformation (comp_basis_ref, block_basis_ref, trans_h2, bsize*(bsize-1)/2, diag_out, diag_toggle);
+    verify_tranformation  (comp_h2, block_h2, trans_h2);
+
   }
 
+  catch (const char * msg)
+  {
+    std::cerr << msg << std::endl;  
+  }
+ 
+
+  ref_m.resize           (boost::extents[0][0]);
+  h2_mat.resize          (boost::extents[0][0][0][0][0]);
+  comp_h2.resize         (boost::extents[0][0]);
+  comp_basis_ref.resize  (boost::extents[0][0]);
+  block_basis_ref.resize (boost::extents[0][0]);
 }
 
 
@@ -119,6 +153,46 @@ void read_in_reference_m_scheme (two_array & ref_m, const std::string m_ref_file
 
   
 }
+
+
+/***************************************************************
+
+
+ Function to populate the 1-body part of the Hamiltonian. 
+ The 1-body part here is T + U for kinetic energy T and external 
+ potential U.
+
+ If diag_toggle is true, output the result to diag_out.
+
+***************************************************************/
+
+
+void populate_1body (const two_array & ref_m, two_array & h1_mat, const double hw, std::ofstream & diag_out, const bool diag_toggle)
+{
+
+  size_t mat_length = h1_mat.size();
+
+
+  for (size_t i = 0; i < mat_length; ++i)
+  {
+    double n = ref_m [i][1];
+    double l = ref_m [i][2];
+
+    h1_mat[i][i] = (2.*n + l + 1.5) * hw;
+  }
+
+
+  if (diag_toggle)
+  {
+    diag_out << "1 body Hamiltonian matrix" << std::endl << std::endl;
+
+    print(diag_out, h1_mat); 
+
+    diag_out << std::endl << std::endl;
+  }
+
+}
+
 
 /***************************************************************
 
@@ -216,14 +290,6 @@ void read_in_matrix_m_scheme (const two_array & ref_m, five_array & h2_mat, cons
     }
   }
 
-  // reset index term on reference matrix to span 0 to m_size instead of e.g. 3, 4, 9, 10, etc... for neutrons
-
-//  for (size_t n = 0; n < m_size; n++)
-//  ref_m[n][0] = n;
-
-//  print(std::cout, ref_m);
-
-
 }
 
 
@@ -235,8 +301,10 @@ Function for M projection and parity blocks.
 ***************************************************************/
 
 
-size_t block_list (const two_array & ref_m, two_array & block_mat, two_array & bcopy)
+void block_list (const size_t bsize, const two_array & ref_m, two_array & block_mat)
 {
+  two_array bcopy (boost::extents[2*bsize][4]);
+
 	size_t num 	= 0;
 
 
@@ -496,14 +564,25 @@ size_t block_list (const two_array & ref_m, two_array & block_mat, two_array & b
   		}
 	}
 
-	return num;
+	block_mat.resize(boost::extents[num][4]);
 }
 
+/***************************************************************
+
+Function to put the block diagonal structure into a 1D array.
+Output is in SPD format (i.e., -5 means a 5x5 block with all 
+diagonal entries).
+
+Then the matrix is resized down to the total non-zero blocks.
+
+***************************************************************/
 
 
-size_t fill_oned_blocks (const size_t sub_blocks, one_array & oned_blocks, const two_array & block_mat)
+void fill_oned_blocks (one_array & oned_blocks, const two_array & block_mat)
 {
   size_t num = 0; 
+
+  const size_t sub_blocks = block_mat.size();
 
 	for (size_t a = 0; a < sub_blocks; a++)
 	{
@@ -513,35 +592,7 @@ size_t fill_oned_blocks (const size_t sub_blocks, one_array & oned_blocks, const
       num++;
   }
 
-  return num;
-}
-
-
-/***************************************************************
-
-Wrapper function to read in single-particle m scheme reference 
-file, populate 1-body Hamiltonian matrix elements, and then 
-populate 2-body matrix elements.
-
-***************************************************************/
-
-
-
-void fullm_populate_hamiltonian (two_array & ref_m, two_array & h1_mat, five_array & h2_mat, const std::string reference_file, const std::string matrix_file, const double hw, std::ofstream & diag_out, const bool diag_toggle, two_array & block_mat) 
-{
-
-  try
-  {
-    read_in_reference_m_scheme (ref_m, reference_file, diag_out, diag_toggle);
-    populate_1body (ref_m, h1_mat, hw);
-    read_in_matrix_m_scheme (ref_m, h2_mat, matrix_file);
-  }
-
-  catch (const char * msg)
-  {
-    std::cerr << msg << std::endl;  
-  }
- 
+  oned_blocks.resize(boost::extents[num]);
 
 }
 
@@ -553,7 +604,7 @@ Function to put the potential in two index form.
 ***************************************************************/
 
 
-void compactify_h2 (const two_array & ref_m, two_array & comp_h2, five_array & h2_mat, std::ofstream & diag_out, const bool diag_toggle, two_array & basis_ref)
+void compactify_h2 (const two_array & ref_m, two_array & comp_h2, five_array & h2_mat, two_array & basis_ref, std::ofstream & diag_out, const bool diag_toggle)
 {
   const size_t bsize = h2_mat.size();
 
@@ -592,7 +643,6 @@ void compactify_h2 (const two_array & ref_m, two_array & comp_h2, five_array & h
             gamma = h2_mat [i][j][k][l][3];
             delta = h2_mat [i][j][k][l][4];
 
-//            std::cout << alpha << " " << beta << "\t" << gamma << " " << delta << " " << value << "\n";
 
             if (diag_toggle)
             {
@@ -682,18 +732,6 @@ void compactify_h2 (const two_array & ref_m, two_array & comp_h2, five_array & h
             size_t right = lps - kps + (2*bsize - kps) * (kps - 1)/2 - 1;
 
 
-  /*         if (i == 0 && j == 4 && k == 0)
-            {
-            	std::cout << ref_m[l][1] << "\t" << ref_m[l][2] << "\n";
-            }
-
-           if (i == 0 && j == 1)
-            {
-            	std::cout << right << " " << l << " " << k << "\t" << value << "\n"; 
-            }
-*/
-
-//            std::cout << value << std::endl;
 
             comp_h2 [left][right] = value;
 
@@ -718,7 +756,6 @@ void compactify_h2 (const two_array & ref_m, two_array & comp_h2, five_array & h
 	            	basis_ref [z][0] = alpha;
     	        	basis_ref [z][1] = beta;
         	    	z++;
-//        	    	std::cout << "HIT" << std::endl;
         	    }
             }
 
@@ -728,10 +765,19 @@ void compactify_h2 (const two_array & ref_m, two_array & comp_h2, five_array & h
   }
 
 
-//  print (std::cout, basis_ref);
 
   if (diag_toggle)
+  {
     diag_out << std::endl << std::endl;
+
+    diag_out << "Compact basis reference" << std::endl << std::endl;
+    print (diag_out, basis_ref);
+    diag_out << std::endl << std::endl;
+
+    diag_out << "Compacted 2 body Hamiltonian matrix" << std::endl << std::endl;
+    print (diag_out, comp_h2);
+    diag_out << std::endl << std::endl;
+  }
 }
 
 
@@ -745,7 +791,7 @@ diagonlization.
 
 ***************************************************************/
 
-void blockdiag_h2 (const two_array & ref_m, two_array & block_h2, five_array & h2_mat, std::ofstream & diag_out, const bool diag_toggle, const two_array & block_mat, two_array & basis_ref)
+void blockdiag_h2 (const two_array & ref_m, two_array & block_h2, five_array & h2_mat, const two_array & block_mat, two_array & basis_ref, std::ofstream & diag_out, const bool diag_toggle)
 {
   const size_t bsize = h2_mat.size();
 
@@ -928,19 +974,33 @@ void blockdiag_h2 (const two_array & ref_m, two_array & block_h2, five_array & h
 
   }
 
-//  print (std::cout, basis_ref);
 
-//  print (std::cout, block_h2);
-//  if (diag_toggle)
-//    diag_out << std::endl << std::endl;
+  if (diag_toggle)
+  {
+      diag_out << "Block basis reference" << std::endl << std::endl;
+      print (diag_out, basis_ref);
+      diag_out << std::endl << std::endl;
+
+      diag_out << "Block diagonal 2 body Hamiltonian matrix" << std::endl << std::endl;
+      print (diag_out, block_h2);
+      diag_out << std::endl << std::endl;
+  }
+
 }
 
 
 /***************************************************************
+  
+  Function to create the permutation matrix that takes our 2body
+  Hamiltonian to a block diagonal form. 
+
+  Organizes by total M projection for 2body ME, (e.g., m1 = 1/2
+  and m2 = 3/2 leads to M = 2). Also organizes by parity of the
+  states based on (l1 + l2) and whether that is odd or even.
 
 ***************************************************************/
 
-void create_transformation (const two_array & compact_ref, const two_array & block_ref, two_array & trans_h2, size_t extent)
+void create_transformation (const two_array & compact_ref, const two_array & block_ref, two_array & trans_h2, size_t extent, std::ofstream & diag_out, const bool diag_toggle)
 {
 	for (size_t i = 0; i < extent; i++)
 	{
@@ -957,9 +1017,20 @@ void create_transformation (const two_array & compact_ref, const two_array & blo
 	}
 	}
 
-//	print (std::cout, trans_h2);
+  if (diag_toggle)
+  {
+      diag_out << "Permutation matrix: Compact to block" << std::endl << std::endl;
+      print (diag_out, trans_h2);
+      diag_out << std::endl << std::endl;
+  }
 }
 
+/***************************************************************
+  
+  Function to verify that the permutation matrix define before
+  explicitly reproduces 
+
+***************************************************************/
 
 void verify_tranformation  (const two_array & comp_h2, const two_array & block_h2, const two_array & trans_h2)
 {
