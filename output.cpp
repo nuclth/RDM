@@ -85,37 +85,62 @@ void con_matrix_out (const two_array & m_pass, size_t con_count, size_t bsize, s
         n -= abs(sub);
       }
 
-
-
       if (m_pass[i][j] != 0.0 and abs(m) <= abs(sub) and abs (n) <= abs(sub))
         spda_out << con_count << " " << block << " " << m << " " << n << " " << m_pass[i][j] << std::endl;
 
-
-
-
     }
     }
+
+
 
 
     if (flag_pass.Q_flag)
     {
 
+      block++;
+      a = 0;
+      offset = 0;
+
       lower += PQsize; 
       upper += PQsize;
+
 
       for (size_t i = lower; i < upper; i++)
       {
       for (size_t j = i;     j < upper; j++)
       {
-        size_t k = i + 1 - lower;
-        size_t l = j + 1 - lower;
+  //      size_t k = i + 1 - lower;
+  //      size_t l = j + 1 - lower;
+      
+        size_t k = i - lower;
+        size_t l = j - lower;
 
-        if (m_pass[i][j] != 0.0)
-          spda_out << con_count << " " << 4 << " " << k << " " << l << " " << m_pass[i][j] << std::endl;
+        int m = k - offset + 1;
+        int n = l - offset + 1;
+
+        size_t sub = (size_t) abs(block_mat[a]);
+
+
+        if (abs(m) > abs(sub) and a < block_mat.size())
+        {
+          offset += abs(sub);
+          block++;
+          a++;
+
+          m -= abs(sub);
+          n -= abs(sub);
+        }
+
+        if (m_pass[i][j] != 0.0 and abs(m) <= abs(sub) and abs (n) <= abs(sub))
+          spda_out << con_count << " " << block << " " << m << " " << n << " " << m_pass[i][j] << std::endl;
+
       }
       }
 
     }
+
+
+    
 
     if (flag_pass.G_flag)
     {

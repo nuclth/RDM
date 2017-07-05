@@ -188,7 +188,7 @@ between the 2RDM partial trace and the 1RDM.
 ***************************************************************/
 
 //template <typename one_array, typename two_array, typename three_array, typename four_array, typename six_array>
-void init_P_flag (four_array & F3_build_1, six_array & F3_build_3, three_array & F3_con, one_array & F3_val, const size_t bsize, const size_t N, const two_array trans_h2)
+void init_P_flag (four_array & F3_build_1, six_array & F3_build_3, three_array & F3_con, one_array & F3_val, const size_t bsize, const size_t N, const two_array & trans_h2)
 {
 
   for (size_t i = 0; i < bsize; i++)      // loop over ith constraint matrix
@@ -442,7 +442,7 @@ relations between the 1RDM, q, 2RDM, and Q.
 ***************************************************************/
 
 //template <typename one_array, typename three_array, typename six_array, typename eight_array>
-void init_Q_flag (six_array & F7_build_2, eight_array & F7_build_3, eight_array & F7_build_5, three_array & F7_con, one_array & F7_val, const size_t bsize, const size_t cmat_extent, size_t & skip)
+void init_Q_flag (six_array & F7_build_2, eight_array & F7_build_3, eight_array & F7_build_5, three_array & F7_con, one_array & F7_val, const size_t bsize, const size_t cmat_extent, size_t & skip, const two_array & trans_h2)
 {
 
 
@@ -678,6 +678,90 @@ void init_Q_flag (six_array & F7_build_2, eight_array & F7_build_3, eight_array 
   }
   std::cout << "COUNTER = " << counter << std::endl;
   std::cout << "SKIP " << skip << " MATRICES" << std::endl;
+
+
+  for (size_t a = 0; a < counter; a++)
+  {
+    const size_t extent = bsize * (bsize-1) / 2;
+
+    double perm_data     [extent*extent];
+
+    double flag_P_data   [extent*extent];
+    double flag_Q_data   [extent*extent];
+
+    double inter_P_data  [extent*extent];
+    double answer_P_data [extent*extent];
+
+    double inter_Q_data  [extent*extent];
+    double answer_Q_data [extent*extent];
+
+    size_t q = 0;
+
+    for (size_t i = 0; i < extent; i++)
+    {
+    for (size_t j = 0; j < extent; j++)
+    {
+
+      size_t lP = i + 2 * bsize;
+      size_t rP = j + 2 * bsize;
+
+      size_t lQ = i + 2 * bsize + bsize*(bsize-1)/2;
+      size_t rQ = j + 2 * bsize + bsize*(bsize-1)/2;
+
+      perm_data     [q] = trans_h2 [i][j];
+
+      flag_P_data   [q] = F7_con[a][lP][rP];
+      flag_Q_data   [q] = F7_con[a][lQ][rQ];
+
+      inter_P_data  [q] = 0.0;
+      answer_P_data [q] = 0.0;
+
+      inter_Q_data  [q] = 0.0;
+      answer_Q_data [q] = 0.0;
+      q++;
+    }
+    }
+
+    gsl_matrix_view p  = gsl_matrix_view_array (perm_data, extent, extent);
+    gsl_matrix_view f1 = gsl_matrix_view_array (flag_P_data, extent, extent);
+    gsl_matrix_view f2 = gsl_matrix_view_array (flag_Q_data, extent, extent);
+
+    gsl_matrix_view inter_P  = gsl_matrix_view_array (inter_P_data,  extent, extent);
+    gsl_matrix_view answer_P = gsl_matrix_view_array (answer_P_data, extent, extent);
+
+    gsl_matrix_view inter_Q  = gsl_matrix_view_array (inter_Q_data,  extent, extent);
+    gsl_matrix_view answer_Q = gsl_matrix_view_array (answer_Q_data, extent, extent);
+
+
+    gsl_blas_dgemm (CblasTrans,   CblasNoTrans, 1.0, &p.matrix, &f1.matrix, 0.0, &inter_P.matrix);
+    gsl_blas_dgemm (CblasNoTrans, CblasNoTrans, 1.0, &inter_P.matrix, &p.matrix, 0.0, &answer_P.matrix);
+
+    gsl_blas_dgemm (CblasTrans,   CblasNoTrans, 1.0, &p.matrix, &f2.matrix, 0.0, &inter_Q.matrix);
+    gsl_blas_dgemm (CblasNoTrans, CblasNoTrans, 1.0, &inter_Q.matrix, &p.matrix, 0.0, &answer_Q.matrix);
+
+
+    q = 0;
+
+    for (size_t i = 0; i < extent; i++)
+    {
+    for (size_t j = 0; j < extent; j++)
+    {
+      double value_P = answer_P_data [q];
+      double value_Q = answer_Q_data [q];
+      q++;
+
+      size_t lP = i + 2 * bsize;
+      size_t rP = j + 2 * bsize;
+
+      size_t lQ = i + 2 * bsize + bsize*(bsize-1)/2;
+      size_t rQ = j + 2 * bsize + bsize*(bsize-1)/2;
+
+      F7_con[a][lP][rP] = value_P;
+      F7_con[a][lQ][rQ] = value_Q;
+    }
+    } 
+    
+  }
 
 }
 

@@ -92,7 +92,7 @@ int main ()
   const bool N_flag = true;  // p START - TRACE CONDITION
   const bool O_flag = true;  // q START - LINEAR RELATIONS
   const bool P_flag = true;  // P START - TRACE CONDITION
-  const bool Q_flag = false; // Q START - LINEAR RELATIONS
+  const bool Q_flag = true; // Q START - LINEAR RELATIONS
   const bool G_flag = false; // G START - LINEAR REALTIONS
 
   const bool two_body_toggle = true;
@@ -257,7 +257,7 @@ int main ()
     six_array   F7_build_1 (boost::extents[bsize][bsize][bsize][bsize][bsize][bsize]);
     eight_array F7_build_3 (boost::extents[bsize][bsize][bsize][bsize][bsize][bsize][bsize][bsize]);
     eight_array F7_build_5 (boost::extents[bsize][bsize][bsize][bsize][bsize][bsize][bsize][bsize]);
-    init_Q_flag (F7_build_1, F7_build_3, F7_build_5, Q_con, Q_val, bsize, cmat_extent, skip);
+    init_Q_flag (F7_build_1, F7_build_3, F7_build_5, Q_con, Q_val, bsize, cmat_extent, skip, trans_h2);
     F7_build_1.resize(boost::extents[0][0][0][0][0][0]);
     F7_build_3.resize(boost::extents[0][0][0][0][0][0][0][0]);
     F7_build_5.resize(boost::extents[0][0][0][0][0][0][0][0]);
