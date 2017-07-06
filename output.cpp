@@ -26,7 +26,7 @@ void con_matrix_out (const two_array & m_pass, size_t con_count, size_t bsize, s
     size_t k = i + 1 - lower;
     size_t l = j + 1 - lower;
 
-    if (m_pass[i][j] != 0.0)
+    if (m_pass[i][j] != 0.0 and i == j)
       spda_out << con_count << " " << block << " " << k << " " << l << " " << m_pass[i][j] << std::endl;
   }
   }
@@ -43,7 +43,7 @@ void con_matrix_out (const two_array & m_pass, size_t con_count, size_t bsize, s
     size_t k = i + 1 - lower;
     size_t l = j + 1 - lower;
 
-    if (m_pass[i][j] != 0.0)
+    if (m_pass[i][j] != 0.0 and i == j)
       spda_out << con_count << " " << block << " " << k << " " << l << " " << m_pass[i][j] << std::endl;
   }
   }
@@ -402,10 +402,10 @@ print (std::cout, oned_blocks);
 
   // block sizes start
   if (flag_pass.N_flag)
-    spda_out << bsize << " ";
+    spda_out << (-1 * (int)bsize) << " ";
 
   if (flag_pass.O_flag)
-    spda_out << bsize << " ";     // output block sizes
+    spda_out << (-1 * (int)bsize) << " ";     // output block sizes
   
   if (flag_pass.two_body_toggle)
   {

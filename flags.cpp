@@ -442,121 +442,8 @@ relations between the 1RDM, q, 2RDM, and Q.
 ***************************************************************/
 
 //template <typename one_array, typename three_array, typename six_array, typename eight_array>
-void init_Q_flag (six_array & F7_build_2, eight_array & F7_build_3, eight_array & F7_build_5, three_array & F7_con, one_array & F7_val, const size_t bsize, const size_t cmat_extent, size_t & skip, const two_array & trans_h2)
+void init_Q_flag (three_array & F7_con, one_array & F7_val, const size_t bsize, const size_t cmat_extent, size_t & skip, const two_array & trans_h2)
 {
-
-
-  for (size_t i = 0; i < bsize; i++)      // loop over ith constraint matrix
-  {
-  for (size_t j = i+1; j < bsize; j++)      // loop over jth constraint matrix
-  {
-  for (size_t k = i; k < bsize; k++)    // loop over matrix row
-  {
-  for (size_t l = k+1; l < bsize; l++)    // loop over matrix column
-  {
-    if (j < l && k <= i)
-      continue;
-
-    for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
-    {
-    for (size_t jp = 0; jp < bsize; jp++)      // loop over jth constraint matrix
-    {
-        F7_build_2 [i][j][k][l][ip][jp] = (1./2.) * (
-          F7_2_matrix (i, j, k, l, ip, jp) + F7_2_matrix (i, j, k, l, jp, ip)
-        );
-
-
-/*        std::cout << "i j k l; ip jp: ";
-     	std::cout << i << " " << j << " " << k << " " << l;
-     	std::cout << "\t";
-     	std::cout << ip << " " << jp;
-     	std::cout << "\t" << F7_build_2 [i][j][k][l][ip][jp] << std::endl;
-*/
-    }
-    }
-   }
-   }
-   }
-   } 
-
-
-//  std::cout << std::endl << std::endl;
-
-  for (size_t i = 0; i < bsize; i++)      // loop over ith constraint matrix
-  {
-  for (size_t j = i+1; j < bsize; j++)      // loop over jth constraint matrix
-  {
-  for (size_t k = i; k < bsize; k++)    // loop over matrix row
-  {
-  for (size_t l = k+1; l < bsize; l++)    // loop over matrix column
-  {
-    if (j < l && k <= i)
-      continue;
-
-    for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
-    {
-    for (size_t jp = 0; jp < bsize; jp++)      // loop over jth constraint matrix
-    {
-//    	if (ip >= jp)
-//    		continue;
-
-    for (size_t kp = 0; kp < bsize; kp++)    // loop over matrix row
-    {
-    for (size_t lp = 0; lp < bsize; lp++)    // loop over matrix column
-    {
-//    	if (kp >= lp)
-//    		continue;
-
-
-    	F7_build_3 [i][j][k][l][ip][jp][kp][lp] = (1./4.) *
-    	F7_3_matrix_A (i, j, k, l, ip, jp, kp, lp);
-    	F7_build_5 [i][j][k][l][ip][jp][kp][lp] = (-1./8.) *
-    	F7_5_matrix_A (i, j, k, l, ip, jp, kp, lp);
-
-
-/*     	std::cout << "i j k l; ip jp kp lp: ";
-     	std::cout << i << " " << j << " " << k << " " << l;
-     	std::cout << "\t";
-     	std::cout << ip << " " << jp << " " << kp << " " << lp;
-     	std::cout << "\t" << F7_build_3 [i][j][k][l][ip][jp][kp][lp] << std::endl;
-*/
-//    	if (F7_build_3 [i][j][k][l][ip][jp][kp][lp] != 0)
-//    			std::cout << "ip jp kp lp" << "\t" << ip << " " << jp << " " << kp << " " << lp << std::endl;
-
-//    	F7_build_3 [i][j][k][l][ip][jp][kp][lp] = 
-//    	F7_3_matrix (i, j, k, l, ip, jp, kp, lp) + F7_3_matrix (i, j, k, l, kp, lp, ip, jp);
-
-//    	F7_build_5 [i][j][k][l][ip][jp][kp][lp] = F7_5_matrix (i, j, k, l, ip, jp, kp, lp);
-/*      F7_build_3 [i][j][k][l][ip][jp][kp][lp] = (1./32.) * (
-      	  F7_3_matrix_A (i, j, k, l, ip, jp, kp, lp) + F7_3_matrix_A (k, l, i, j, ip, jp, kp, lp)
-      	- F7_3_matrix_A (j, i, k, l, ip, jp, kp, lp) - F7_3_matrix_A (k, l, j, i, ip, jp, kp, lp)
-      	- F7_3_matrix_A (i, j, l, k, ip, jp, kp, lp) - F7_3_matrix_A (l, k, i, j, ip, jp, kp, lp)
-      	+ F7_3_matrix_A (j, i, l, k, ip, jp, kp, lp) + F7_3_matrix_A (l, k, j, i, ip, jp, kp, lp)
-      );
-
-      F7_build_5 [i][j][k][l][ip][jp][kp][lp] = (1./64.) * (
-      	  F7_5_matrix_A (i, j, k, l, ip, jp, kp, lp) + F7_5_matrix_A (k, l, i, j, ip, jp, kp, lp)
-      	- F7_5_matrix_A (j, i, k, l, ip, jp, kp, lp) - F7_5_matrix_A (k, l, j, i, ip, jp, kp, lp)
-      	- F7_5_matrix_A (i, j, l, k, ip, jp, kp, lp) - F7_5_matrix_A (l, k, i, j, ip, jp, kp, lp)
-      	+ F7_5_matrix_A (j, i, l, k, ip, jp, kp, lp) + F7_5_matrix_A (l, k, j, i, ip, jp, kp, lp)
-      );
-*/
-    }
-    }
-    }
-    }
-
-//    std::cout << "i j k l" << "\t" << i << " " << j << " " << k << " " << l << std::endl;
-//    print (std::cout, F7_build_3[i][j][k][l]);
-//    std::cout << std::endl;
-
-  }
-  }
-  }
-  }
-
-
-
 
   size_t counter = 0;
 
@@ -610,8 +497,11 @@ void init_Q_flag (six_array & F7_build_2, eight_array & F7_build_3, eight_array 
       size_t left_Q  = left  + 2*bsize + bsize*(bsize-1)/2;
       size_t right_Q = right + 2*bsize + bsize*(bsize-1)/2;
 
-      F7_con[b][left_P][right_P] = F7_build_3 [i][j][k][l][ip][jp][kp][lp];
-      F7_con[b][left_Q][right_Q] = F7_build_5 [i][j][k][l][ip][jp][kp][lp];
+      F7_con[b][left_P][right_P] = 
+      (1./4.) * F7_3_matrix_A (i, j, k, l, ip, jp, kp, lp);
+
+      F7_con[b][left_Q][right_Q] = 
+      (-1./8.) * F7_5_matrix_A (i, j, k, l, ip, jp, kp, lp);
 
 
     }
@@ -628,7 +518,8 @@ void init_Q_flag (six_array & F7_build_2, eight_array & F7_build_3, eight_array 
       size_t left_q  = ip + bsize;
       size_t right_q = jp + bsize;
 
-      F7_con[b][left_q][right_q] = F7_build_2 [i][j][k][l][ip][jp];
+      F7_con[b][left_q][right_q] = 
+      (1./2.) * (F7_2_matrix (i, j, k, l, ip, jp) + F7_2_matrix (i, j, k, l, jp, ip));
     }
     }
 

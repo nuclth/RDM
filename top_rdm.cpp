@@ -96,7 +96,7 @@ int main ()
   const bool G_flag = false; // G START - LINEAR REALTIONS
 
   const bool two_body_toggle = true;
-  const bool diag_toggle 	 = true;
+  const bool diag_toggle 	 = false;
   const bool redundant_check = false;
 
 
@@ -254,13 +254,7 @@ int main ()
   if (Q_flag)
   {
     size_t skip = 0;
-    six_array   F7_build_1 (boost::extents[bsize][bsize][bsize][bsize][bsize][bsize]);
-    eight_array F7_build_3 (boost::extents[bsize][bsize][bsize][bsize][bsize][bsize][bsize][bsize]);
-    eight_array F7_build_5 (boost::extents[bsize][bsize][bsize][bsize][bsize][bsize][bsize][bsize]);
-    init_Q_flag (F7_build_1, F7_build_3, F7_build_5, Q_con, Q_val, bsize, cmat_extent, skip, trans_h2);
-    F7_build_1.resize(boost::extents[0][0][0][0][0][0]);
-    F7_build_3.resize(boost::extents[0][0][0][0][0][0][0][0]);
-    F7_build_5.resize(boost::extents[0][0][0][0][0][0][0][0]);
+    init_Q_flag (Q_con, Q_val, bsize, cmat_extent, skip, trans_h2);
     std::cout << "Q FLAG DONE" << std::endl;
   }
 

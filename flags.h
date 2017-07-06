@@ -21,7 +21,7 @@ void init_O_flag (four_array & F2_con_1, three_array & F2_con, one_array & F2_va
 void init_P_flag (four_array & F3_build_1, six_array & F3_build_3, three_array & F3_con, one_array & F3_val, const size_t bsize, const size_t N, const two_array & trans_h2);
 
 //template <typename one_array, typename three_array, typename six_array, typename eight_array>
-void init_Q_flag (six_array & F7_build_2, eight_array & F7_build_3, eight_array & F7_build_5, three_array & F7_con, one_array & F7_val, const size_t bsize, const size_t cmat_extent, size_t & skip, const two_array & trans_h2);
+void init_Q_flag (three_array & F7_con, one_array & F7_val, const size_t bsize, const size_t cmat_extent, size_t & skip, const two_array & trans_h2);
 
 //template <typename one_array, typename three_array, typename six_array, typename eight_array>
 void init_G_flag (six_array & F10_build_1, eight_array & F10_build_3, eight_array & F10_build_5, three_array & F10_con, one_array & F10_val, const size_t bsize);
