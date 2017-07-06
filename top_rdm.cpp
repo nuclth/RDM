@@ -162,13 +162,15 @@ int main ()
 
   fullm_populate_hamiltonian (bsize, h1_mat, block_h2, trans_h2, block_mat, oned_blocks, m_ref, m_mat, hw, diag_out, diag_toggle);
 
-
-
-
-
-
-
   two_array c_matrix (boost::extents[cmat_extent][cmat_extent]);
+
+  create_c_matrix (h1_mat, block_h2, c_matrix, two_body_toggle);
+
+  h1_mat.resize   (boost::extents[0][0]);
+  block_h2.resize (boost::extents[0][0]);
+
+
+
 
   three_array N_con (boost::extents[0][0][0]);
   three_array O_con (boost::extents[0][0][0]);
@@ -187,18 +189,24 @@ int main ()
   {
     N_con.resize(boost::extents[N_num][cmat_extent][cmat_extent]);
     N_val.resize(boost::extents[N_num]);
+    init_N_flag (N_con, N_val, bsize, particles);
+    std::cout << "N FLAG DONE" << std::endl;
   }
 
   if (O_flag)
   {
     O_con.resize(boost::extents[O_num][cmat_extent][cmat_extent]);
     O_val.resize(boost::extents[O_num]);
+    init_O_flag (O_con, O_val, bsize);
+    std::cout << "O FLAG DONE" << std::endl;
   }
 
   if (P_flag)
   {
     P_con.resize(boost::extents[P_num][cmat_extent][cmat_extent]);
     P_val.resize(boost::extents[P_num]);
+    init_P_flag (P_con, P_val, bsize, particles, trans_h2);
+    std::cout << "P FLAG DONE" << std::endl; 
   }
 
 
@@ -206,6 +214,9 @@ int main ()
   {
     Q_con.resize(boost::extents[Q_num][cmat_extent][cmat_extent]);
     Q_val.resize(boost::extents[Q_num]);
+    size_t skip = 0;
+    init_Q_flag (Q_con, Q_val, bsize, cmat_extent, skip, trans_h2);
+    std::cout << "Q FLAG DONE" << std::endl;
   }
 
  
@@ -215,48 +226,6 @@ int main ()
     G_val.resize(boost::extents[G_num]);
   }
 
-
-
-
-
-  create_c_matrix (h1_mat, block_h2, c_matrix, two_body_toggle);
-
-  if (N_flag)
-  {
-    two_array  F1_build_1 (boost::extents[bsize][bsize]);
-    init_N_flag (N_con, N_val, bsize, particles);
-    F1_build_1.resize(boost::extents[0][0]);
-    std::cout << "N FLAG DONE" << std::endl;
-  }
-
-
-
-  if (O_flag)
-  {
-    four_array F2_build_1 (boost::extents[bsize][bsize][bsize][bsize]);
-    init_O_flag (F2_build_1, O_con, O_val, bsize);
-    F2_build_1.resize(boost::extents[0][0][0][0]);
-    std::cout << "O FLAG DONE" << std::endl;
-  }
-
-  if (P_flag)
-  {
-    four_array F3_build_1 (boost::extents[bsize][bsize][bsize][bsize]);
-    six_array  F3_build_3 (boost::extents[bsize][bsize][bsize][bsize][bsize][bsize]);
-    init_P_flag (F3_build_1, F3_build_3, P_con, P_val, bsize, particles, trans_h2);
-    F3_build_1.resize(boost::extents[0][0][0][0]);
-    F3_build_3.resize(boost::extents[0][0][0][0][0][0]);
-    std::cout << "P FLAG DONE" << std::endl;  
-  }
-
-
-
-  if (Q_flag)
-  {
-    size_t skip = 0;
-    init_Q_flag (Q_con, Q_val, bsize, cmat_extent, skip, trans_h2);
-    std::cout << "Q FLAG DONE" << std::endl;
-  }
 
 
   if (G_flag)
