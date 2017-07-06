@@ -6,10 +6,10 @@
 100
 
 # Size of the basis  
-10
+3
 
 # Number of particles
-4
+2
 
 # Value of hbar * c in MeV * fm
 197.32891
@@ -18,7 +18,7 @@
 938.9059
 
 # value for hbar * omega of the Harmonic oscillator
-20
+10
 
 # input reference file for m-scheme
 test-spM.dat

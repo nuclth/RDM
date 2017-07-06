@@ -283,6 +283,19 @@ template <typename two_array>
 void con_matrix_out (const two_array & m_pass, const size_t con_count, const size_t bsize, const struct con_flags flag_pass, std::ofstream & spda_out)
 {
 
+	const size_t extent = m_pass.size();
+
+	for (size_t i = 0; i < extent; i++)
+	{
+	for (size_t j = 0; j < extent; j++)
+	{
+		spda_out << m_pass[i][j] << " ";
+	}
+	}
+
+	spda_out << std::endl;
+
+/*
   const size_t PQsize = bsize*(bsize-1)/2;
 
   size_t lower = 0;
@@ -376,7 +389,7 @@ void con_matrix_out (const two_array & m_pass, const size_t con_count, const siz
   }
 
 
-
+*/
 }
 
 /***************************************************************
@@ -1033,7 +1046,7 @@ void create_c_matrix (const two_array & h1_mat, const two_array & h2_mat, two_ar
   {
     for (size_t j = 0; j < h1_len; j++)
     {
-      c_matrix[i][j] = h1_mat [i][j] * -1.0;
+      c_matrix[i][j] = h1_mat [i][j] * 1.0;
     }
 
   }
@@ -1049,7 +1062,7 @@ void create_c_matrix (const two_array & h1_mat, const two_array & h2_mat, two_ar
 
 // CHANGE
 //      c_matrix[ic][jc] = h2_mat [i][j] * -1.0;
-        c_matrix[ic][jc] = h2_mat [i][j] * -1./2.;
+        c_matrix[ic][jc] = h2_mat [i][j] * 1./2.;
     }
     }
   }
@@ -2100,13 +2113,13 @@ int main ()
   const bool F4_flag = false; // REDUNDANT - P TRACE CONDITION
   const bool F5_flag = false;  // P ANTI-SYMMETRY
   const bool F6_flag = false; // REDUNDANT - P ANTI-SYMMETRY
-  const bool F7_flag = true;  // Q START - LINEAR RELATIONS
+  const bool F7_flag = false;  // Q START - LINEAR RELATIONS
   const bool F8_flag = false; // Q ANTI-SYMMETRY
   const bool F9_flag = false; // REDUNDANT - Q ANTI-SYMMETRY
-  const bool F10_flag = true; // G START - LINEAR REALTIONS
+  const bool F10_flag = false; // G START - LINEAR REALTIONS
 
-  const bool Q_flag = true;
-  const bool G_flag = true;
+  const bool Q_flag = false;
+  const bool G_flag = false;
 
   const bool redundant_check = false;
 
