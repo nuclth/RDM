@@ -283,17 +283,80 @@ template <typename two_array>
 void con_matrix_out (const two_array & m_pass, const size_t con_count, const size_t bsize, const struct con_flags flag_pass, std::ofstream & spda_out)
 {
 
-	const size_t extent = m_pass.size();
 
-	for (size_t i = 0; i < extent; i++)
-	{
-	for (size_t j = 0; j < extent; j++)
-	{
-		spda_out << m_pass[i][j] << " ";
-	}
-	}
+  const size_t PQsize = bsize*(bsize-1)/2;
 
-	spda_out << std::endl;
+  size_t lower = 0;
+  size_t upper = bsize;
+
+  for (size_t i = lower; i < upper; i++)
+  {
+  for (size_t j = lower; j < upper; j++)
+  {
+      spda_out << m_pass[i][j] << " ";
+  }
+  }
+
+  lower += bsize;
+  upper += bsize;
+
+  for (size_t i = lower; i < upper; i++)
+  {
+  for (size_t j = lower; j < upper; j++)
+  {
+      spda_out << m_pass[i][j] << " ";
+  }
+  }
+
+  lower += bsize;
+  upper += PQsize;
+
+  if (flag_pass.two_body_toggle)
+  {
+    for (size_t i = lower; i < upper; i++)
+    {
+    for (size_t j = lower; j < upper; j++)
+    {
+      spda_out << m_pass[i][j] << " ";
+    }
+    }
+
+
+    if (flag_pass.Q_flag)
+    {
+
+      lower += PQsize; 
+      upper += PQsize;
+
+      for (size_t i = lower; i < upper; i++)
+      {
+      for (size_t j = lower;     j < upper; j++)
+      {
+      	spda_out << m_pass[i][j] << " ";
+      }
+      }
+
+    }
+
+    if (flag_pass.G_flag)
+    {
+
+      lower += PQsize; 
+      upper += bsize*bsize;
+
+      for (size_t i = lower; i < upper; i++)
+      {
+      for (size_t j = lower;     j < upper; j++)
+      {
+      	spda_out << m_pass[i][j] << " ";
+      }
+      }
+
+    }
+
+  }
+
+  spda_out << std::endl;
 
 /*
   const size_t PQsize = bsize*(bsize-1)/2;
@@ -305,8 +368,8 @@ void con_matrix_out (const two_array & m_pass, const size_t con_count, const siz
   {
   for (size_t j = i;     j < upper; j++)
   {
-    size_t k = i + 1 - lower;
-    size_t l = j + 1 - lower;
+//    size_t k = i + 1 - lower;
+//    size_t l = j + 1 - lower;
 
     if (m_pass[i][j] != 0.0)
       spda_out << con_count << " " << 1 << " " << k << " " << l << " " << m_pass[i][j] << std::endl;
@@ -1046,7 +1109,7 @@ void create_c_matrix (const two_array & h1_mat, const two_array & h2_mat, two_ar
   {
     for (size_t j = 0; j < h1_len; j++)
     {
-      c_matrix[i][j] = h1_mat [i][j] * 1.0;
+      c_matrix[i][j] = h1_mat [i][j] * -1.0;
     }
 
   }
@@ -1062,7 +1125,7 @@ void create_c_matrix (const two_array & h1_mat, const two_array & h2_mat, two_ar
 
 // CHANGE
 //      c_matrix[ic][jc] = h2_mat [i][j] * -1.0;
-        c_matrix[ic][jc] = h2_mat [i][j] * 1./2.;
+        c_matrix[ic][jc] = h2_mat [i][j] * -1./2.;
     }
     }
   }
@@ -1102,19 +1165,99 @@ matches the dimensions of the F0 constraint matrix.
 ***************************************************************/
 
 template <typename one_array, typename three_array>
-void init_F1_flag (three_array & F1_con, one_array & F1_val, const size_t bsize, const size_t particles)
+void init_con_values (std::ofstream & spda_out, const size_t particles)
 {
 
 //  size_t cmat_extent = F1_con.size();
 
+  // F1 Flag - N Trace condition
+  spda_out << particles << " ";
 
-  for (size_t i = 0; i < bsize; i++)
+  // F2 Flag - Linear p q relations
+  for (size_t i1 = 0;  i1 < bsize; i1++)
   {
-    if (i < bsize)
-      F1_con[0][i][i] = 1.;
+  for (size_t i2 = i1; i2 < bsize; i2++)
+  {
+
+    if (i1 == i2)
+      spda_out << 1. << " ";
+    else
+      spda_out << 0. << " ";
+
+
+  }
   }
 
-  F1_val[0] = particles;
+  // F3 Flag - P and p trace relation
+  for (size_t i = 0; i < bsize; i++)      // loop over ith constraint matrix
+  {
+  for (size_t k = i; k < bsize; k++)      // loop over jth constraint matrix
+  {
+
+    spda_out << 0. << " ";
+
+  }
+  }
+
+}
+
+
+void init_F1_flag (std::ofstream & spda_out, const size_t bsize)
+{
+
+    for (size_t ip = 0; ip < bsize; ip++)
+    {
+    for (size_t kp = 0; kp < bsize; kp++)
+    {
+
+
+      double val1 = kron_del (ip, kp);
+
+      spda_out << val1 << " ";
+
+
+    }
+    }
+
+
+    for (size_t ip = 0; ip < bsize; ip++)
+    {
+    for (size_t kp = 0; kp < bsize; kp++)
+    {
+
+
+      double val2 = 0.;
+
+      spda_out << val2 << " ";
+
+
+    }
+    }
+
+    for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
+    {
+    for (size_t jp = 0; jp < bsize; jp++)      // loop over jth constraint matrix
+    {
+      if (ip >= jp)
+        continue;
+
+    for (size_t kp = 0; kp < bsize; kp++)    // loop over matrix row
+    {
+    for (size_t lp = 0; lp < bsize; lp++)    // loop over matrix column
+    {
+      if (kp >= lp)
+        continue;
+
+
+      double val3 = 0.;
+
+      spda_out << val3 << " ";
+
+
+    }
+    }
+    }
+    }
 
 }
 
@@ -1133,163 +1276,42 @@ F2_con.
 
 ***************************************************************/
 
-
-template <typename three_array, typename one_array, typename four_array>
-void init_F2_flag (four_array & F2_con_1, three_array & F2_con, one_array & F2_val, const size_t bsize)
+void init_F2_flag (std::ofstream & spda_out, const size_t bsize)
 {
 
-
-//  size_t F2num = F2_con.size();           // number of F2 constraint matrices
-//  size_t bsize = F2_con_1.size();         // basis size
-
-  for (size_t i = 0; i < bsize; i++)      // loop over ith constraint matrix
+  for (size_t i = 0; i < bsize; i++)
   {
-  for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
+  for (size_t j = i; j < bsize; j++)
   {
-    for (size_t k = 0; k < bsize; k++)    // loop over matrix row
-    {
-    for (size_t l = 0; l < bsize; l++)    // loop over matrix column
-    {
-
-        F2_con_1[i][j][k][l] = (1./2.)*(kron_del(i,k)*kron_del(j,l) + kron_del(i,l)*kron_del(j,k));
-    }
-    }
-
-  }
-  }
-
-  size_t counter = 0;
-
-  for (size_t i1 = 0;  i1 < bsize; i1++)
-  {
-  for (size_t i2 = i1; i2 < bsize; i2++)
-  {
-    for (size_t j = 0; j < bsize; j++)
-    {
     for (size_t k = 0; k < bsize; k++)
     {
-      size_t jq = j + bsize;
-      size_t kq = k + bsize;
-
-      size_t i = counter;
-
-      F2_con[i][j][k]   = F2_con_1 [i1][i2][j][k];
-      F2_con[i][jq][kq] = F2_con_1 [i1][i2][j][k];
-    }
-    }
-
-    if (i1 == i2)
-      F2_val[counter] = 1.;
-    else
-      F2_val[counter] = 0.;
-
-    counter++;
-  }
-  }
-
-//  printf("%i", F2num);
-//  printf("\n");
-//  printf("%i", bsize);
-//  printf("\n");
-}
-
-int F3_3_matrix (const int i, const int k, const int ip, const int jp, const int kp, const int lp)
-{
-  const int value = kron_del (i,ip) * kron_del (k,kp) * kron_del (jp, lp);
-
-  return value;  
-}
-
-/***************************************************************
-
-Function to create our F3 constraint matrix to fix the relation
-between the 2RDM partial trace and the 1RDM.
-
-***************************************************************/
-
-template <typename one_array, typename three_array, typename four_array, typename six_array>
-void init_F3_flag (four_array & F3_build_1, six_array & F3_build_3, three_array & F3_con, one_array & F3_val, const size_t bsize, const size_t N)
-{
-
-  for (size_t i = 0; i < bsize; i++)      // loop over ith constraint matrix
-  {
-  for (size_t k = i; k < bsize; k++)      // loop over jth constraint matrix
-  {
-    for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
+    for (size_t l = 0; l < bsize; l++)
     {
-    for (size_t kp = 0; kp < bsize; kp++)    // loop over matrix row
-    {
-      F3_build_1 [i][k][ip][kp] = -1.0 * (N - 1.0) / 4.0 * (
-        kron_del(i,ip)*kron_del(k,kp) + kron_del(k,ip)*kron_del(i,kp)
-        );
+
+
+      double val1 = (1./2.)*(kron_del(i,k)*kron_del(j,l) + kron_del(i,l)*kron_del(j,k))
+
+      spda_out << val1 << " ";
+
+
     }
     }
-  }
-  }
-
-  for (size_t i = 0; i < bsize; i++)      // loop over ith constraint matrix
-  {
-  for (size_t k = i; k < bsize; k++)      // loop over jth constraint matrix
-  {
-    for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
-    {
-    for (size_t jp = 0; jp < bsize; jp++)      // loop over jth constraint matrix
-    {
-    for (size_t kp = 0; kp < bsize; kp++)    // loop over matrix row
-    {
-    for (size_t lp = 0; lp < bsize; lp++)    // loop over matrix column
-    {
-     F3_build_3 [i][k][ip][jp][kp][lp] = 1./8. * (
-        F3_3_matrix (i, k, ip, jp, kp, lp) +  F3_3_matrix (i, k, kp, lp, ip, jp)
-
-      - F3_3_matrix (i, k, jp, ip, kp, lp) -  F3_3_matrix (i, k, kp, lp, jp, ip)
-
-      - F3_3_matrix (i, k, ip, jp, lp, kp) -  F3_3_matrix (i, k, lp, kp, ip, jp)
-
-      + F3_3_matrix (i, k, jp, ip, lp, kp) +  F3_3_matrix (i, k, lp, kp, jp, ip)        
-      );
-
-//     	std::cout << "i k; ip jp kp lp: ";
-//     	std::cout << i << " " << k << "\t" << ip << " " << jp << " " << kp << " " << lp;
-//     	std::cout << "\t" << F3_build_3 [i][k][ip][jp][kp][lp] << std::endl;
-    }
-    }
-    }
-    }
-  }
-  }
 
 
-  size_t counter = 0;
-
-  for (size_t i1 = 0; i1 < bsize; i1++)
-  {
-  for (size_t i2 = i1; i2 < bsize; i2++)
-  {
-    for (size_t j = 0; j < bsize; j++)
-    {
     for (size_t k = 0; k < bsize; k++)
     {
+    for (size_t l = 0; l < bsize; l++)
+    {
 
-      size_t b = counter;
 
-      F3_con[b][j][k] = F3_build_1 [i1][i2][j][k];
+      double val2 = (1./2.)*(kron_del(i,k)*kron_del(j,l) + kron_del(i,l)*kron_del(j,k));
+
+      spda_out << val2 << " ";
 
 
     }
     }
 
-    counter++;
-  }
-  }
-
-
-  counter = 0;
-
-  for (size_t i = 0; i < bsize; i++)      // loop over ith constraint matrix
-  {
-  for (size_t k = i; k < bsize; k++)      // loop over jth constraint matrix
-  {
     for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
     {
     for (size_t jp = 0; jp < bsize; jp++)      // loop over jth constraint matrix
@@ -1305,38 +1327,120 @@ void init_F3_flag (four_array & F3_build_1, six_array & F3_build_3, three_array 
         continue;
 
 
-      size_t b = counter;
+      double val3 = 0;
 
-      size_t ips = ip + 1;
-      size_t jps = jp + 1;
-      size_t kps = kp + 1;
-      size_t lps = lp + 1;
-
-      size_t left  = jps - ips + (2*bsize - ips) * (ips - 1)/2 - 1;
-      size_t right = lps - kps + (2*bsize - kps) * (kps - 1)/2 - 1;
-
-//      std::cout << ips << " " << jps << " " << kps << " " << lps << std::endl;
-
-//      std::cout << left << "\t" << right << std::endl;
-
-      size_t left_P  = left  + 2*bsize;
-      size_t right_P = right + 2*bsize;
+      spda_out << val3 << " ";
 
 
-      F3_con[b][left_P][right_P] = F3_build_3 [i][k][ip][jp][kp][lp];
-
-
-//      std::cout << "SUCCESS" << std::endl;
     }
     }
     }
     }
 
-    F3_val[counter] = 0.;
-
-    counter++;
   }
   }
+
+
+}
+
+
+
+
+
+int F3_3_matrix (const int i, const int k, const int ip, const int jp, const int kp, const int lp)
+{
+  const int value = kron_del (i,ip) * kron_del (k,kp) * kron_del (jp, lp);
+
+  return value;  
+}
+
+int F3_3_matrix_A (const int i, const int k, const int ip, const int jp, const int kp, const int lp)
+{
+	const int value = 
+	    F3_3_matrix (i, k, ip, jp, kp, lp) +  F3_3_matrix (i, k, kp, lp, ip, jp)
+      - F3_3_matrix (i, k, jp, ip, kp, lp) -  F3_3_matrix (i, k, kp, lp, jp, ip)
+      - F3_3_matrix (i, k, ip, jp, lp, kp) -  F3_3_matrix (i, k, lp, kp, ip, jp)
+      + F3_3_matrix (i, k, jp, ip, lp, kp) +  F3_3_matrix (i, k, lp, kp, jp, ip);
+
+	return value;
+}
+
+/***************************************************************
+
+Function to create our F3 constraint matrix to fix the relation
+between the 2RDM partial trace and the 1RDM.
+
+***************************************************************/
+
+
+void init_F3_flag (std::ofstream & spda_out, const size_t bsize, const size_t N)
+{
+
+
+  for (size_t i = 0; i < bsize; i++)
+  {
+  for (size_t k = i; k < bsize; k++)
+  {
+    for (size_t ip = 0; ip < bsize; ip++)
+    {
+    for (size_t kp = 0; kp < bsize; kp++)
+    {
+
+
+      double val1 = 
+      -1.0 * (N - 1.0) / 4.0 * (
+        kron_del(i,ip)*kron_del(k,kp) + kron_del(k,ip)*kron_del(i,kp)
+        );
+
+      spda_out << val1 << " ";
+
+
+    }
+    }
+
+
+    for (size_t ip = 0; ip < bsize; ip++)
+    {
+    for (size_t kp = 0; kp < bsize; kp++)
+    {
+
+
+      double val2 = 0.;
+
+      spda_out << val2 << " ";
+
+
+    }
+    }
+
+    for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
+    {
+    for (size_t jp = 0; jp < bsize; jp++)      // loop over jth constraint matrix
+    {
+      if (ip >= jp)
+        continue;
+
+    for (size_t kp = 0; kp < bsize; kp++)    // loop over matrix row
+    {
+    for (size_t lp = 0; lp < bsize; lp++)    // loop over matrix column
+    {
+      if (kp >= lp)
+        continue;
+
+
+      double val3 = 1./8. * F3_3_matrix_A (i, k, ip, jp, kp, lp);
+
+      spda_out << val3 << " ";
+
+
+    }
+    }
+    }
+    }
+
+  }
+  }
+
 
 }
 
@@ -2113,13 +2217,13 @@ int main ()
   const bool F4_flag = false; // REDUNDANT - P TRACE CONDITION
   const bool F5_flag = false;  // P ANTI-SYMMETRY
   const bool F6_flag = false; // REDUNDANT - P ANTI-SYMMETRY
-  const bool F7_flag = false;  // Q START - LINEAR RELATIONS
+  const bool F7_flag = true;  // Q START - LINEAR RELATIONS
   const bool F8_flag = false; // Q ANTI-SYMMETRY
   const bool F9_flag = false; // REDUNDANT - Q ANTI-SYMMETRY
-  const bool F10_flag = false; // G START - LINEAR REALTIONS
+  const bool F10_flag = true; // G START - LINEAR REALTIONS
 
-  const bool Q_flag = false;
-  const bool G_flag = false;
+  const bool Q_flag = true;
+  const bool G_flag = true;
 
   const bool redundant_check = false;
 
@@ -2169,7 +2273,7 @@ int main ()
   flag_pass.Q_flag = Q_flag;
   flag_pass.G_flag = G_flag;
 
-  flag_pass.diag_toggle = true;
+  flag_pass.diag_toggle = false;
 
 
 
@@ -2220,6 +2324,30 @@ int main ()
 	printf ("%f", x[i]);
 	printf ("\n");
   }*/
+
+
+  init_spda ();
+  init_con_values;
+
+
+
+  if (F1_flag)
+  {
+    init_F1_flag (spda_out, bsize);
+  }
+
+  if (F2_flag)
+  {
+    init_F2_flag (spda_out, bsize);
+  }
+
+  if (F3_flag)
+  {
+    init_F3_flag (spda_out, bsize, particles);
+  }
+
+
+  return EXIT_SUCCESS;
 
  
   typedef boost::multi_array<double, 1> one_array;
