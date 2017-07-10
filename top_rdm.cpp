@@ -804,25 +804,17 @@ void read_in_matrix_m_scheme (const ref_array & ref_m, five_array & h2_mat, cons
   {
     if (alpha == ref_m[w][0]) 
       i = w;
-  }
-  
-  for (size_t w = 0; w < m_size; w++)
-  {
+
     if (beta == ref_m[w][0]) 
       j = w;
-  }
 
-  for (size_t w = 0; w < m_size; w++)
-  {
     if (gamma == ref_m[w][0]) 
       k = w;
-  }
 
-  for (size_t w = 0; w < m_size; w++)
-  {
     if (delta == ref_m[w][0]) 
       l = w;
   }
+  
 
   if (i >= 0 && j >= 0 && k >= 0 && l >= 0) // only activates if all 4 "if" statements above are true
     {
@@ -860,8 +852,11 @@ void fullm_populate_hamiltonian (two_array & ref_m, two_array & h1_mat, five_arr
   try
   {
     read_in_reference_m_scheme (ref_m, reference_file, diag_out, diag_toggle);
+    std::cout << "REFERENCE READ" << std::endl;
     populate_1body (ref_m, h1_mat, hw);
+    std::cout << "1 BODY POPULATED" << std::endl;
     read_in_matrix_m_scheme (ref_m, h2_mat, matrix_file);
+    std::cout << "2 BODY POPULATED" << std::endl;
   }
 
   catch (const char * msg)
@@ -1065,9 +1060,9 @@ void init_C_matrix (const con_flags flag_pass, std::ofstream & spda_out, const t
 
 	if (flag_pass.F10_flag)
 	{
-	    for (size_t ip = 0; ip < bsize*bsize; ip++)      // loop over ith constraint matrix
+	    for (size_t ip = 0; ip < h1_len*h1_len; ip++)      // loop over ith constraint matrix
 	    {
-	    for (size_t jp = 0; jp < bsize*bsize; jp++)      // loop over jth constraint matrix
+	    for (size_t jp = 0; jp < h1_len*h1_len; jp++)      // loop over jth constraint matrix
 	    {
 
 	      double val5 = 0.;
@@ -1331,7 +1326,7 @@ void init_F1_flag (const con_flags flag_pass, std::ofstream & spda_out, const si
 
 	 }
 
-    spda_out << std::endl;
+    spda_out << "\n";
 
 }
 
@@ -1353,10 +1348,15 @@ F2_con.
 void init_F2_flag (const con_flags flag_pass, std::ofstream & spda_out, const size_t bsize)
 {
 
+
+
   for (size_t i = 0; i < bsize; i++)
   {
   for (size_t j = i; j < bsize; j++)
   {
+
+  	std::stringstream ss;
+
     for (size_t k = 0; k < bsize; k++)
     {
     for (size_t l = 0; l < bsize; l++)
@@ -1365,8 +1365,8 @@ void init_F2_flag (const con_flags flag_pass, std::ofstream & spda_out, const si
 
       double val1 = (1./2.)*(kron_del(i,k)*kron_del(j,l) + kron_del(i,l)*kron_del(j,k));
 
-      spda_out << val1 << " ";
-
+//      spda_out << val1 << " ";
+      ss << val1 << " ";
 
     }
     }
@@ -1380,9 +1380,9 @@ void init_F2_flag (const con_flags flag_pass, std::ofstream & spda_out, const si
 
       double val2 = (1./2.)*(kron_del(i,k)*kron_del(j,l) + kron_del(i,l)*kron_del(j,k));
 
-      spda_out << val2 << " ";
+//      spda_out << val2 << " ";
 
-
+      ss << val2 << " ";
     }
     }
 
@@ -1391,14 +1391,14 @@ void init_F2_flag (const con_flags flag_pass, std::ofstream & spda_out, const si
     {
 	    for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
 	    {
-	    for (size_t jp = 0; jp < bsize; jp++)      // loop over jth constraint matrix
+	    for (size_t jp = ip; jp < bsize; jp++)      // loop over jth constraint matrix
 	    {
 	      if (ip >= jp)
 	        continue;
 
 	    for (size_t kp = 0; kp < bsize; kp++)    // loop over matrix row
 	    {
-	    for (size_t lp = 0; lp < bsize; lp++)    // loop over matrix column
+	    for (size_t lp = kp; lp < bsize; lp++)    // loop over matrix column
 	    {
 	      if (kp >= lp)
 	        continue;
@@ -1406,9 +1406,9 @@ void init_F2_flag (const con_flags flag_pass, std::ofstream & spda_out, const si
 
 	      double val3 = 0;
 
-	      spda_out << val3 << " ";
+//	      spda_out << val3 << " ";
 
-
+	      ss << val3 << " ";
 	    }
 	    }
 	    }
@@ -1447,16 +1447,16 @@ void init_F2_flag (const con_flags flag_pass, std::ofstream & spda_out, const si
 
 	if (flag_pass.F10_flag)
 	{
-		for (size_t i = 0; i < bsize; i++)      // loop over ith constraint matrix
+		for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
 		{
-		for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
+		for (size_t jp = 0; jp < bsize; jp++)      // loop over jth constraint matrix
 		{
-		for (size_t k = 0; k < bsize; k++)    // loop over matrix row
+		for (size_t kp = 0; kp < bsize; kp++)    // loop over matrix row
 		{
-		for (size_t l = j; l < bsize; l++)    // loop over matrix column
+		for (size_t lp = jp; lp < bsize; lp++)    // loop over matrix column
 		{
 		    
-		    if (j == l && k < i)
+		    if (jp == lp && kp < ip)
 		      continue;
 
 		    spda_out << 0. << " ";
@@ -1469,7 +1469,11 @@ void init_F2_flag (const con_flags flag_pass, std::ofstream & spda_out, const si
 	}
 
 
-  spda_out << std::endl;
+  ss << "\n";
+
+  spda_out.write(ss.str().c_str(), ss.str().length());
+
+//  spda_out << ss;
 
   }
   }
@@ -1606,16 +1610,16 @@ void init_F3_flag (const con_flags flag_pass, std::ofstream & spda_out, const si
 
 	if (flag_pass.F10_flag)
 	{
-		for (size_t i = 0; i < bsize; i++)      // loop over ith constraint matrix
+		for (size_t ip = 0;  ip < bsize; ip++)      // loop over ith constraint matrix
 		{
-		for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
+		for (size_t jp = 0;  jp < bsize; jp++)      // loop over jth constraint matrix
 		{
-		for (size_t k = 0; k < bsize; k++)    // loop over matrix row
+		for (size_t kp = 0;  kp < bsize; kp++)    // loop over matrix row
 		{
-		for (size_t l = j; l < bsize; l++)    // loop over matrix column
+		for (size_t lp = jp; lp < bsize; lp++)    // loop over matrix column
 		{
 		    
-		    if (j == l && k < i)
+		    if (jp == lp && kp < ip)
 		      continue;
 
 		    spda_out << 0. << " ";
@@ -1627,7 +1631,7 @@ void init_F3_flag (const con_flags flag_pass, std::ofstream & spda_out, const si
 
 	}
 
-  spda_out << std::endl;
+  spda_out << "\n";
 
   }
   }
@@ -1825,16 +1829,16 @@ void init_F7_flag (const con_flags flag_pass, std::ofstream & spda_out, const si
 
 	if (flag_pass.F10_flag)
 	{
-		for (size_t i = 0; i < bsize; i++)      // loop over ith constraint matrix
+		for (size_t ip = 0;  ip < bsize; ip++)      // loop over ith constraint matrix
 		{
-		for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
+		for (size_t jp = 0;  jp < bsize; jp++)      // loop over jth constraint matrix
 		{
-		for (size_t k = 0; k < bsize; k++)    // loop over matrix row
+		for (size_t kp = 0;  kp < bsize; kp++)    // loop over matrix row
 		{
-		for (size_t l = j; l < bsize; l++)    // loop over matrix column
+		for (size_t lp = jp; lp < bsize; lp++)    // loop over matrix column
 		{
 		    
-		    if (j == l && k < i)
+		    if (jp == lp && kp < ip)
 		      continue;
 
 		    spda_out << 0. << " ";
@@ -2168,6 +2172,8 @@ int main ()
 
   // define flags for all different combinations of conditions in RDM
   const bool two_body_toggle = true;
+  const bool redundant_check = false;
+  const bool diag_toggle = false;
 
   // START CONSTRAINT FLAG DEFINE
 
@@ -2177,15 +2183,15 @@ int main ()
   const bool F4_flag = false; // REDUNDANT - P TRACE CONDITION
   const bool F5_flag = false;  // P ANTI-SYMMETRY
   const bool F6_flag = false; // REDUNDANT - P ANTI-SYMMETRY
-  const bool F7_flag = true;  // Q START - LINEAR RELATIONS
+  const bool F7_flag = false;  // Q START - LINEAR RELATIONS
   const bool F8_flag = false; // Q ANTI-SYMMETRY
   const bool F9_flag = false; // REDUNDANT - Q ANTI-SYMMETRY
   const bool F10_flag = false; // G START - LINEAR REALTIONS
 
-  const bool Q_flag = true;
+  const bool Q_flag = false;
   const bool G_flag = false;
 
-  const bool redundant_check = false;
+
 
   if (!two_body_toggle and (F4_flag or F5_flag or F6_flag or F7_flag))
   {
@@ -2211,7 +2217,7 @@ int main ()
     return EXIT_FAILURE;
   }
 
-  const bool diag_toggle = false;
+
 
 
   struct con_flags flag_pass;
@@ -2233,7 +2239,7 @@ int main ()
   flag_pass.Q_flag = Q_flag;
   flag_pass.G_flag = G_flag;
 
-  flag_pass.diag_toggle = false;
+  flag_pass.diag_toggle = diag_toggle;
 
 
 
@@ -2310,10 +2316,13 @@ int main ()
 
   fullm_populate_hamiltonian (ref_m, h1_mat, h2_mat, m_ref, m_mat, hw, diag_out, diag_toggle);
 
+  std::cout << "HAMILTONIAN BUILT" << std::endl;
+
   two_array comp_h2 (boost::extents[bsize*(bsize-1)/2][bsize*(bsize-1)/2]);
 
   compactify_h2 (ref_m, comp_h2, h2_mat, diag_out, diag_toggle);
 
+  std::cout << "POTENTIAL COMPACTIFIED" << std::endl;
 
   spda_out << cons << std::endl;
   spda_out << blocks << std::endl;
@@ -2350,6 +2359,8 @@ int main ()
 
   init_C_matrix (flag_pass, spda_out, h1_mat, comp_h2);
 
+  std::cout << "C MATRIX DONE" << std::endl;
+
   if (F1_flag)
   {
     init_F1_flag (flag_pass, spda_out, bsize);
@@ -2376,7 +2387,7 @@ int main ()
 
   if (F10_flag)
   {
-    init_F10_flag (flag_pass, spda_out, bsize);
+//    init_F10_flag (flag_pass, spda_out, bsize);
     std::cout << "FLAG 10 DONE" << std::endl;
   }
 
