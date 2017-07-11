@@ -1209,126 +1209,30 @@ void init_con_values (const con_flags flag_pass, std::ofstream & spda_out, const
 }
 
 
-void init_F1_flag (const con_flags flag_pass, std::ofstream & spda_out, const size_t bsize)
+void init_F1_flag (const con_flags flag_pass, std::ofstream & spda_out, const size_t bsize, size_t & con_count)
 {
+	con_count++;
 
-    for (size_t ip = 0; ip < bsize; ip++)
+    for (size_t ip = 0;  ip < bsize; ip++)
     {
-    for (size_t kp = 0; kp < bsize; kp++)
+    for (size_t kp = ip; kp < bsize; kp++)
     {
 
 
       double val1 = kron_del (ip, kp);
 
-      spda_out << val1 << " ";
+      size_t n = ip + 1;
+      size_t m = kp + 1; 
+
+      if (val1 != 0.)
+      	spda_out << con_count << " " << 1 << " " << n << " " << m << " " << val1 << "\n";
 
 
     }
     }
 
 
-    if (flag_pass.F2_flag)
-    {
-	    for (size_t ip = 0; ip < bsize; ip++)
-	    {
-	    for (size_t kp = 0; kp < bsize; kp++)
-	    {
-
-
-	      double val2 = 0.;
-
-	      spda_out << val2 << " ";
-
-
-	    }
-	    }
-	}
-
-
-
-	if (flag_pass.F3_flag)
-	{
-	    for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
-	    {
-	    for (size_t jp = 0; jp < bsize; jp++)      // loop over jth constraint matrix
-	    {
-	      if (ip >= jp)
-	        continue;
-
-	    for (size_t kp = 0; kp < bsize; kp++)    // loop over matrix row
-	    {
-	    for (size_t lp = 0; lp < bsize; lp++)    // loop over matrix column
-	    {
-	      if (kp >= lp)
-	        continue;
-
-
-	      double val3 = 0.;
-
-	      spda_out << val3 << " ";
-
-
-	    }
-	    }
-	    }
-	    }
-	}
-
-
-
-	if (flag_pass.F7_flag)
-	{
-	    for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
-	    {
-	    for (size_t jp = 0; jp < bsize; jp++)      // loop over jth constraint matrix
-	    {
-	      if (ip >= jp)
-	        continue;
-
-	    for (size_t kp = 0; kp < bsize; kp++)    // loop over matrix row
-	    {
-	    for (size_t lp = 0; lp < bsize; lp++)    // loop over matrix column
-	    {
-	      if (kp >= lp)
-	        continue;
-
-
-	      double val4 = 0.;
-
-	      spda_out << val4 << " ";
-
-
-	    }
-	    }
-	    }
-	    }
-	}
-
-	 if (flag_pass.F10_flag)
-	 {
-		  for (size_t i = 0; i < bsize; i++)      // loop over ith constraint matrix
-		  {
-		  for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
-		  {
-		  for (size_t k = 0; k < bsize; k++)    // loop over matrix row
-		  {
-		  for (size_t l = j; l < bsize; l++)    // loop over matrix column
-		  {
-		    
-		    if (j == l && k < i)
-		      continue;
-
-		    spda_out << 0. << " ";
-
-		  }
-		  }
-		  }
-		  }
-
-	 }
-
-    spda_out << "\n";
-
+    con_count++;
 }
 
 
@@ -1346,7 +1250,7 @@ F2_con.
 
 ***************************************************************/
 
-void init_F2_flag (const con_flags flag_pass, std::ofstream & spda_out, const size_t bsize)
+void init_F2_flag (const con_flags flag_pass, std::ofstream & spda_out, const size_t bsize, size_t & con_count)
 {
 
 
@@ -1374,9 +1278,9 @@ void init_F2_flag (const con_flags flag_pass, std::ofstream & spda_out, const si
 
 //  char * buffer = new char [extent*10];
 
-  char * buffera = new char [bsize*bsize*10];
-  char * bufferb = new char [bsize*bsize*10];
-  char * bufferc = new char [bsize*bsize*bsize*bsize*10];
+//  char * buffera = new char [bsize*bsize*10];
+//  char * bufferb = new char [bsize*bsize*10];
+//  char * bufferc = new char [bsize*bsize*bsize*bsize*10];
 
 //  char* ss1 = new char [10000];
 //  char* ss2 = new char [10000];
@@ -1403,30 +1307,38 @@ void init_F2_flag (const con_flags flag_pass, std::ofstream & spda_out, const si
 
 //	std::cout << "TEST";
 
-  	int testa = 0, testb = 0, testc = 0;
+//  	int testa = 0, testb = 0, testc = 0;
 
-  	int a = 0, b = 0, c = 0;
+//  	int a = 0, b = 0, c = 0;
 
     for (size_t k = 0; k < bsize; k++)
     {
-    for (size_t l = 0; l < bsize; l++)
+    for (size_t l = k; l < bsize; l++)
     {
 
 //    	std::cout << j1 << " ";
 
-      float val1 = (1./2.)*(kron_del(i,k)*kron_del(j,l) + kron_del(i,l)*kron_del(j,k));
+      double val1 = (1./2.)*(kron_del(i,k)*kron_del(j,l) + kron_del(i,l)*kron_del(j,k));
+
+      size_t n = k + 1;
+      size_t m = l + 1; 
+
+      if (val1 != 0.)
+      	spda_out << con_count << " " << 1 << " " << n << " " << m << " " << val1 << "\n";
+
+
 
 //      track += sprintf (buffer+track, "%f", val1);
 //      track += sprintf (buffer+track, " ");
 
 //      num += 9;
 
-      testa += sprintf (buffera+testa, "%f", val1);
+//      testa += sprintf (buffera+testa, "%f", val1);
 
-      testa += sprintf (buffera+testa, " ");
+//      testa += sprintf (buffera+testa, " ");
 //      spda_out.write (buffera+testa-9,9);
 
-      a++;
+//      a++;
 
 //      ss1.append(val1);
 //      spda_out.write("%f ", val1);
@@ -1463,19 +1375,25 @@ void init_F2_flag (const con_flags flag_pass, std::ofstream & spda_out, const si
 
     for (size_t k = 0; k < bsize; k++)
     {
-    for (size_t l = 0; l < bsize; l++)
+    for (size_t l = k; l < bsize; l++)
     {
 
 
-      float val2 = (1./2.)*(kron_del(i,k)*kron_del(j,l) + kron_del(i,l)*kron_del(j,k));
+      double val2 = (1./2.)*(kron_del(i,k)*kron_del(j,l) + kron_del(i,l)*kron_del(j,k));
 
-      testb += sprintf (bufferb+testb, "%f", val2);
+      size_t n = k + 1;
+      size_t m = l + 1; 
 
-      testb += sprintf (bufferb+testb, " ");
+      if (val2 != 0.)
+      	spda_out << con_count << " " << 2 << " " << n << " " << m << " " << val2 << "\n";
+
+//      testb += sprintf (bufferb+testb, "%f", val2);
+
+//      testb += sprintf (bufferb+testb, " ");
 
 //      spda_out.write (bufferb+testb-9,9);
 
-      b++;
+//      b++;
 
 //      track += sprintf (buffer+track, "%f", val2);
 //      track += sprintf (buffer+track, " ");
@@ -1489,110 +1407,15 @@ void init_F2_flag (const con_flags flag_pass, std::ofstream & spda_out, const si
     }
 
 
-    if (flag_pass.F3_flag)
-    {
-	    for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
-	    {
-	    for (size_t jp = ip; jp < bsize; jp++)      // loop over jth constraint matrix
-	    {
-	      if (ip >= jp)
-	        continue;
-
-	    for (size_t kp = 0; kp < bsize; kp++)    // loop over matrix row
-	    {
-	    for (size_t lp = kp; lp < bsize; lp++)    // loop over matrix column
-	    {
-	      if (kp >= lp)
-	        continue;
-
-
-	      float val3 = 0;
-
-//          track += sprintf (buffer+track, "%f", val3);
-//          track += sprintf (buffer+track, " ");
-
-//      	  num += 9;
-
-     	  testc += sprintf (bufferc+testc, "%f", val3);
-
-          testc += sprintf (bufferc+testc, " ");
-
-//          spda_out.write (bufferc+testc-9,9);
-
-          c++;
-
-//	      spda_out << val3 << " ";
-
-//      	  spda_out.write("%f ", val3);
-	    }
-	    }
-	    }
-	    }
-	}
-
-
-
-    if (flag_pass.F7_flag)
-    {
-	    for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
-	    {
-	    for (size_t jp = 0; jp < bsize; jp++)      // loop over jth constraint matrix
-	    {
-	      if (ip >= jp)
-	        continue;
-
-	    for (size_t kp = 0; kp < bsize; kp++)    // loop over matrix row
-	    {
-	    for (size_t lp = 0; lp < bsize; lp++)    // loop over matrix column
-	    {
-	      if (kp >= lp)
-	        continue;
-
-
-	      float val4 = 0.;
-
-	      spda_out << val4 << " ";
-
-
-	    }
-	    }
-	    }
-	    }
-	}
-
-	if (flag_pass.F10_flag)
-	{
-		for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
-		{
-		for (size_t jp = 0; jp < bsize; jp++)      // loop over jth constraint matrix
-		{
-		for (size_t kp = 0; kp < bsize; kp++)    // loop over matrix row
-		{
-		for (size_t lp = jp; lp < bsize; lp++)    // loop over matrix column
-		{
-		    
-		    if (jp == lp && kp < ip)
-		      continue;
-
-		  	float val5 = 0.;
-
-		    spda_out << val5 << " ";
-
-		}
-		}
-		}
-		}
-
-	}
 
 //	track += sprintf (buffer+track, "\n");
 
 
 //    num++;
-	spda_out.write(buffera, 9*a);
-	spda_out.write(bufferb, 9*b);
-	spda_out.write(bufferc, 9*c);
-	spda_out << "\n";
+//	spda_out.write(buffera, 9*a);
+//	spda_out.write(bufferb, 9*b);
+//	spda_out.write(bufferc, 9*c);
+//	spda_out << "\n";
 //  spda_out.write(ss1.str().c_str(), ss1.str().length());
 //  spda_out.write(ss2.str().c_str(), ss2.str().length());
 //  spda_out.write(ss3.str().c_str(), ss3.str().length());
@@ -1609,6 +1432,8 @@ void init_F2_flag (const con_flags flag_pass, std::ofstream & spda_out, const si
 //  ss3.clear();
 
 //  spda_out << ss;
+
+    con_count++;
 
   }
   }
@@ -1647,14 +1472,10 @@ between the 2RDM partial trace and the 1RDM.
 ***************************************************************/
 
 
-void init_F3_flag (const con_flags flag_pass, std::ofstream & spda_out, const size_t bsize, const size_t N)
+void init_F3_flag (const con_flags flag_pass, std::ofstream & spda_out, const size_t bsize, const size_t N, size_t & con_count)
 {
 
   std::ios_base::sync_with_stdio(false);
-
-  char * buffera = new char [bsize*bsize*10];
-  char * bufferb = new char [bsize*bsize*10];
-  char * bufferc = new char [bsize*bsize*bsize*bsize*10];
 
 
   for (size_t i = 0; i < bsize; i++)
@@ -1662,48 +1483,31 @@ void init_F3_flag (const con_flags flag_pass, std::ofstream & spda_out, const si
   for (size_t k = i; k < bsize; k++)
   {
 
-  	int testa = 0, testb = 0, testc = 0;
-
-  	int a = 0, b = 0, c = 0;
 
 
     for (size_t ip = 0; ip < bsize; ip++)
     {
-    for (size_t kp = 0; kp < bsize; kp++)
+    for (size_t kp = ip; kp < bsize; kp++)
     {
 
 
-      float val1 = 
+      double val1 = 
       -1.0 * (N - 1.0) / 4.0 * (
         kron_del(i,ip)*kron_del(k,kp) + kron_del(k,ip)*kron_del(i,kp)
         );
 
-      testa += sprintf (buffera+testa, "%f", val1);
-      testa += sprintf (buffera+testa, " ");
-      a++;
+      size_t n = ip + 1;
+      size_t m = kp + 1; 
 
-//      spda_out.write((char *)&val1, sizeof(float));
+      if (val1 != 0.)
+      	spda_out << con_count << " " << 1 << " " << n << " " << m << " " << val1 << "\n";
 
-
-    }
-    }
-
-
-    for (size_t ip = 0; ip < bsize; ip++)
-    {
-    for (size_t kp = 0; kp < bsize; kp++)
-    {
-
-      float val2 = 0.;
-
-      testb += sprintf (bufferb+testb, "%f", val2);
-      testb += sprintf (bufferb+testb, " ");
-      b++;
-//      spda_out.write((char *)&val2, sizeof(float));
 
 
     }
     }
+
+
 
     for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
     {
@@ -1719,14 +1523,19 @@ void init_F3_flag (const con_flags flag_pass, std::ofstream & spda_out, const si
       if (kp >= lp)
         continue;
 
+      size_t ips = ip + 1;
+      size_t jps = jp + 1;
+      size_t kps = kp + 1;
+      size_t lps = lp + 1;
 
-      float val3 = 1./8. * F3_3_matrix_A (i, k, ip, jp, kp, lp);
+      size_t n = jps - ips + (2*bsize - ips) * (ips - 1)/2;
+      size_t m = lps - kps + (2*bsize - kps) * (kps - 1)/2;
 
-      testc += sprintf (bufferc+testc, "%f", val3);
-      testc += sprintf (bufferc+testc, " ");
-      c++;
+      double val3 = 1./8. * F3_3_matrix_A (i, k, ip, jp, kp, lp);
 
-//      spda_out.write((char *)&val3, sizeof(float));
+
+      if (val3 != 0.)
+      	spda_out << con_count << " " << 3 << " " << n << " " << m << " " << val3 << "\n";
 
 
     }
@@ -1734,66 +1543,7 @@ void init_F3_flag (const con_flags flag_pass, std::ofstream & spda_out, const si
     }
     }
 
-
-    if (flag_pass.F7_flag)
-    {
-	    for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
-	    {
-	    for (size_t jp = 0; jp < bsize; jp++)      // loop over jth constraint matrix
-	    {
-	      if (ip >= jp)
-	        continue;
-
-	    for (size_t kp = 0; kp < bsize; kp++)    // loop over matrix row
-	    {
-	    for (size_t lp = 0; lp < bsize; lp++)    // loop over matrix column
-	    {
-	      if (kp >= lp)
-	        continue;
-
-
-	      float val4 = 0;
-
-	      spda_out << val4 << " ";
-
-
-	    }
-	    }
-	    }
-	    }
-	}
-
-
-
-	if (flag_pass.F10_flag)
-	{
-		for (size_t ip = 0;  ip < bsize; ip++)      // loop over ith constraint matrix
-		{
-		for (size_t jp = 0;  jp < bsize; jp++)      // loop over jth constraint matrix
-		{
-		for (size_t kp = 0;  kp < bsize; kp++)    // loop over matrix row
-		{
-		for (size_t lp = jp; lp < bsize; lp++)    // loop over matrix column
-		{
-		    
-		    if (jp == lp && kp < ip)
-		      continue;
-
-		  	float val5 = 0.;
-
-		    spda_out << val5 << " ";
-
-		}
-		}
-		}
-		}
-
-	}
-
-  spda_out.write(buffera, 9*a);
-  spda_out.write(bufferb, 9*b);
-  spda_out.write(bufferc, 9*c);
-  spda_out << "\n";
+    con_count++;
 
   }
   }
@@ -2423,7 +2173,7 @@ int main ()
 
 
   const std::string diag_file = "diagnostic_out/test_diag.dat";
-  const std::string spda_file = "sdp_files/test_spd.dat";
+  const std::string spda_file = "sdp_files/test_spd.dat-s";
 
   std::ofstream diag_out (diag_file);
   std::ofstream spda_out (spda_file);
@@ -2523,21 +2273,23 @@ int main ()
 
   std::cout << "C MATRIX DONE" << std::endl;
 
+  size_t con_count = 0;
+
   if (F1_flag)
   {
-    init_F1_flag (flag_pass, spda_out, bsize);
+    init_F1_flag (flag_pass, spda_out, bsize, con_count);
     std::cout << "FLAG 1 DONE" << std::endl;
   }
 
   if (F2_flag)
   {
-    init_F2_flag (flag_pass, spda_out, bsize);
+    init_F2_flag (flag_pass, spda_out, bsize, con_count);
     std::cout << "FLAG 2 DONE" << std::endl;
   }
 
   if (F3_flag)
   {
-    init_F3_flag (flag_pass, spda_out, bsize, particles);
+    init_F3_flag (flag_pass, spda_out, bsize, particles, con_count);
     std::cout << "FLAG 3 DONE" << std::endl;
   }
 
