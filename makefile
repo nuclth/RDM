@@ -18,7 +18,7 @@ OBJS     := $(patsubst %.cpp,%.o,$(SRCS)) 	# program object files
 ########################################################################### 
 
 CC        = g++ -std=c++11
-CFLAGS    = -g -O2 -fopenmp 
+CFLAGS    = -g -O3 -fopenmp 
 LDFLAGS   = -g
 WARNFLAGS = -Wall -Wextra -Wshadow -fno-common -Wno-unused-parameter
 MOREFLAGS = -ansi -pedantic -Wpointer-arith -Wcast-qual -Wcast-align \

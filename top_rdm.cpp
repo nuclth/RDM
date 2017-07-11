@@ -32,6 +32,7 @@ for the system.
 #include <gsl/gsl_sf_laguerre.h>
 #include <gsl/gsl_sf_gamma.h>
 #include <cstdio>
+#include <iomanip>
 #include <armadillo>
 #include <cmath>
 #include <cstdlib>
@@ -1349,27 +1350,115 @@ void init_F2_flag (const con_flags flag_pass, std::ofstream & spda_out, const si
 {
 
 
+//  std::stringstream ss1;
+//  std::stringstream ss2;
+//  std::stringstream ss3;
+
+  std::ios_base::sync_with_stdio(false);
+
+//  std::string ss1;
+//  std::string ss2;
+//  std::string ss3;
+
+//  ss1.reserve(bsize*bsize*32);
+//  ss2.reserve(bsize*bsize*32);
+//  ss3.reserve(bsize*bsize*bsize*bsize*32);  
+
+//  spda_out << std::setprecision(4);
+
+//  std::cout << "BEFORE" << std::endl;
+
+//  size_t extent = 2*bsize*bsize + (bsize*bsize-1)*(bsize*bsize-1);
+
+//  extent *= bsize*bsize;
+
+//  char * buffer = new char [extent*10];
+
+  char * buffera = new char [bsize*bsize*10];
+  char * bufferb = new char [bsize*bsize*10];
+  char * bufferc = new char [bsize*bsize*bsize*bsize*10];
+
+//  char* ss1 = new char [10000];
+//  char* ss2 = new char [10000];
+//  char* ss3 = new char [10000];
+
+//  std::cout << "AFTER" << std::endl;
+
+//  int j1, j2, j3;
+
+//  j1 = sprintf (ss1, "%f", 0.);
+//  j2 = sprintf (ss2, "%f", 0.);
+//  j3 = sprintf (ss3, "%f", 0.);
+
+//  std::cout << "LOOP START" << std::endl;
+
+
+//  int track = 0;
+//  int num = 0;
 
   for (size_t i = 0; i < bsize; i++)
   {
   for (size_t j = i; j < bsize; j++)
   {
 
-  	std::stringstream ss;
+//	std::cout << "TEST";
+
+  	int testa = 0, testb = 0, testc = 0;
+
+  	int a = 0, b = 0, c = 0;
 
     for (size_t k = 0; k < bsize; k++)
     {
     for (size_t l = 0; l < bsize; l++)
     {
 
+//    	std::cout << j1 << " ";
 
-      double val1 = (1./2.)*(kron_del(i,k)*kron_del(j,l) + kron_del(i,l)*kron_del(j,k));
+      float val1 = (1./2.)*(kron_del(i,k)*kron_del(j,l) + kron_del(i,l)*kron_del(j,k));
 
+//      track += sprintf (buffer+track, "%f", val1);
+//      track += sprintf (buffer+track, " ");
+
+//      num += 9;
+
+      testa += sprintf (buffera+testa, "%f", val1);
+
+      testa += sprintf (buffera+testa, " ");
+//      spda_out.write (buffera+testa-9,9);
+
+      a++;
+
+//      ss1.append(val1);
+//      spda_out.write("%f ", val1);
 //      spda_out << val1 << " ";
-      ss << val1 << " ";
+//      ss1 << val1 << " ";
+//      	j1 += sprintf (ss1+j1, "%f", val1);
+//      	j2 += sprintf (ss2+j2, "%f", val1);
 
+/*
+      ss2 << val1 << " ";
+
+      if (flag_pass.F3_flag and k < l)
+      {
+      	float val3 = 0.;
+
+	    for (size_t kp = 0; kp < bsize; kp++)    // loop over matrix row
+	    {
+	    for (size_t lp = kp; lp < bsize; lp++)    // loop over matrix column
+	    {
+	    	if (lp > kp)
+	    		ss3 << val3 << " ";
+
+	    }
+		}
+
+
+      }
+
+	*/
     }
     }
+
 
 
     for (size_t k = 0; k < bsize; k++)
@@ -1378,11 +1467,24 @@ void init_F2_flag (const con_flags flag_pass, std::ofstream & spda_out, const si
     {
 
 
-      double val2 = (1./2.)*(kron_del(i,k)*kron_del(j,l) + kron_del(i,l)*kron_del(j,k));
+      float val2 = (1./2.)*(kron_del(i,k)*kron_del(j,l) + kron_del(i,l)*kron_del(j,k));
+
+      testb += sprintf (bufferb+testb, "%f", val2);
+
+      testb += sprintf (bufferb+testb, " ");
+
+//      spda_out.write (bufferb+testb-9,9);
+
+      b++;
+
+//      track += sprintf (buffer+track, "%f", val2);
+//      track += sprintf (buffer+track, " ");
+
+//      num += 9;
 
 //      spda_out << val2 << " ";
 
-      ss << val2 << " ";
+//      spda_out.write("%f ", val2);
     }
     }
 
@@ -1404,11 +1506,24 @@ void init_F2_flag (const con_flags flag_pass, std::ofstream & spda_out, const si
 	        continue;
 
 
-	      double val3 = 0;
+	      float val3 = 0;
+
+//          track += sprintf (buffer+track, "%f", val3);
+//          track += sprintf (buffer+track, " ");
+
+//      	  num += 9;
+
+     	  testc += sprintf (bufferc+testc, "%f", val3);
+
+          testc += sprintf (bufferc+testc, " ");
+
+//          spda_out.write (bufferc+testc-9,9);
+
+          c++;
 
 //	      spda_out << val3 << " ";
 
-	      ss << val3 << " ";
+//      	  spda_out.write("%f ", val3);
 	    }
 	    }
 	    }
@@ -1434,7 +1549,7 @@ void init_F2_flag (const con_flags flag_pass, std::ofstream & spda_out, const si
 	        continue;
 
 
-	      double val4 = 0;
+	      float val4 = 0.;
 
 	      spda_out << val4 << " ";
 
@@ -1459,7 +1574,9 @@ void init_F2_flag (const con_flags flag_pass, std::ofstream & spda_out, const si
 		    if (jp == lp && kp < ip)
 		      continue;
 
-		    spda_out << 0. << " ";
+		  	float val5 = 0.;
+
+		    spda_out << val5 << " ";
 
 		}
 		}
@@ -1468,17 +1585,35 @@ void init_F2_flag (const con_flags flag_pass, std::ofstream & spda_out, const si
 
 	}
 
+//	track += sprintf (buffer+track, "\n");
 
-  ss << "\n";
 
-  spda_out.write(ss.str().c_str(), ss.str().length());
+//    num++;
+	spda_out.write(buffera, 9*a);
+	spda_out.write(bufferb, 9*b);
+	spda_out.write(bufferc, 9*c);
+	spda_out << "\n";
+//  spda_out.write(ss1.str().c_str(), ss1.str().length());
+//  spda_out.write(ss2.str().c_str(), ss2.str().length());
+//  spda_out.write(ss3.str().c_str(), ss3.str().length());
+//	fprintf(spda_out, "%s", ss1);
+//	fprintf(spda_out, "%s", ss2);
+//	fprintf(spda_out, "%s", ss3);
+//  spda_out << "\n";
+
+//  ss1.str("");
+//  ss1.clear();
+//  ss2.str("");
+//  ss2.clear();  
+//  ss3.str("");
+//  ss3.clear();
 
 //  spda_out << ss;
 
   }
   }
 
-
+//  spda_out.write(buffer, num);
 
 }
 
@@ -1515,23 +1650,39 @@ between the 2RDM partial trace and the 1RDM.
 void init_F3_flag (const con_flags flag_pass, std::ofstream & spda_out, const size_t bsize, const size_t N)
 {
 
+  std::ios_base::sync_with_stdio(false);
+
+  char * buffera = new char [bsize*bsize*10];
+  char * bufferb = new char [bsize*bsize*10];
+  char * bufferc = new char [bsize*bsize*bsize*bsize*10];
+
 
   for (size_t i = 0; i < bsize; i++)
   {
   for (size_t k = i; k < bsize; k++)
   {
+
+  	int testa = 0, testb = 0, testc = 0;
+
+  	int a = 0, b = 0, c = 0;
+
+
     for (size_t ip = 0; ip < bsize; ip++)
     {
     for (size_t kp = 0; kp < bsize; kp++)
     {
 
 
-      double val1 = 
+      float val1 = 
       -1.0 * (N - 1.0) / 4.0 * (
         kron_del(i,ip)*kron_del(k,kp) + kron_del(k,ip)*kron_del(i,kp)
         );
 
-      spda_out << val1 << " ";
+      testa += sprintf (buffera+testa, "%f", val1);
+      testa += sprintf (buffera+testa, " ");
+      a++;
+
+//      spda_out.write((char *)&val1, sizeof(float));
 
 
     }
@@ -1543,10 +1694,12 @@ void init_F3_flag (const con_flags flag_pass, std::ofstream & spda_out, const si
     for (size_t kp = 0; kp < bsize; kp++)
     {
 
+      float val2 = 0.;
 
-      double val2 = 0.;
-
-      spda_out << val2 << " ";
+      testb += sprintf (bufferb+testb, "%f", val2);
+      testb += sprintf (bufferb+testb, " ");
+      b++;
+//      spda_out.write((char *)&val2, sizeof(float));
 
 
     }
@@ -1567,9 +1720,13 @@ void init_F3_flag (const con_flags flag_pass, std::ofstream & spda_out, const si
         continue;
 
 
-      double val3 = 1./8. * F3_3_matrix_A (i, k, ip, jp, kp, lp);
+      float val3 = 1./8. * F3_3_matrix_A (i, k, ip, jp, kp, lp);
 
-      spda_out << val3 << " ";
+      testc += sprintf (bufferc+testc, "%f", val3);
+      testc += sprintf (bufferc+testc, " ");
+      c++;
+
+//      spda_out.write((char *)&val3, sizeof(float));
 
 
     }
@@ -1595,7 +1752,7 @@ void init_F3_flag (const con_flags flag_pass, std::ofstream & spda_out, const si
 	        continue;
 
 
-	      double val4 = 0;
+	      float val4 = 0;
 
 	      spda_out << val4 << " ";
 
@@ -1622,7 +1779,9 @@ void init_F3_flag (const con_flags flag_pass, std::ofstream & spda_out, const si
 		    if (jp == lp && kp < ip)
 		      continue;
 
-		    spda_out << 0. << " ";
+		  	float val5 = 0.;
+
+		    spda_out << val5 << " ";
 
 		}
 		}
@@ -1631,6 +1790,9 @@ void init_F3_flag (const con_flags flag_pass, std::ofstream & spda_out, const si
 
 	}
 
+  spda_out.write(buffera, 9*a);
+  spda_out.write(bufferb, 9*b);
+  spda_out.write(bufferc, 9*c);
   spda_out << "\n";
 
   }
