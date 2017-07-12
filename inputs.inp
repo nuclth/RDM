@@ -6,7 +6,7 @@
 100
 
 # Size of the basis  
-3
+40
 
 # Number of particles
 2
@@ -21,8 +21,8 @@
 10
 
 # input reference file for m-scheme
-spM_bad.dat
+test-spM.dat
 
 # input matrix file for m-scheme 
-VM-scheme_bad.dat
+test-VM-scheme.dat
 

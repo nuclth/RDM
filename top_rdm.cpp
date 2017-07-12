@@ -992,89 +992,51 @@ the negative energy.
 ***************************************************************/
 
 
-void init_C_matrix (const con_flags flag_pass, std::ofstream & spda_out, const two_array & h1_mat, const two_array & h2_mat)
+void init_C_matrix (const con_flags flag_pass, std::ofstream & spda_out, const two_array & h1_mat, const two_array & h2_mat, size_t & con_count)
 {
   size_t h1_len = h1_mat.size();
   size_t h2_len = h2_mat.size();
 
 
-    for (size_t ip = 0; ip < h1_len; ip++)
+    for (size_t ip = 0;  ip < h1_len; ip++)
     {
-    for (size_t jp = 0; jp < h1_len; jp++)
+    for (size_t jp = ip; jp < h1_len; jp++)
     {
 
-	  double val1 = h1_mat [ip][jp] * -1.0;
+	    double val1 = h1_mat [ip][jp] * -1.0;
 
-      spda_out << val1 << " ";
+      size_t n = ip + 1;
+      size_t m = jp + 1; 
 
+      if (val1 != 0.)
+        spda_out << con_count << " " << 1 << " " << n << " " << m << " " << val1 << "\n";
     }
     }
 
 
-    if (flag_pass.F2_flag)
-    {
-	    for (size_t ip = 0; ip < h1_len; ip++)
-	    {
-	    for (size_t kp = 0; kp < h1_len; kp++)
-	    {
 
-	      double val2 = 0.;
-
-	      spda_out << val2 << " ";
-
-	    }
-	    }
-	}
 
 
 	if (flag_pass.F3_flag)
 	{
 	    for (size_t ip = 0; ip < h2_len; ip++)      // loop over ith constraint matrix
 	    {
-	    for (size_t jp = 0; jp < h2_len; jp++)      // loop over jth constraint matrix
+	    for (size_t jp = ip; jp < h2_len; jp++)      // loop over jth constraint matrix
 	    {
 
 	      double val3 = h2_mat [ip][jp] * -1./2.;
 
-	      spda_out << val3 << " ";
+        size_t n = ip + 1;
+        size_t m = jp + 1; 
+
+      if (val3 != 0.)
+        spda_out << con_count << " " << 3 << " " << n << " " << m << " " << val3 << "\n";
 
 	    }
 	    }
 	}
 
-
-	if (flag_pass.F7_flag)
-	{
-	    for (size_t ip = 0; ip < h2_len; ip++)      // loop over ith constraint matrix
-	    {
-	    for (size_t jp = 0; jp < h2_len; jp++)      // loop over jth constraint matrix
-	    {
-
-	      double val4 = 0.;
-
-	      spda_out << val4 << " ";
-
-	    }
-	    }
-	}
-
-
-	if (flag_pass.F10_flag)
-	{
-	    for (size_t ip = 0; ip < h1_len*h1_len; ip++)      // loop over ith constraint matrix
-	    {
-	    for (size_t jp = 0; jp < h1_len*h1_len; jp++)      // loop over jth constraint matrix
-	    {
-
-	      double val5 = 0.;
-
-	      spda_out << val5 << " ";
-
-	    }
-	    }
-	}
-    
-  spda_out << std::endl;    
+  con_count++;
 
 }
 
@@ -1211,7 +1173,7 @@ void init_con_values (const con_flags flag_pass, std::ofstream & spda_out, const
 
 void init_F1_flag (const con_flags flag_pass, std::ofstream & spda_out, const size_t bsize, size_t & con_count)
 {
-	con_count++;
+
 
     for (size_t ip = 0;  ip < bsize; ip++)
     {
@@ -2269,11 +2231,13 @@ int main ()
   
   init_con_values (flag_pass, spda_out, bsize, particles);
 
-  init_C_matrix (flag_pass, spda_out, h1_mat, comp_h2);
+  size_t con_count = 0;
+
+
+  init_C_matrix (flag_pass, spda_out, h1_mat, comp_h2, con_count);
 
   std::cout << "C MATRIX DONE" << std::endl;
 
-  size_t con_count = 0;
 
   if (F1_flag)
   {
