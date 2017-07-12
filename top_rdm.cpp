@@ -1496,7 +1496,7 @@ void init_F3_flag (const con_flags flag_pass, std::ofstream & spda_out, const si
       double val3 = 1./8. * F3_3_matrix_A (i, k, ip, jp, kp, lp);
 
 
-      if (val3 != 0.)
+      if (val3 != 0. and n <= m)
       	spda_out << con_count << " " << 3 << " " << n << " " << m << " " << val3 << "\n";
 
 
