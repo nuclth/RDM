@@ -18,11 +18,11 @@
 938.9059
 
 # value for hbar * omega of the Harmonic oscillator
-10
+20
 
 # input reference file for m-scheme
-spM_bad.dat
+full-spM_20-B.dat
 
 # input matrix file for m-scheme 
-VM-scheme_bad.dat
+full-VM-scheme_20-B.dat
 
