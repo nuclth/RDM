@@ -46,15 +46,11 @@ for the system.
 
 struct parameters 
 {
-	size_t nodes;
-	size_t mesh_size;
 	size_t basis;
 	size_t particles;
-	double hc;
-	double mass;
 	double hw;
-  std::string m_ref;
-  std::string m_mat;
+    std::string m_ref;
+    std::string m_mat;
 };
 
 struct con_flags
@@ -978,6 +974,22 @@ void compactify_h2 (const two_array & ref_m, two_array & comp_h2, five_array & h
     diag_out << std::endl << std::endl;
 }
 
+
+/***************************************************************
+
+Kronecker delta function. Returns 1 if i=j and 0 otherwise.
+
+***************************************************************/
+
+double kron_del(const size_t i, const size_t j)
+{
+
+  if (i == j)
+    return 1.;
+
+  return 0.;
+}
+
 /***************************************************************
 
 Function to create the F0 constraint matrix for the SDP solver.
@@ -1005,11 +1017,11 @@ void init_C_matrix (const con_flags flag_pass, std::ofstream & spda_out, const t
 
 	    double val1 = h1_mat [ip][jp] * -1.0;
 
-      size_t n = ip + 1;
-      size_t m = jp + 1; 
+    	size_t n = ip + 1;
+      	size_t m = jp + 1; 
 
-      if (val1 != 0.)
-        spda_out << con_count << " " << 1 << " " << n << " " << m << " " << val1 << "\n";
+      	if (val1 != 0.)
+        	spda_out << con_count << " " << 1 << " " << n << " " << m << " " << val1 << "\n";
     }
     }
 
@@ -1024,13 +1036,13 @@ void init_C_matrix (const con_flags flag_pass, std::ofstream & spda_out, const t
 	    for (size_t jp = ip; jp < h2_len; jp++)      // loop over jth constraint matrix
 	    {
 
-	      double val3 = h2_mat [ip][jp] * -1./2.;
+	      double val3 = h2_mat [ip][jp] * -1.;//-1./2.;
 
-        size_t n = ip + 1;
-        size_t m = jp + 1; 
+          size_t n = ip + 1;
+          size_t m = jp + 1; 
 
-      if (val3 != 0.)
-        spda_out << con_count << " " << 3 << " " << n << " " << m << " " << val3 << "\n";
+          if (val3 != 0.)
+        	spda_out << con_count << " " << 3 << " " << n << " " << m << " " << val3 << "\n";
 
 	    }
 	    }
@@ -1040,20 +1052,6 @@ void init_C_matrix (const con_flags flag_pass, std::ofstream & spda_out, const t
 
 }
 
-/***************************************************************
-
-Kronecker delta function. Returns 1 if i=j and 0 otherwise.
-
-***************************************************************/
-
-double kron_del(const size_t i, const size_t j)
-{
-
-  if (i == j)
-    return 1.;
-
-  return 0.;
-}
 
 
 /***************************************************************
@@ -1215,70 +1213,19 @@ F2_con.
 void init_F2_flag (const con_flags flag_pass, std::ofstream & spda_out, const size_t bsize, size_t & con_count)
 {
 
-
-//  std::stringstream ss1;
-//  std::stringstream ss2;
-//  std::stringstream ss3;
-
   std::ios_base::sync_with_stdio(false);
 
-//  std::string ss1;
-//  std::string ss2;
-//  std::string ss3;
-
-//  ss1.reserve(bsize*bsize*32);
-//  ss2.reserve(bsize*bsize*32);
-//  ss3.reserve(bsize*bsize*bsize*bsize*32);  
-
-//  spda_out << std::setprecision(4);
-
-//  std::cout << "BEFORE" << std::endl;
-
-//  size_t extent = 2*bsize*bsize + (bsize*bsize-1)*(bsize*bsize-1);
-
-//  extent *= bsize*bsize;
-
-//  char * buffer = new char [extent*10];
-
-//  char * buffera = new char [bsize*bsize*10];
-//  char * bufferb = new char [bsize*bsize*10];
-//  char * bufferc = new char [bsize*bsize*bsize*bsize*10];
-
-//  char* ss1 = new char [10000];
-//  char* ss2 = new char [10000];
-//  char* ss3 = new char [10000];
-
-//  std::cout << "AFTER" << std::endl;
-
-//  int j1, j2, j3;
-
-//  j1 = sprintf (ss1, "%f", 0.);
-//  j2 = sprintf (ss2, "%f", 0.);
-//  j3 = sprintf (ss3, "%f", 0.);
-
-//  std::cout << "LOOP START" << std::endl;
-
-
-//  int track = 0;
-//  int num = 0;
 
   for (size_t i = 0; i < bsize; i++)
   {
   for (size_t j = i; j < bsize; j++)
   {
 
-//	std::cout << "TEST";
-
-//  	int testa = 0, testb = 0, testc = 0;
-
-//  	int a = 0, b = 0, c = 0;
-
     for (size_t k = 0; k < bsize; k++)
     {
     for (size_t l = k; l < bsize; l++)
     {
 
-//    	std::cout << j1 << " ";
 
       double val1 = (1./2.)*(kron_del(i,k)*kron_del(j,l) + kron_del(i,l)*kron_del(j,k));
 
@@ -1289,47 +1236,6 @@ void init_F2_flag (const con_flags flag_pass, std::ofstream & spda_out, const si
       	spda_out << con_count << " " << 1 << " " << n << " " << m << " " << val1 << "\n";
 
 
-
-//      track += sprintf (buffer+track, "%f", val1);
-//      track += sprintf (buffer+track, " ");
-
-//      num += 9;
-
-//      testa += sprintf (buffera+testa, "%f", val1);
-
-//      testa += sprintf (buffera+testa, " ");
-//      spda_out.write (buffera+testa-9,9);
-
-//      a++;
-
-//      ss1.append(val1);
-//      spda_out.write("%f ", val1);
-//      spda_out << val1 << " ";
-//      ss1 << val1 << " ";
-//      	j1 += sprintf (ss1+j1, "%f", val1);
-//      	j2 += sprintf (ss2+j2, "%f", val1);
-
-/*
-      ss2 << val1 << " ";
-
-      if (flag_pass.F3_flag and k < l)
-      {
-      	float val3 = 0.;
-
-	    for (size_t kp = 0; kp < bsize; kp++)    // loop over matrix row
-	    {
-	    for (size_t lp = kp; lp < bsize; lp++)    // loop over matrix column
-	    {
-	    	if (lp > kp)
-	    		ss3 << val3 << " ";
-
-	    }
-		}
-
-
-      }
-
-	*/
     }
     }
 
@@ -1349,58 +1255,17 @@ void init_F2_flag (const con_flags flag_pass, std::ofstream & spda_out, const si
       if (val2 != 0.)
       	spda_out << con_count << " " << 2 << " " << n << " " << m << " " << val2 << "\n";
 
-//      testb += sprintf (bufferb+testb, "%f", val2);
 
-//      testb += sprintf (bufferb+testb, " ");
-
-//      spda_out.write (bufferb+testb-9,9);
-
-//      b++;
-
-//      track += sprintf (buffer+track, "%f", val2);
-//      track += sprintf (buffer+track, " ");
-
-//      num += 9;
-
-//      spda_out << val2 << " ";
-
-//      spda_out.write("%f ", val2);
     }
     }
 
 
-
-//	track += sprintf (buffer+track, "\n");
-
-
-//    num++;
-//	spda_out.write(buffera, 9*a);
-//	spda_out.write(bufferb, 9*b);
-//	spda_out.write(bufferc, 9*c);
-//	spda_out << "\n";
-//  spda_out.write(ss1.str().c_str(), ss1.str().length());
-//  spda_out.write(ss2.str().c_str(), ss2.str().length());
-//  spda_out.write(ss3.str().c_str(), ss3.str().length());
-//	fprintf(spda_out, "%s", ss1);
-//	fprintf(spda_out, "%s", ss2);
-//	fprintf(spda_out, "%s", ss3);
-//  spda_out << "\n";
-
-//  ss1.str("");
-//  ss1.clear();
-//  ss2.str("");
-//  ss2.clear();  
-//  ss3.str("");
-//  ss3.clear();
-
-//  spda_out << ss;
 
     con_count++;
 
   }
   }
 
-//  spda_out.write(buffer, num);
 
 }
 
@@ -1617,7 +1482,7 @@ relations between the 1RDM, q, 2RDM, and Q.
 
 ***************************************************************/
 
-void init_F7_flag (const con_flags flag_pass, std::ofstream & spda_out, const size_t bsize)
+void init_F7_flag (const con_flags flag_pass, std::ofstream & spda_out, const size_t bsize, size_t con_count)
 {
 
 
@@ -1632,24 +1497,19 @@ void init_F7_flag (const con_flags flag_pass, std::ofstream & spda_out, const si
     if (j < l && k <= i)
       continue;
 
-    for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
-    {
-    for (size_t jp = 0; jp < bsize; jp++)      // loop over jth constraint matrix
-    {
-    	double val1 = 0.;
-    	spda_out << val1 << " ";
-    }
-	}
-
-
     
     for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
     {
-    for (size_t jp = 0; jp < bsize; jp++)      // loop over jth constraint matrix
+    for (size_t jp = ip; jp < bsize; jp++)      // loop over jth constraint matrix
     {
     	double val2 = 
     	(1./2.) * (F7_2_matrix (i, j, k, l, ip, jp) + F7_2_matrix (i, j, k, l, jp, ip));
-    	spda_out << val2 << " ";
+
+    	size_t n = k + 1;
+        size_t m = l + 1; 
+
+        if (val2 != 0.)
+      		spda_out << con_count << " " << 2 << " " << n << " " << m << " " << val2 << "\n";
     }
 	}
 
@@ -1671,7 +1531,20 @@ void init_F7_flag (const con_flags flag_pass, std::ofstream & spda_out, const si
 
     	double val3 = (1./4.) * F7_3_matrix_A (i, j, k, l, ip, jp, kp, lp);
 
-    	spda_out << val3 << " ";
+
+        size_t ips = ip + 1;
+        size_t jps = jp + 1;
+        size_t kps = kp + 1;
+        size_t lps = lp + 1;
+
+        size_t n = jps - ips + (2*bsize - ips) * (ips - 1)/2;
+        size_t m = lps - kps + (2*bsize - kps) * (kps - 1)/2;
+
+
+        if (val3 != 0. and n <= m)
+   		   	spda_out << con_count << " " << 3 << " " << n << " " << m << " " << val3 << "\n";
+
+
 	}
 	}
 	}
@@ -1694,38 +1567,27 @@ void init_F7_flag (const con_flags flag_pass, std::ofstream & spda_out, const si
 
     	double val4 = (-1./8.) * F7_4_matrix_A (i, j, k, l, ip, jp, kp, lp);
 
-    	spda_out << val4 << " ";
+    	size_t ips = ip + 1;
+        size_t jps = jp + 1;
+        size_t kps = kp + 1;
+        size_t lps = lp + 1;
+
+        size_t n = jps - ips + (2*bsize - ips) * (ips - 1)/2;
+        size_t m = lps - kps + (2*bsize - kps) * (kps - 1)/2;
+
+
+        if (val4 != 0. and n <= m)
+   		   	spda_out << con_count << " " << 4 << " " << n << " " << m << " " << val4 << "\n";
+
+
 	}
 	}
 	}
 	}
 
 
-	if (flag_pass.F10_flag)
-	{
-		for (size_t ip = 0;  ip < bsize; ip++)      // loop over ith constraint matrix
-		{
-		for (size_t jp = 0;  jp < bsize; jp++)      // loop over jth constraint matrix
-		{
-		for (size_t kp = 0;  kp < bsize; kp++)    // loop over matrix row
-		{
-		for (size_t lp = jp; lp < bsize; lp++)    // loop over matrix column
-		{
-		    
-		    if (jp == lp && kp < ip)
-		      continue;
 
-		    spda_out << 0. << " ";
-
-		}
-		}
-		}
-		}
-
-	}
-
-
-  	spda_out << std::endl;
+  con_count++;
 
   }	
   }
@@ -1989,17 +1851,14 @@ int main ()
   // Now create/copy input parameters for ease of reading the code into newly defined local variables
 
 
-//  const int mesh_size = input_params.mesh_size;		 // how many points to use for Gauss-Legendre (G-L) quadrature 
-  const size_t bsize = input_params.basis;	   // the size of the HO basis used, ONLY ACTIVE FOR S-WAVE
+
+  const size_t bsize = input_params.basis;	   // the size of the HO basis used
   const size_t particles = input_params.particles;		 // the number of neutrons (particles) in the trap
-//  const int nodes = input_params.nodes;
-//  const double hc = input_params.hc;					     // hbar * c - given in MeV * fm
-//  const double mass = input_params.mass;			     // Nucleon mass - given in MeV/c^2
   const double hw = input_params.hw;					     // hbar * omega 
   const std::string m_ref = input_params.m_ref;    // single particle reference file - m scheme
   const std::string m_mat = input_params.m_mat;    // m scheme matrix elements
 
-//  const double l_param = hc / sqrt(mass * hw);		 // the relevant length parameter for the HO
+
 
   std::cout << ("Building system... ") << std::endl;
 
@@ -2057,12 +1916,12 @@ int main ()
   const bool F4_flag = false; // REDUNDANT - P TRACE CONDITION
   const bool F5_flag = false;  // P ANTI-SYMMETRY
   const bool F6_flag = false; // REDUNDANT - P ANTI-SYMMETRY
-  const bool F7_flag = false;  // Q START - LINEAR RELATIONS
+  const bool F7_flag = true;  // Q START - LINEAR RELATIONS
   const bool F8_flag = false; // Q ANTI-SYMMETRY
   const bool F9_flag = false; // REDUNDANT - Q ANTI-SYMMETRY
   const bool F10_flag = false; // G START - LINEAR REALTIONS
 
-  const bool Q_flag = false;
+  const bool Q_flag = true;
   const bool G_flag = false;
 
 
@@ -2259,7 +2118,7 @@ int main ()
 
   if (F7_flag)
   {
-    init_F7_flag (flag_pass, spda_out, bsize);
+    init_F7_flag (flag_pass, spda_out, bsize, con_count);
     std::cout << "FLAG 7 DONE" << std::endl;
   }
 
@@ -2273,24 +2132,7 @@ int main ()
   return EXIT_SUCCESS;
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
  
-
 
 /************************************************
 
@@ -2325,31 +2167,19 @@ parameters read_in_inputs ()
 	ss << dummy;					// read in the line to the stringstream ss
 
 	if (counter == 0)				// read in parameters by the way they're ordered in "inputs.inp"
-	  ss >> input.nodes;
-
-	if (counter == 1)
-	  ss >> input.mesh_size;
-	
-	if (counter == 2)
 	  ss >> input.basis;
 
-	if (counter == 3)
+	if (counter == 1)
 	  ss >> input.particles;
 
-	if (counter == 4)
-	  ss >> input.hc;
-	
-	if (counter == 5)
-	  ss >> input.mass;
-
-	if (counter == 6)
+	if (counter == 2)
 	  ss >> input.hw;
 
-  if (counter == 7)
-    ss >> input.m_ref;
+	if (counter == 3)
+	  ss >> input.m_ref;
 
-  if (counter == 8)
-    ss >> input.m_mat;
+  	if (counter == 4)
+      ss >> input.m_mat;
 
 
 	counter++;					// increase the counter after reading in a parameter	
