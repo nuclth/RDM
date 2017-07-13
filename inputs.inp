@@ -1,15 +1,15 @@
 # Size of the basis  
-4
+40
 
 # Number of particles
-2
+8
 
 # value for hbar * omega of the Harmonic oscillator
-20
+10
 
 # input reference file for m-scheme
-full-spM_20-B.dat
+spM_bad.dat
 
 # input matrix file for m-scheme 
-full-VM-scheme_20-B.dat
+VM-scheme_bad.dat
 
