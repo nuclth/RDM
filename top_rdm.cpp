@@ -627,6 +627,7 @@ void init_C_matrix (const con_flags flag_pass, std::ofstream & spda_out, const t
   size_t h1_len = h1_mat.size();
   size_t h2_len = h2_mat.size();
 
+    spda_out << std::setprecision(16);
 
     for (size_t ip = 0;  ip < h1_len; ip++)
     {
