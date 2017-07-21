@@ -1,5 +1,9 @@
-# ignore object files
+# ignore object files and data files
 *.o
+*.dat
+
+# ignore sdp_files/
+sdp_files/
 
 # ignore executable
 run_rdm
