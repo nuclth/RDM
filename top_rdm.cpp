@@ -204,20 +204,22 @@ void read_in_reference_m_scheme (ref_array & ref_m, const std::string m_ref_file
 
   ss << dummy;            // read in the line to stringstream ss
 
-  ss >> orbit_dummy_1 >> orbit_dummy_2 >> ref_num >> n >> l >> j >> m_j >> tz;  // assign values of the line
+//  ss >> orbit_dummy_1 >> orbit_dummy_2 >> ref_num >> n >> l >> j >> m_j >> tz;  // assign values of the line
+
+  ss >> ref_num >> n >> l >> j >> m_j >> tz;  // assign values of the line
 
 //  std::cout << ref_num << " " << n << " " << l << " " << j << " " << m_j << " " << tz << "\n";
 
 
   // only extract neutron-neutron states
-  if (tz == 1.)
+  if (tz == -1.)
   {
     ref_m [ele_in][0] = ref_num;    // reference number of the line
     ref_m [ele_in][1] = n;          // principle quantum number
     ref_m [ele_in][2] = l;          // orbital angular mom.
     ref_m [ele_in][3] = j * 0.5;    // total angular mom.
     ref_m [ele_in][4] = m_j * 0.5;  // total angular mom. projection
-    ref_m [ele_in][5] = tz;         // isospin projection (should all be +1.0)
+    ref_m [ele_in][5] = tz;         // isospin projection (should all be -1.0)
     ref_m [ele_in][6] = ele_in;     // new index for sp orbital
     ele_in++;
   }
