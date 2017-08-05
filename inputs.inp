@@ -1,5 +1,5 @@
 # Size of the basis  
-32
+54
 
 # Number of particles
 2
@@ -8,8 +8,8 @@
 10
 
 # input reference file for m-scheme
-test_index.dat
+spM_trun.dat
 
 # input matrix file for m-scheme 
-test_mscheme.dat
+VM-scheme_trun.dat
 

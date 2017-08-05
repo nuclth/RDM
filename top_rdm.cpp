@@ -204,6 +204,8 @@ void read_in_reference_m_scheme (ref_array & ref_m, const std::string m_ref_file
 
   ss << dummy;            // read in the line to stringstream ss
 
+  // MORTEN VS. HEIKO READ IN FILE FORMAT
+
 //  ss >> orbit_dummy_1 >> orbit_dummy_2 >> ref_num >> n >> l >> j >> m_j >> tz;  // assign values of the line
 
   ss >> ref_num >> n >> l >> j >> m_j >> tz;  // assign values of the line

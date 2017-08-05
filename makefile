@@ -3,7 +3,7 @@
 
 # NOTE: FOLDERS WILL BE CREATED IF NOT EXISTENT 
 OBJ_DIR  := obj_files		# where to put object files
-OUTPUT   := output		# create output directory
+OUTPUT   := sdp_files		# create output directory
 
 MAKENAME := makefile		# The name of the makefile
 TARGET   := run_rdm		# program command
@@ -31,7 +31,7 @@ LDLIBS    = -lgsl -lgslcblas -lgomp
 
 all: $(TARGET)
 
-$(TARGET): $(OBJS) # $(HDRS) $(MAKENAME)# | $(OBJ_DIR) $(OUTPUT) 
+$(TARGET): $(OBJS) | $(OUTPUT) # $(HDRS) $(MAKENAME)# | $(OBJ_DIR) $(OUTPUT) 
 	$(CC) $(LDFLAGS) -o $(TARGET) $(OBJS) $(LDLIBS)
 
 %.o: %.cpp  
