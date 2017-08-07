@@ -1,16 +1,11 @@
-#SHELL=/bin/sh
- 
-
 # NOTE: FOLDERS WILL BE CREATED IF NOT EXISTENT 
-OBJ_DIR  := obj_files		# where to put object files
-OUTPUT   := sdp_files		# create output directory
+OBJ_DIR  = obj
+SRC_DIR  = src
+OUTPUT   = sdp_files
 
-MAKENAME := makefile		# The name of the makefile
-TARGET   := run_rdm		# program command
-SRCS     := $(wildcard *.cpp)	# program source files
-HDRS     := $(wildcard *.h)	# program header files
-OBJS     := $(patsubst %.cpp,%.o,$(SRCS)) 	# program object files
-#OBJS     := $(SRCS:.cpp=.o) 	# program object files
+BINARY   = run_rdm
+SRCS     = $(wildcard $(SRC_DIR)/*.cpp)
+OBJS     = $(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(SRCS))
 
 
 ###########################################################################
@@ -29,12 +24,12 @@ LDLIBS    = -lgsl -lgslcblas -lgomp
 # Instructions to compile and link -- allow for different dependencies
 ########################################################################### 
 
-all: $(TARGET)
+all: $(BINARY) 
 
-$(TARGET): $(OBJS) | $(OUTPUT) # $(HDRS) $(MAKENAME)# | $(OBJ_DIR) $(OUTPUT) 
-	$(CC) $(LDFLAGS) -o $(TARGET) $(OBJS) $(LDLIBS)
+$(BINARY): $(OBJS) | $(OBJ_DIR)
+	$(CC) $(LDFLAGS) -o $@ $(OBJS) $(LDLIBS)
 
-%.o: %.cpp  
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp  
 	$(CC) $(CFLAGS) -c $< -o $@ $(WARNFLAGS) 
 
 
@@ -47,16 +42,12 @@ $(TARGET): $(OBJS) | $(OUTPUT) # $(HDRS) $(MAKENAME)# | $(OBJ_DIR) $(OUTPUT)
 ##########################################################################
 
 $(OBJ_DIR):
-	mkdir -p $(OBJ_DIR)
-
-$(OUTPUT):
-	mkdir -p $(OUTPUT)
+	mkdir -p $@
 
 .PHONY: all clean
 
 clean:
-	rm -f *.o
-#	rm -f $(OBJ_DIR)/*.o
+	rm -f $(OBJ_DIR)/*.o
 
 zip:
 	zip -r $(COMMAND).zip $(MAKEFILE) $(SRCS) $(HDRS)
