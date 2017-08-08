@@ -66,10 +66,40 @@ or
 
 where solution.dat will store the solution to the SDP. For other options, try ```man sdpa``` or refer to relevant manual files.
 
+## Branches
+
+### Dynamic
+
+* master - main development branch
+
+* jscheme - development branch to allow for use of a J scheme basis. Should allow for much larger basis sets when working. Open issues about anti-symmetry, normalization of matrix elements, construction of constraint matrices, etc...
+
+### static
+
+* blockdiag - Branch used for project to put SDP file into local block diagonal structure for m scheme. The idea was that the potential for different ```Jz``` and/or different parities (say ```Jz = 1``` and ```Jz = 0``` both with even parity) do not talk to one another. That is, all of these matrix elements are zero. This should speed up the SDP solver immensely. However, these goals were not achieved. The energy behaved erratically and I was unable to reproduce the results of the antisym part of the code. My working theory on why this is the following: the ground state of the system is in good total ```J``` but by rotational invariance is independent of total ```Jz``` (may be wrong). Therefore, different ```Jz``` states can contribute to the ground state and by making them block diagonal, we are cutting off this coupling in the system (even if individual matrix elements do not couple). I am not convinced by this explanation (or at least by the way it is stated now). However, I still believe the idea here is sound and should be applied to a J scheme calculation when up and running. The system has good total ```J``` and parity which can be extracted easily, so the blockdiagonal structure should work there. 
+	* codeclean - Offshoot of blockdiag. First attempt to clean up my code (use different headers/source files, more commenting, etc...). Lots of futile work here as this branch was ultimately abadoned once blockdiag continued to not work.
+
+* antisym - First branch to take advantage of the anti-symmetric nature of the 2RDM and potential matrix elements. Allows for smaller matrix sizes with the same basis. Quite a good amount of speed up against the original implementation. For a basis size of r, the original implementation used matrices of rank ```r*r``` while the antisym exploit allows for rank ```r*(r-1)/2``` 
+
+* original_imp - Points to the point on master branch where the first 'working' implemenation was made in m scheme. Naive implementation with no benefits due to block diagonal structure, anti-symmetry of the potential, code maintenance, etc... Marker kept for purposes of comparison/bench marking with future work.
+
 ## Dependencies
 
-
+N/A 
 
 ## Issues
 
+Doesn't work yet.
 
+## Benchmarks
+
+For 2 particles interacting via Minnesota potential (with usual parameters, **add paper ref**) and choice of:
+
+```
+hb*c = 197.326 MeV-fm
+m    = 938.92 MeV
+hb*w = 10 MeV
+b    = hb*c / sqr(hb*w*m) = 2.0364 fm
+```
+
+the ground state energy of the system is ```E = 24.265 MeV```. 
