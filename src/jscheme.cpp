@@ -52,7 +52,7 @@ void read_in_reference_j_scheme (two_array & ref_j, const std::string j_ref_file
 
   // MORTEN VS. HEIKO READ IN FILE FORMAT
 
-  ss >> orbit_dummy_1 >> orbit_dummy_2 >> ref_num >> n >> l >> j >> m_j >> tz;  // assign values of the line
+//  ss >> orbit_dummy_1 >> orbit_dummy_2 >> ref_num >> n >> l >> j >> m_j >> tz;  // assign values of the line
 
 //  ss >> ref_num >> n >> l >> j >> m_j >> tz;  // assign values of the line
 
@@ -92,7 +92,7 @@ void read_in_reference_j_scheme (two_array & ref_j, const std::string j_ref_file
 
 /***************************************************************
 
-Function to read in the actual m scheme matrix  elements 
+Function to read in the actual m scheme matrix elements 
 calculated from Morten's code. 
 
 THIS WILL BREAK IF THE INPUT FILE .dat CHANGES TITLE OR FORMAT.
@@ -107,11 +107,12 @@ void read_in_matrix_j_scheme (const two_array & ref_j, five_array & h2_mat, cons
 
   size_t total_lines = 0;
   std::string dummy;
+  int tz, parity, twoJ;
   int alpha, beta, gamma, delta;
   double value;
 
   if (j_matrix_in.fail())
-  throw "ERROR: Cannot read m-scheme matrix file";
+  throw "ERROR: Cannot read j-scheme matrix file";
 
   // get the total number of lines in the matrix elements file
   while(std::getline(j_matrix_in, dummy))
@@ -145,7 +146,7 @@ void read_in_matrix_j_scheme (const two_array & ref_j, five_array & h2_mat, cons
 
   ss << dummy;
 
-  ss >> alpha >> beta >> gamma >> delta >> value;
+  ss >> tz >> parity >> twoJ >> alpha >> beta >> gamma >> delta >> value;
 
   // check to see if alpha, beta, gamma, delta we're reading in
   // matches the reference numbers in our reference matrix
@@ -174,6 +175,9 @@ void read_in_matrix_j_scheme (const two_array & ref_j, five_array & h2_mat, cons
       h2_mat [i][j][k][l][2] = beta;
       h2_mat [i][j][k][l][3] = gamma;
       h2_mat [i][j][k][l][4] = delta;
+      h2_mat [i][j][k][l][5] = tz;
+      h2_mat [i][j][k][l][6] = parity;
+      h2_mat [i][j][k][l][7] = twoJ;
     }
   }
 

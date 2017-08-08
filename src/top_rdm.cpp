@@ -215,22 +215,31 @@ int main ()
   	blocks++;
   }
 
-
-
+  bool mscheme = true;
 
   two_array ref_m (boost::extents[bsize][7]);
   two_array h1_mat(boost::extents[bsize][bsize]);
-  five_array h2_mat(boost::extents[bsize][bsize][bsize][bsize][5]);
-
-  fullm_populate_hamiltonian (ref_m, h1_mat, h2_mat, m_ref, m_mat, hw, diag_out, diag_toggle);
-
-  std::cout << "HAMILTONIAN BUILT" << std::endl;
 
   two_array comp_h2 (boost::extents[bsize*(bsize-1)/2][bsize*(bsize-1)/2]);
 
-  compactify_h2 (ref_m, comp_h2, h2_mat, diag_out, diag_toggle);
+  if (mscheme)
+  {
+  	five_array h2_mat(boost::extents[bsize][bsize][bsize][bsize][5]);
+    fullm_populate_hamiltonian (ref_m, h1_mat, h2_mat, m_ref, m_mat, hw, diag_out, diag_toggle);
+    std::cout << "HAMILTONIAN BUILT" << std::endl;
+  	compactify_h2 (ref_m, comp_h2, h2_mat, diag_out, diag_toggle);
+  	std::cout << "POTENTIAL COMPACTIFIED" << std::endl;
+  }
 
-  std::cout << "POTENTIAL COMPACTIFIED" << std::endl;
+  if (!mscheme)
+  {
+  	five_array h2_mat(boost::extents[bsize][bsize][bsize][bsize][8]);
+    fullm_populate_hamiltonian (ref_m, h1_mat, h2_mat, m_ref, m_mat, hw, diag_out, diag_toggle);
+    std::cout << "HAMILTONIAN BUILT" << std::endl;
+  	compactify_h2 (ref_m, comp_h2, h2_mat, diag_out, diag_toggle);
+  	std::cout << "POTENTIAL COMPACTIFIED" << std::endl;
+  }
+
 
   spda_out << cons << std::endl;
   spda_out << blocks << std::endl;
