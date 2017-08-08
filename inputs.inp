@@ -1,5 +1,5 @@
 # Size of the basis  
-36
+20
 
 # Number of particles
 2
@@ -13,3 +13,32 @@ me_files/spM_trun.dat
 # input matrix file for m-scheme 
 me_files/VM-scheme_trun.dat
 
+# two_body toggle
+1
+
+# N Flag
+1
+
+# O Flag
+1
+
+# P Flag
+1
+
+# Q Flag
+0
+
+# G Flag
+0
+
+# diag toggle
+0
+
+# output sdp file
+sdp_files/test_sdp.dat-s
+
+# output diag file
+test_diag.dat
+
+# mscheme toggle (no = j scheme)
+1
