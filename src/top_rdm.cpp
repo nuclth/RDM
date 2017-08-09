@@ -113,8 +113,8 @@ int main ()
 
   header_sdp_file (flag_pass, bsize, N_num, O_num, P_num, Q_num, G_num, spda_out);
 
-  two_array ref_m (boost::extents[bsize][7]);
-  two_array h1_mat(boost::extents[bsize][bsize]);
+  two_array ref_m  (boost::extents[bsize][7]);
+  two_array h1_mat (boost::extents[bsize][bsize]);
 
   two_array comp_h2 (boost::extents[bsize*(bsize-1)/2][bsize*(bsize-1)/2]);
 
@@ -130,7 +130,7 @@ int main ()
   if (!mscheme_toggle)
   {
   	five_array h2_mat(boost::extents[bsize][bsize][bsize][bsize][8]);
-    fullm_populate_hamiltonian (ref_m, h1_mat, h2_mat, m_ref, m_mat, hw, diag_out, diag_toggle);
+    fullj_populate_hamiltonian (ref_m, h1_mat, h2_mat, m_ref, m_mat, hw, diag_out, diag_toggle);
     std::cout << "HAMILTONIAN BUILT" << std::endl;
   	compactify_h2 (ref_m, comp_h2, h2_mat, diag_out, diag_toggle);
   	std::cout << "POTENTIAL COMPACTIFIED" << std::endl;

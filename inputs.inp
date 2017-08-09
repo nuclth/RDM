@@ -1,5 +1,5 @@
 # Size of the basis  
-20
+1
 
 # Number of particles
 2
@@ -8,10 +8,10 @@
 10
 
 # input reference file for m-scheme
-me_files/spM_trun.dat
+me_files/spJ_trun.dat
 
 # input matrix file for m-scheme 
-me_files/VM-scheme_trun.dat
+me_files/VJ-scheme_trun.dat
 
 # two_body toggle
 1
@@ -41,4 +41,4 @@ sdp_files/test_sdp.dat-s
 test_diag.dat
 
 # mscheme toggle (no = j scheme)
-1
+0

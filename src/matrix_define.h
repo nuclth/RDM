@@ -8,6 +8,7 @@ Last Mod: 8/2017
 
 #include "boost/multi_array.hpp"
 #include "boost/array.hpp"
+#include "boost/cstdlib.hpp"
 
 typedef boost::multi_array<double, 1> one_array;
 typedef boost::multi_array<double, 2> two_array;

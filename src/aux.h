@@ -9,6 +9,8 @@ Last Mod: 8/2017
 
 #include <iostream>
 #include <string>
+#include "matrix_define.h"
+#include <cstdio>
 
 // struct to hold the input file variables
 struct parameters 
@@ -44,9 +46,12 @@ struct con_flags
 
 parameters read_in_inputs ();
 double kron_del(const size_t i, const size_t j);
-template <typename Array> void print(std::ostream& os, const Array & A);
-template <> void print (std::ostream& os, const double & x);
-template <> void print (std::ostream& os, const int & x);
+
+template <typename Array> 
+void print(std::ostream& os, const Array & A);
+
+template <> void print<double> (std::ostream& os, const double & x);
+template <> void print<int> (std::ostream& os, const int & x);
 
 size_t Q_loop (size_t);
 size_t G_loop (size_t);

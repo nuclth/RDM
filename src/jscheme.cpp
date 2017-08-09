@@ -4,6 +4,7 @@ Last Mod: 8/2017
 *****************************************************************************/
 
 #include "jscheme.h"
+#include "aux.h"
 
 
 /***************************************************************
@@ -18,15 +19,15 @@ Last Mod: 8/2017
 void read_in_reference_j_scheme (two_array & ref_j, const std::string j_ref_file, std::ofstream & diag_out, const bool diag_toggle)
 {
   const char * j_reference_file = (j_ref_file).c_str();
-  // input file stream for m_scheme
+  // input file stream for j_scheme
   std::ifstream j_ref_in (j_reference_file);
  
   if (j_ref_in.fail())
-  throw "ERROR: Cannot open m-scheme reference file";
+  throw "ERROR: Cannot open j-scheme reference file";
  
   size_t total_lines = 0;
   std::string dummy;
-  double ref_num, n, l, j , m_j, tz;
+  double ref_num, n, l, twoj, tz, twonpl, HO_energy;
 
   // find total number of defined reference lines
   while (std::getline (j_ref_in, dummy))
@@ -45,7 +46,6 @@ void read_in_reference_j_scheme (two_array & ref_j, const std::string j_ref_file
   for (size_t i = 0; i < total_lines; i++)
   {
   std::string orbit_dummy_1;
-  std::string orbit_dummy_2;
   std::getline (j_ref_in, dummy);
 
   if (!dummy.length() || dummy[0] == '#')     // skip zero length lines and lines that start with #
@@ -57,7 +57,7 @@ void read_in_reference_j_scheme (two_array & ref_j, const std::string j_ref_file
 
   // MORTEN VS. HEIKO READ IN FILE FORMAT
 
-//  ss >> orbit_dummy_1 >> orbit_dummy_2 >> ref_num >> n >> l >> j >> m_j >> tz;  // assign values of the line
+  ss >> orbit_dummy_1 >> ref_num >> n >> l >> twoj >> tz >> twonpl >> HO_energy;  // assign values of the line
 
 //  ss >> ref_num >> n >> l >> j >> m_j >> tz;  // assign values of the line
 
@@ -68,12 +68,12 @@ void read_in_reference_j_scheme (two_array & ref_j, const std::string j_ref_file
   if (tz == -1.)
   {
     ref_j [ele_in][0] = ref_num;    // reference number of the line
-    ref_j [ele_in][1] = n;          // principle quantum number
+    ref_j [ele_in][1] = n;          // principal quantum number
     ref_j [ele_in][2] = l;          // orbital angular mom.
-    ref_j [ele_in][3] = j * 0.5;    // total angular mom.
-    ref_j [ele_in][4] = m_j * 0.5;  // total angular mom. projection
-    ref_j [ele_in][5] = tz;         // isospin projection (should all be -1.0)
-    ref_j [ele_in][6] = ele_in;     // new index for sp orbital
+    ref_j [ele_in][3] = twoj * 0.5; // total angular mom.
+    ref_j [ele_in][4] = tz;         // isospin projection (should all be -1.0)
+    ref_j [ele_in][5] = twonpl;    // value of 2*n+l
+    ref_j [ele_in][6] = HO_energy;  // HO energy for the sp state
     ele_in++;
   }
 
@@ -87,7 +87,7 @@ void read_in_reference_j_scheme (two_array & ref_j, const std::string j_ref_file
   if(diag_toggle)
   {
     diag_out << "Single particle orbitals pulled from REF file" << std::endl << std::endl;
-//    print(diag_out, ref_m);            // print the resulting matrix
+//    print(diag_out, ref_j);            // print the resulting matrix
     diag_out << std::endl << std::endl;
   }
 

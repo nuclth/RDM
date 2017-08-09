@@ -4,6 +4,7 @@ Last Mod: 8/2017
 *****************************************************************************/
 
 #include "mscheme.h"
+#include "aux.h"
 #include <sstream>
 
 
@@ -88,7 +89,7 @@ void read_in_reference_m_scheme (two_array & ref_m, const std::string m_ref_file
   if(diag_toggle)
   {
     diag_out << "Single particle orbitals pulled from REF file" << std::endl << std::endl;
-//    print(diag_out, ref_m);            // print the resulting matrix
+ //   print(diag_out, ref_m);            // print the resulting matrix
     diag_out << std::endl << std::endl;
   }
 

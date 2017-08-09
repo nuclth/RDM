@@ -5,6 +5,7 @@ Last Mod: 8/2017
 
 #include "hamiltonian.h"
 #include "mscheme.h"
+#include "jscheme.h"
 #include <iostream>
 
 
@@ -24,7 +25,7 @@ void fullm_populate_hamiltonian (two_array & ref_m, two_array & h1_mat, five_arr
   {
     read_in_reference_m_scheme (ref_m, reference_file, diag_out, diag_toggle);
     std::cout << "REFERENCE READ" << std::endl;
-    populate_1body (ref_m, h1_mat, hw);
+    mpopulate_1body (ref_m, h1_mat, hw);
     std::cout << "1 BODY POPULATED" << std::endl;
     read_in_matrix_m_scheme (ref_m, h2_mat, matrix_file);
     std::cout << "2 BODY POPULATED" << std::endl;
@@ -48,7 +49,7 @@ void fullm_populate_hamiltonian (two_array & ref_m, two_array & h1_mat, five_arr
 ***************************************************************/
 
 
-void populate_1body (const two_array & ref_m, two_array & h1_mat, const double hw)
+void mpopulate_1body (const two_array & ref_m, two_array & h1_mat, const double hw)
 {
 
   size_t mat_length = h1_mat.size();
@@ -60,6 +61,58 @@ void populate_1body (const two_array & ref_m, two_array & h1_mat, const double h
     double l = ref_m [i][2];
 
     h1_mat[i][i] = (2.*n + l + 1.5) * hw;
+  }
+
+}
+
+
+/***************************************************************
+
+Wrapper function to read in single-particle j scheme reference 
+file, populate 1-body Hamiltonian matrix elements, and then 
+populate 2-body matrix elements.
+
+***************************************************************/
+
+
+void fullj_populate_hamiltonian (two_array & ref_j, two_array & h1_mat, five_array & h2_mat, const std::string reference_file, const std::string matrix_file, const double hw, std::ofstream & diag_out, const bool diag_toggle) 
+{
+
+  try
+  {
+    read_in_reference_j_scheme (ref_j, reference_file, diag_out, diag_toggle);
+    std::cout << "REFERENCE READ" << std::endl;
+    jpopulate_1body (ref_j, h1_mat, hw);
+    std::cout << "1 BODY POPULATED" << std::endl;
+    read_in_matrix_j_scheme (ref_j, h2_mat, matrix_file);
+    std::cout << "2 BODY POPULATED" << std::endl;
+  }
+
+  catch (const char * msg)
+  {
+    std::cerr << msg << std::endl;  
+  }
+ 
+}
+
+/***************************************************************
+
+
+ Function to populate the 1-body part of the Hamiltonian. 
+ The 1-body part here is T + U for kinetic energy T and external potential U
+
+
+***************************************************************/
+
+void jpopulate_1body (const two_array & ref_j, two_array & h1_mat, const double hw)
+{
+
+  size_t mat_length = h1_mat.size();
+
+
+  for (size_t i = 0; i < mat_length; ++i)
+  {
+    h1_mat[i][i] = ref_j[i][6];
   }
 
 }
