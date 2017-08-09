@@ -175,7 +175,12 @@ void read_in_matrix_j_scheme (const two_array & ref_j, five_array & h2_mat, cons
 
   if (i >= 0 && j >= 0 && k >= 0 && l >= 0) // only activates if all 4 "if" statements above are true
     {
-      h2_mat [i][j][k][l][0] = value;
+      double degen1 = sqrt(degen(i+1));
+      double degen2 = sqrt(degen(j+1));
+      double degen3 = sqrt(degen(k+1));
+      double degen4 = sqrt(degen(l+1));            
+
+      h2_mat [i][j][k][l][0] = value * degen1 * degen2 * degen3 * degen4;
       h2_mat [i][j][k][l][1] = alpha;
       h2_mat [i][j][k][l][2] = beta;
       h2_mat [i][j][k][l][3] = gamma;

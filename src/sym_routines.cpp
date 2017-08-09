@@ -14,6 +14,14 @@ int F3_3_matrix (const int i, const int k, const int ip, const int jp, const int
   return value;  
 }
 
+int F3_3_matrix_S (const int i, const int k, const int ip, const int jp, const int kp, const int lp)
+{
+  const int value = 
+  		F3_3_matrix (i, k, ip, jp, kp, lp) +  F3_3_matrix (i, k, kp, lp, ip, jp);
+
+  return value;  
+}
+
 int F3_3_matrix_A (const int i, const int k, const int ip, const int jp, const int kp, const int lp)
 {
 	const int value = 

@@ -7,6 +7,7 @@ Last Mod: 8/2017
 #include "sym_routines.h"
 #include "aux.h"
 #include <iomanip>
+#include <cmath>
 
 
 
@@ -38,8 +39,11 @@ void init_con_values (const con_flags flag_pass, std::ofstream & spda_out, const
     for (size_t i2 = i1; i2 < bsize; i2++)
     {
 
+      double degen1 = sqrt(degen(i1+1));
+      double degen2 = sqrt(degen(i2+1));
+
       if (i1 == i2)
-        spda_out << 1. << " ";
+        spda_out << degen1*degen2 << " ";
       else
         spda_out << 0. << " ";
 
@@ -147,13 +151,18 @@ void init_C_matrix (const con_flags flag_pass, std::ofstream & spda_out, const t
     for (size_t jp = ip; jp < h1_len; jp++)
     {
 
-      double val1 = h1_mat [ip][jp] * -1.0;
+
 
       size_t n = ip + 1;
-        size_t m = jp + 1; 
+      size_t m = jp + 1; 
 
-        if (val1 != 0.)
-          spda_out << con_count << " " << 1 << " " << n << " " << m << " " << val1 << "\n";
+      double degen1 = sqrt(degen(n));
+      double degen2 = sqrt(degen(m));
+
+      double val1 = h1_mat [ip][jp] * -1.0 * degen1 * degen2;
+
+      if (val1 != 0.)
+        spda_out << con_count << " " << 1 << " " << n << " " << m << " " << val1 << "\n";
     }
     }
 
@@ -170,10 +179,10 @@ void init_C_matrix (const con_flags flag_pass, std::ofstream & spda_out, const t
 
         double val3 = h2_mat [ip][jp] * -1./2.;
 
-          size_t n = ip + 1;
-          size_t m = jp + 1; 
+        size_t n = ip + 1;
+        size_t m = jp + 1; 
 
-          if (val3 != 0.)
+        if (val3 != 0.)
           spda_out << con_count << " " << 3 << " " << n << " " << m << " " << val3 << "\n";
 
       }
@@ -209,11 +218,15 @@ void init_N_flag (std::ofstream & spda_out, const size_t bsize, size_t & con_cou
     for (size_t kp = ip; kp < bsize; kp++)
     {
 
-
-      double val1 = kron_del (ip, kp);
-
       size_t n = ip + 1;
       size_t m = kp + 1; 
+
+      double degen1 = sqrt(degen(n));
+      double degen2 = sqrt(degen(m));
+
+      double val1 = kron_del (ip, kp) * degen1 * degen2;
+
+
 
       if (val1 != 0.)
       	spda_out << con_count << " " << 1 << " " << n << " " << m << " " << val1 << "\n";
@@ -258,11 +271,13 @@ void init_O_flag (std::ofstream & spda_out, const size_t bsize, size_t & con_cou
     for (size_t l = k; l < bsize; l++)
     {
 
-
-      double val1 = (1./2.)*(kron_del(i,k)*kron_del(j,l) + kron_del(i,l)*kron_del(j,k));
-
       size_t n = k + 1;
       size_t m = l + 1; 
+
+      double degen1 = sqrt(degen(n));
+      double degen2 = sqrt(degen(m));
+
+      double val1 = (1./2.)*(kron_del(i,k)*kron_del(j,l) + kron_del(i,l)*kron_del(j,k)) * degen1 * degen2;
 
       if (val1 != 0.)
         spda_out << con_count << " " << 1 << " " << n << " " << m << " " << val1 << "\n";
@@ -278,11 +293,13 @@ void init_O_flag (std::ofstream & spda_out, const size_t bsize, size_t & con_cou
     for (size_t l = k; l < bsize; l++)
     {
 
-
-      double val2 = (1./2.)*(kron_del(i,k)*kron_del(j,l) + kron_del(i,l)*kron_del(j,k));
-
       size_t n = k + 1;
       size_t m = l + 1; 
+
+      double degen1 = sqrt(degen(n));
+      double degen2 = sqrt(degen(m));
+
+      double val2 = (1./2.)*(kron_del(i,k)*kron_del(j,l) + kron_del(i,l)*kron_del(j,k)) * degen1 * degen2;
 
       if (val2 != 0.)
         spda_out << con_count << " " << 2 << " " << n << " " << m << " " << val2 << "\n";
@@ -329,14 +346,16 @@ void init_P_flag (std::ofstream & spda_out, const size_t bsize, size_t & con_cou
     for (size_t kp = ip; kp < bsize; kp++)
     {
 
+      size_t n = ip + 1;
+      size_t m = kp + 1; 
+
+      double degen1 = sqrt (degen(n));
+      double degen2 = sqrt (degen(m));
 
       double val1 = 
       -1.0 * (N - 1.0) / 4.0 * (
         kron_del(i,ip)*kron_del(k,kp) + kron_del(k,ip)*kron_del(i,kp)
-        );
-
-      size_t n = ip + 1;
-      size_t m = kp + 1; 
+        ) * degen1 * degen2;
 
       if (val1 != 0.)
         spda_out << con_count << " " << 1 << " " << n << " " << m << " " << val1 << "\n";
@@ -352,26 +371,35 @@ void init_P_flag (std::ofstream & spda_out, const size_t bsize, size_t & con_cou
     {
     for (size_t jp = 0; jp < bsize; jp++)      // loop over jth constraint matrix
     {
-      if (ip >= jp)
-        continue;
+//      if (ip >= jp)
+//        continue;
 
     for (size_t kp = 0; kp < bsize; kp++)    // loop over matrix row
     {
     for (size_t lp = 0; lp < bsize; lp++)    // loop over matrix column
     {
-      if (kp >= lp)
-        continue;
+//      if (kp >= lp)
+//        continue;
 
       size_t ips = ip + 1;
       size_t jps = jp + 1;
       size_t kps = kp + 1;
       size_t lps = lp + 1;
 
-      size_t n = jps - ips + (2*bsize - ips) * (ips - 1)/2;
-      size_t m = lps - kps + (2*bsize - kps) * (kps - 1)/2;
+      double degen1 = sqrt(degen (ips));
+      double degen2 = sqrt(degen (jps));
+      double degen3 = sqrt(degen (kps));
+      double degen4 = sqrt(degen (lps));
 
-      double val3 = 1./8. * F3_3_matrix_A (i, k, ip, jp, kp, lp);
+//      size_t n = jps - ips + (2*bsize - ips) * (ips - 1)/2;
+//      size_t m = lps - kps + (2*bsize - kps) * (kps - 1)/2;
 
+    size_t n = ip * bsize + jp + 1;
+    size_t m = kp * bsize + lp + 1;
+
+//      double val3 = 1./8. * F3_3_matrix_A (i, k, ip, jp, kp, lp);
+
+      double val3 = 1./2. * F3_3_matrix_S (i, k, ip, jp, kp, lp) * degen1 * degen2 * degen3 * degen4;
 
       if (val3 != 0. and n <= m)
         spda_out << con_count << " " << 3 << " " << n << " " << m << " " << val3 << "\n";

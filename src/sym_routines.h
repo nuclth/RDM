@@ -7,8 +7,8 @@ Last Mod: 8/2017
 #define SYM_ROUTINES_H
 
 
-int F3_3_matrix (const int i, const int k, const int ip, const int jp, const int kp, const int lp);
-
+int F3_3_matrix   (const int i, const int k, const int ip, const int jp, const int kp, const int lp);
+int F3_3_matrix_S (const int i, const int k, const int ip, const int jp, const int kp, const int lp);
 int F3_3_matrix_A (const int i, const int k, const int ip, const int jp, const int kp, const int lp);
 
 

@@ -58,5 +58,6 @@ size_t G_loop (size_t);
 
 void header_sdp_file (con_flags flag_pass, size_t, size_t Nnum, size_t Onum, size_t Pnum, size_t Qnum, size_t Gnum, std::ofstream & sdp_out);
 
+double degen (size_t);
 
 #endif

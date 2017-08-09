@@ -116,7 +116,7 @@ int main ()
   two_array ref_m  (boost::extents[bsize][7]);
   two_array h1_mat (boost::extents[bsize][bsize]);
 
-  two_array comp_h2 (boost::extents[bsize*(bsize-1)/2][bsize*(bsize-1)/2]);
+  two_array comp_h2 (boost::extents[bsize*bsize][bsize*bsize]);
 
   if (mscheme_toggle)
   {

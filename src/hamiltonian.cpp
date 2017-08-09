@@ -112,7 +112,9 @@ void jpopulate_1body (const two_array & ref_j, two_array & h1_mat, const double 
 
   for (size_t i = 0; i < mat_length; ++i)
   {
-    h1_mat[i][i] = ref_j[i][6];
+//  	double j     = ref_j[i][3];
+    double degen = 1.;//(2.*j + 1.);
+    h1_mat[i][i] = ref_j[i][6] * degen;
   }
 
 }
@@ -141,15 +143,15 @@ void compactify_h2 (const two_array & ref_m, two_array & comp_h2, five_array & h
   {
   for (size_t j = 0; j < bsize; ++j)
   {
-    if (i >= j)
-      continue;
+//    if (i >= j)
+//      continue;
 
   for (size_t k = 0; k < bsize; ++k)
   {
   for (size_t l = 0; l < bsize; ++l)
   {
-    if (k >= l)
-      continue;
+//    if (k >= l)
+//      continue;
 
             value = h2_mat [i][j][k][l][0];
 
@@ -194,14 +196,16 @@ void compactify_h2 (const two_array & ref_m, two_array & comp_h2, five_array & h
               }
             }
 
-            size_t ips = i + 1;
-            size_t jps = j + 1;
-            size_t kps = k + 1;
-            size_t lps = l + 1;
+//            size_t ips = i + 1;
+//            size_t jps = j + 1;
+//            size_t kps = k + 1;
+//            size_t lps = l + 1;
 
-            size_t left  = jps - ips + (2*bsize - ips) * (ips - 1)/2 - 1;
-            size_t right = lps - kps + (2*bsize - kps) * (kps - 1)/2 - 1;
+//            size_t left  = jps - ips + (2*bsize - ips) * (ips - 1)/2 - 1;
+//            size_t right = lps - kps + (2*bsize - kps) * (kps - 1)/2 - 1;
 
+            size_t left  = i * bsize + j;
+            size_t right = k * bsize + l;
 
   /*         if (i == 0 && j == 4 && k == 0)
             {

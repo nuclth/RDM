@@ -264,7 +264,7 @@ void header_sdp_file (con_flags flag_pass, size_t bsize, size_t Nnum, size_t Onu
   
   if (flag_pass.two_body_toggle)
   {
-    sdp_out << bsize * (bsize-1)/2 << " ";
+    sdp_out << bsize * bsize << " ";
   }
 
   if (flag_pass.Q_flag)
@@ -279,6 +279,41 @@ void header_sdp_file (con_flags flag_pass, size_t bsize, size_t Nnum, size_t Onu
 
   sdp_out << std::endl;
 
+}
 
+double degen (size_t num)
+{
+	double factor = 0;
 
+	if (num == 1)
+		factor = 2;
+
+	else if (num == 2)
+		factor = 4;
+
+	else if (num == 3)
+		factor = 2;
+
+	else if (num == 4)
+		factor = 6;
+
+	else if (num == 5)
+		factor = 4;		
+
+	else if (num == 6)
+		factor = 2;
+
+	else if (num == 7)
+		factor = 4;
+
+	else if (num == 8)
+		factor = 2;	
+
+	else if (num == 9)
+		factor = 6;	
+
+	else if (num == 10)
+		factor = 4;	
+
+	return factor;
 }
