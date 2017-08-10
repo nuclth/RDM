@@ -103,3 +103,5 @@ b    = hb*c / sqr(hb*w*m) = 2.0364 fm
 ```
 
 the ground state energy of the system is ```E = 24.265 MeV```. 
+
+For 2 particles in 8 single particle m scheme basis states (n=0 l=0, n=0 l=1) gives ```E=25.2014(9) MeV``` where the uncertainty in the last digit comes from using Heiko vs. Morten's code. This needs to be reproduced in the j scheme code. 
