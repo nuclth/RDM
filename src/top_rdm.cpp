@@ -175,7 +175,7 @@ int main ()
 
 
   const std::string diag_file = "diagnostic_out/test_diag.dat";
-  const std::string spda_file = "sdp_files/test_spd.dat-s";
+  const std::string spda_file = "sdp_files/test_sdp.dat-s";
 
   std::ofstream diag_out (diag_file);
   std::ofstream spda_out (spda_file);
