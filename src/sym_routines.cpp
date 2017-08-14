@@ -4,7 +4,7 @@ Last Mod: 8/2017
 *****************************************************************************/
 
 #include "sym_routines.h"
-#include "aux.h"
+#include "auxiliary.h"
 
 
 int F3_3_matrix (const int i, const int k, const int ip, const int jp, const int kp, const int lp)
@@ -65,6 +65,14 @@ int F7_4_matrix (const int i, const int j, const int k, const int l, const int i
   return value;  
 }
 
+int F7_3_matrix_S (const int i, const int j, const int k, const int l, const int ip, const int jp, const int kp, const int lp)
+{
+    const int value =
+      F7_3_matrix (i, j, k, l, ip, jp, kp, lp) +  F7_3_matrix (i, j, k, l, kp, lp, ip, jp);
+
+  return value;
+}
+
 int F7_3_matrix_A (const int i, const int j, const int k, const int l, const int ip, const int jp, const int kp, const int lp)
 {
     const int value =
@@ -74,6 +82,14 @@ int F7_3_matrix_A (const int i, const int j, const int k, const int l, const int
     + F7_3_matrix (i, j, k, l, jp, ip, lp, kp) +  F7_3_matrix (i, j, k, l, lp, kp, jp, ip);
 
 	return value;
+}
+
+int F7_4_matrix_S (const int i, const int j, const int k, const int l, const int ip, const int jp, const int kp, const int lp)
+{
+  const int value = 
+        F7_4_matrix (i, j, k, l, ip, jp, kp, lp) +  F7_4_matrix (i, j, k, l, kp, lp, ip, jp);
+
+  return value;  
 }
 
 int F7_4_matrix_A (const int i, const int j, const int k, const int l, const int ip, const int jp, const int kp, const int lp)
@@ -117,6 +133,13 @@ int F10_5_matrix (const int i, const int j, const int k, const int l, const int 
   return value;
 }
 
+int F10_3_matrix_S (const int i, const int j, const int k, const int l, const int ip, const int jp, const int kp, const int lp)
+{
+    const int value =
+      F10_3_matrix (i, j, k, l, ip, jp, kp, lp) +  F10_3_matrix (i, j, k, l, kp, lp, ip, jp);
+
+  return value;
+}
 
 int F10_3_matrix_A (const int i, const int j, const int k, const int l, const int ip, const int jp, const int kp, const int lp)
 {

@@ -112,7 +112,7 @@ void jpopulate_1body (const two_array & ref_j, two_array & h1_mat, const double 
 
   for (size_t i = 0; i < mat_length; ++i)
   {
-//  	double j     = ref_j[i][3];
+ // 	double j     = ref_j[i][3];
     double degen = 1.;//(2.*j + 1.);
     h1_mat[i][i] = ref_j[i][6] * degen;
   }

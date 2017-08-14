@@ -4,7 +4,7 @@ Last Mod: 8/2017
 *****************************************************************************/
 
 #include "mscheme.h"
-#include "aux.h"
+#include "auxiliary.h"
 #include <sstream>
 
 

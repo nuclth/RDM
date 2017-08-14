@@ -3,7 +3,7 @@ Programmer: Alex Dyhdalo
 Last Mod: 8/2017
 *****************************************************************************/
 
-#include "aux.h"
+#include "auxiliary.h"
 #include <sstream>
 #include <fstream>
 
@@ -154,6 +154,20 @@ size_t Q_loop (size_t bsize)
 
   for (size_t i = 0; i < bsize; i++)      // loop over ith constraint matrix
   {
+  for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
+  {
+  for (size_t k = 0; k < bsize; k++)    // loop over matrix row
+  {
+  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
+  {
+    Q_num++;
+  }
+  }
+  }
+  }
+
+/*  for (size_t i = 0; i < bsize; i++)      // loop over ith constraint matrix
+  {
   for (size_t j = i+1; j < bsize; j++)      // loop over jth constraint matrix
   {
   for (size_t k = i; k < bsize; k++)    // loop over matrix row
@@ -167,7 +181,7 @@ size_t Q_loop (size_t bsize)
   }
   }
   }
-  }
+  }*/
 
   return Q_num;
 }
@@ -189,6 +203,21 @@ size_t G_loop (size_t bsize)
   {
   for (size_t k = 0; k < bsize; k++)    // loop over matrix row
   {
+  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
+  {
+
+    G_num++;
+  }
+  }
+  }
+  }
+
+/*  for (size_t i = 0; i < bsize; i++)      // loop over ith constraint matrix
+  {
+  for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
+  {
+  for (size_t k = 0; k < bsize; k++)    // loop over matrix row
+  {
   for (size_t l = j; l < bsize; l++)    // loop over matrix column
   {
     
@@ -199,7 +228,7 @@ size_t G_loop (size_t bsize)
   }
   }
   }
-  }
+  }*/
 
   return G_num;
 }
@@ -269,7 +298,8 @@ void header_sdp_file (con_flags flag_pass, size_t bsize, size_t Nnum, size_t Onu
 
   if (flag_pass.Q_flag)
   {
-    sdp_out << bsize * (bsize-1)/2 << " ";
+      sdp_out << bsize * bsize << " ";
+//    sdp_out << bsize * (bsize-1)/2 << " ";
   }
 
   if (flag_pass.G_flag)

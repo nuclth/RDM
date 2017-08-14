@@ -4,8 +4,8 @@ Last Mod: 8/2017
 *****************************************************************************/
 
 
-#ifndef AUX_H
-#define AUX_H
+#ifndef AUXILIARY_H
+#define AUXILIARY_H
 
 #include <iostream>
 #include <string>

@@ -1,5 +1,5 @@
 # Size of the basis  
-10
+7
 
 # Number of particles
 2
@@ -26,13 +26,13 @@ me_files/VJ-scheme_trun.dat
 1
 
 # Q Flag
-0
+1
 
 # G Flag
-0
+1
 
 # diag toggle
-0
+1
 
 # output sdp file
 sdp_files/test_sdp.dat-s

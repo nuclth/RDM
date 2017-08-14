@@ -18,8 +18,10 @@ int F7_3_matrix (const int i, const int j, const int k, const int l, const int i
 
 int F7_4_matrix (const int i, const int j, const int k, const int l, const int ip, const int jp, const int kp, const int lp);
 
+int F7_3_matrix_S (const int i, const int j, const int k, const int l, const int ip, const int jp, const int kp, const int lp);
 int F7_3_matrix_A (const int i, const int j, const int k, const int l, const int ip, const int jp, const int kp, const int lp);
 
+int F7_4_matrix_S (const int i, const int j, const int k, const int l, const int ip, const int jp, const int kp, const int lp);
 int F7_4_matrix_A (const int i, const int j, const int k, const int l, const int ip, const int jp, const int kp, const int lp);
 
 
@@ -29,6 +31,7 @@ int F10_3_matrix (const int i, const int j, const int k, const int l, const int 
 
 int F10_5_matrix (const int i, const int j, const int k, const int l, const int ip, const int jp, const int kp, const int lp);
 
+int F10_3_matrix_S (const int i, const int j, const int k, const int l, const int ip, const int jp, const int kp, const int lp);
 int F10_3_matrix_A (const int i, const int j, const int k, const int l, const int ip, const int jp, const int kp, const int lp);
 
 #endif

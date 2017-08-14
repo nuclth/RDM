@@ -14,7 +14,7 @@ done to avoid having to recompile when the user changes input parameters.
 // necessary definitions
 
 #include "matrix_define.h"
-#include "aux.h"
+#include "auxiliary.h"
 #include "flags.h"
 #include "hamiltonian.h"
 

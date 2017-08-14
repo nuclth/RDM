@@ -8,7 +8,7 @@ Last Mod: 8/2017
 
 #include <fstream>
 #include "matrix_define.h"
-#include "aux.h"
+#include "auxiliary.h"
 
 void init_con_values (const con_flags flag_pass, std::ofstream & spda_out, const size_t bsize, const size_t particles);
 
