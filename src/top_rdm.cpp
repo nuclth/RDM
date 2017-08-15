@@ -132,8 +132,8 @@ int main ()
   	five_array h2_mat(boost::extents[bsize][bsize][bsize][bsize][8]);
     fullj_populate_hamiltonian (ref_m, h1_mat, h2_mat, m_ref, m_mat, hw, diag_out, diag_toggle);
     std::cout << "HAMILTONIAN BUILT" << std::endl;
-  	compactify_h2 (ref_m, comp_h2, h2_mat, diag_out, diag_toggle);
-  	std::cout << "POTENTIAL COMPACTIFIED" << std::endl;
+//  	compactify_h2 (ref_m, comp_h2, h2_mat, diag_out, diag_toggle);
+//  	std::cout << "POTENTIAL COMPACTIFIED" << std::endl;
   }
 
 

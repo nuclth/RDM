@@ -198,3 +198,44 @@ void read_in_matrix_j_scheme (const two_array & ref_j, five_array & h2_mat, cons
 
   return;
 }
+
+/***************************************************************
+
+Function to read in J scheme single particle states and count the
+total number of two-particle states for a given single particle
+basis size.
+
+***************************************************************/
+
+size_t count_twopart_jscheme (const two_array & ref_j)
+{
+  size_t jcount = 0;
+  size_t bsize = ref_j.size();
+
+  for (size_t loop1 = 0; loop1 < bsize; loop1++)
+  {
+  for (size_t loop2 = loop1; loop2 < bsize; loop2++)
+  {
+
+    int tz1 = ref_j [loop1][4];
+    int tz2 = ref_j [loop2][4];
+
+    if (tz1 != -1 or tz2 != -1) continue;
+
+    size_t twoj1 = 2 * ref_j [loop1][3];
+    size_t twoj2 = 2 * ref_j [loop2][3];
+
+    size_t twojmax = twoj1 + twoj2;
+    size_t twojmin = abs (twoj1 - twoj2);
+
+//    std::cout << twojmin << " " << twojmax << std::endl;
+
+    for (size_t loop3 = twojmin; loop3 <= twojmax; loop3+=2)
+      jcount++; // end loop3
+
+  } // end loop2
+  } // end loop1
+
+  return jcount;
+}
+

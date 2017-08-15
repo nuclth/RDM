@@ -75,7 +75,7 @@ populate 2-body matrix elements.
 ***************************************************************/
 
 
-void fullj_populate_hamiltonian (two_array & ref_j, two_array & h1_mat, five_array & h2_mat, const std::string reference_file, const std::string matrix_file, const double hw, std::ofstream & diag_out, const bool diag_toggle) 
+void fullj_populate_hamiltonian (two_array & ref_j, two_array & h1_mat, two_array & h2_mat, const std::string reference_file, const std::string matrix_file, const double hw, std::ofstream & diag_out, const bool diag_toggle) 
 {
 
   try
@@ -84,6 +84,12 @@ void fullj_populate_hamiltonian (two_array & ref_j, two_array & h1_mat, five_arr
     std::cout << "REFERENCE READ" << std::endl;
     jpopulate_1body (ref_j, h1_mat, hw);
     std::cout << "1 BODY POPULATED" << std::endl;
+
+    size_t total_twop_basis = count_twopart_jscheme (ref_j);
+    std::cout << "J SCHEME TWO-PARTICLE BASIS EXTENT: " << total_twop_basis << std::endl;
+
+    h2_mat.resize(extents[total_twop_basis][total_twop_basis]);
+
     read_in_matrix_j_scheme (ref_j, h2_mat, matrix_file);
     std::cout << "2 BODY POPULATED" << std::endl;
   }
