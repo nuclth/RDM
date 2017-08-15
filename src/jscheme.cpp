@@ -9,9 +9,7 @@ Last Mod: 8/2017
 
 /***************************************************************
 
- 
  Function to read in the reference file for m scheme.
-
 
 ***************************************************************/
 
@@ -104,7 +102,7 @@ THIS WILL BREAK IF THE INPUT FILE .dat CHANGES TITLE OR FORMAT.
 
 ***************************************************************/
 
-void read_in_matrix_j_scheme (const two_array & ref_j, five_array & h2_mat, const std::string j_mat_file)
+void read_in_matrix_j_scheme (const two_array & ref_j, two_array & h2_mat, const two_array & twop_basis, const std::string j_mat_file)
 {
   // input file stream
   const char * j_matrix_file = (j_mat_file).c_str();
@@ -212,7 +210,7 @@ size_t count_twopart_jscheme (const two_array & ref_j)
   size_t jcount = 0;
   size_t bsize = ref_j.size();
 
-  for (size_t loop1 = 0; loop1 < bsize; loop1++)
+  for (size_t loop1 = 0;     loop1 < bsize; loop1++)
   {
   for (size_t loop2 = loop1; loop2 < bsize; loop2++)
   {
@@ -237,5 +235,55 @@ size_t count_twopart_jscheme (const two_array & ref_j)
   } // end loop1
 
   return jcount;
+}
+
+/***************************************************************
+
+Function to create an array list for all two particle basis
+states in J scheme. Array has three entries:
+
+1. ref number of single particle state 1
+2. ref number of single particle state 2
+3. total J value for sp state combo
+
+***************************************************************/
+
+void create_2pbasis_jscheme (two_array & twop_basis, const two_array & ref_j)
+{
+  size_t count = 0;
+
+  size_t bsize = ref_j.size();
+
+  for (size_t loop1 = 0;     loop1 < bsize; loop1++)
+  {
+  for (size_t loop2 = loop1; loop2 < bsize; loop2++)
+  {
+
+    int tz1 = ref_j [loop1][4];
+    int tz2 = ref_j [loop2][4];
+
+    if (tz1 != -1 or tz2 != -1) continue;
+
+    size_t twoj1 = 2 * ref_j [loop1][3];
+    size_t twoj2 = 2 * ref_j [loop2][3];
+
+    size_t twojmax = twoj1 + twoj2;
+    size_t twojmin = abs (twoj1 - twoj2);
+
+//    std::cout << twojmin << " " << twojmax << std::endl;
+
+    for (size_t twojtot = twojmin; twojtot <= twojmax; twojtot+=2)
+    {
+      twop_basis [count][0] = ref_j [loop1][0];
+      twop_basis [count][1] = ref_j [loop2][0];
+      twop_basis [count][2] = twojtot;
+      count++;
+
+    } // end twojtot loop
+
+  } // end loop2
+  } // end loop1
+
+  return;
 }
 

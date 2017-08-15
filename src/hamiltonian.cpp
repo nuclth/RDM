@@ -88,9 +88,13 @@ void fullj_populate_hamiltonian (two_array & ref_j, two_array & h1_mat, two_arra
     size_t total_twop_basis = count_twopart_jscheme (ref_j);
     std::cout << "J SCHEME TWO-PARTICLE BASIS EXTENT: " << total_twop_basis << std::endl;
 
-    h2_mat.resize(extents[total_twop_basis][total_twop_basis]);
+    h2_mat.resize(boost::extents[total_twop_basis][total_twop_basis]);
 
-    read_in_matrix_j_scheme (ref_j, h2_mat, matrix_file);
+    two_array twop_basis (boost::extents[total_twop_basis][3]);
+
+    create_2pbasis_jscheme (twop_basis, ref_j);
+
+    read_in_matrix_j_scheme (ref_j, h2_mat, twop_basis, matrix_file);
     std::cout << "2 BODY POPULATED" << std::endl;
   }
 
