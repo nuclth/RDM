@@ -1,5 +1,5 @@
 # Size of the basis  
-10
+1
 
 # Number of particles
 2
@@ -26,10 +26,10 @@ me_files/VJ-scheme_trun.dat
 1
 
 # Q Flag
-1
+0
 
 # G Flag
-1
+0
 
 # diag toggle
 1

@@ -356,11 +356,12 @@ between the 2RDM partial trace and the 1RDM.
 ***************************************************************/
 
 
-void init_P_flag (std::ofstream & spda_out, const size_t bsize, size_t & con_count, const size_t N)
+void init_P_flag (std::ofstream & spda_out, const two_array & twop_basis, const size_t bsize, size_t & con_count, const size_t N)
 {
 
   std::ios_base::sync_with_stdio(false);
 
+  size_t h2size = twop_basis.size();
 
   for (size_t i = 0; i < bsize; i++)
   {
@@ -394,8 +395,35 @@ void init_P_flag (std::ofstream & spda_out, const size_t bsize, size_t & con_cou
     }
 
 
+    for (size_t loop1 = 0; loop1 < h2size; loop1++)
+    {
+    for (size_t loop2 = 0; loop2 < h2size; loop2++)
+    {
+      int ref1  = twop_basis[loop1][0];
+      int ref2  = twop_basis[loop1][1];
+      int twoJ1 = twop_basis[loop1][2];
 
-    for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
+      int ref3  = twop_basis[loop2][0];
+      int ref4  = twop_basis[loop2][1];      
+      int twoJ2 = twop_basis[loop2][2];
+
+      double degen1 = twoJ1 + 1.;
+      double degen2 = twoJ2 + 1.;
+
+      double val3 = 1./2. * F3_3_matrix_S (i, k, ref1, ref2, ref3, ref4) * degen1 * degen2;
+
+      size_t n = loop1 + 1;
+      size_t m = loop2 + 1;
+
+      if (val3 != 0. and n <= m)
+        spda_out << con_count << " " << 3 << " " << n << " " << m << " " << val3 << "\n";
+
+    }
+    }
+
+    con_count++;
+
+/*    for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
     {
     for (size_t jp = 0; jp < bsize; jp++)      // loop over jth constraint matrix
     {
@@ -434,7 +462,7 @@ void init_P_flag (std::ofstream & spda_out, const size_t bsize, size_t & con_cou
     }
     }
     }
-    }
+    }*/
 
     con_count++;
 

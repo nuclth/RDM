@@ -102,7 +102,7 @@ THIS WILL BREAK IF THE INPUT FILE .dat CHANGES TITLE OR FORMAT.
 
 ***************************************************************/
 
-void read_in_matrix_j_scheme (const two_array & ref_j, two_array & h2_mat, const two_array & twop_basis, const std::string j_mat_file)
+void read_in_matrix_j_scheme (two_array & h2_mat, const two_array & twop_basis, const std::string j_mat_file)
 {
   // input file stream
   const char * j_matrix_file = (j_mat_file).c_str();
@@ -131,7 +131,7 @@ void read_in_matrix_j_scheme (const two_array & ref_j, two_array & h2_mat, const
   //m_scheme_matrix.set_size (m_size, m_size);
 
 
-  int i,j,k,l;
+  int right, left;
 
   for (size_t n = 0; n < total_lines; n++)
   {
@@ -140,10 +140,8 @@ void read_in_matrix_j_scheme (const two_array & ref_j, two_array & h2_mat, const
   if (!dummy.length() || dummy[0] == '#')
     continue;
 
-  i = -1;
-  j = -1;
-  k = -1;
-  l = -1;
+  right = -1;
+  left = -1;
 
   std::stringstream ss;
 
@@ -152,39 +150,35 @@ void read_in_matrix_j_scheme (const two_array & ref_j, two_array & h2_mat, const
   ss >> tz >> parity >> twoJ >> alpha >> beta >> gamma >> delta >> value;
 
   // check to see if alpha, beta, gamma, delta we're reading in
-  // matches the reference numbers in our reference matrix
+  // matches the reference numbers in our twop basis matrix
   // if yes --> read it in, otherwise discard it
 
   for (size_t w = 0; w < j_size; w++)
   {
-    if (alpha == ref_j[w][0]) 
-      i = w;
+    if (alpha == twop_basis[w][0] and beta == twop_basis[w][1] and twoJ == twop_basis[w][2])
+    {
+      left = w;
+    }
 
-    if (beta == ref_j[w][0]) 
-      j = w;
+    if (alpha == twop_basis[w][1] and beta == twop_basis[w][0] and twoJ == twop_basis[w][2])
+    {
+      left = w;
+    }
 
-    if (gamma == ref_j[w][0]) 
-      k = w;
+    if (gamma == twop_basis[w][0] and delta == twop_basis[w][1] and twoJ == twop_basis[w][2])
+    {
+      right = w;
+    }
 
-    if (delta == ref_j[w][0]) 
-      l = w;
+    if (gamma == twop_basis[w][1] and delta == twop_basis[w][0] and twoJ == twop_basis[w][2])
+    {
+      right = w;
+    }
   }
   
 
-  if (i >= 0 && j >= 0 && k >= 0 && l >= 0) // only activates if all 4 "if" statements above are true
-    {
-      double degen1 = sqrt(degen(i+1) + degen(j+1));
-      double degen2 = sqrt(degen(k+1) + degen(l+1));
+  if (left >= 0 and right >= 0)  h2_mat [left][right] = value; // assign hamiltonian value
 
-      h2_mat [i][j][k][l][0] = value * degen1 * degen2;
-      h2_mat [i][j][k][l][1] = alpha;
-      h2_mat [i][j][k][l][2] = beta;
-      h2_mat [i][j][k][l][3] = gamma;
-      h2_mat [i][j][k][l][4] = delta;
-      h2_mat [i][j][k][l][5] = tz;
-      h2_mat [i][j][k][l][6] = parity;
-      h2_mat [i][j][k][l][7] = twoJ;
-    }
   }
 
   // reset index term on reference matrix to span 0 to m_size instead of e.g. 3, 4, 9, 10, etc... for neutrons

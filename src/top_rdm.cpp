@@ -119,7 +119,7 @@ int main ()
   five_array h2_mat(boost::extents[bsize][bsize][bsize][bsize][5]);
   two_array comp_h2 (boost::extents[bsize*bsize][bsize*bsize]);
 
-
+  two_array twop_basis (boost::extents[bsize][3]);
 
   if (mscheme_toggle)
   {
@@ -132,7 +132,7 @@ int main ()
   else if (!mscheme_toggle)
   {
     h2_mat.resize(boost::extents[0][0][0][0][0]);
-    fullj_populate_hamiltonian (ref_m, h1_mat, comp_h2, m_ref, m_mat, hw, diag_out, diag_toggle);
+    fullj_populate_hamiltonian (ref_m, twop_basis, h1_mat, comp_h2, m_ref, m_mat, hw, diag_out, diag_toggle);
     std::cout << "HAMILTONIAN BUILT" << std::endl;
   }
 
@@ -162,7 +162,7 @@ int main ()
 
   if (P_flag)
   {
-    init_P_flag (spda_out, bsize, con_count, particles);
+    init_P_flag (spda_out, twop_basis, bsize, con_count, particles);
     std::cout << "P FLAG DONE" << std::endl;
   }
 
