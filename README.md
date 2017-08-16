@@ -109,7 +109,7 @@ the ground state energy of the system is ```E = 24.265 MeV```. Building up a bas
 8  states - n = 0, l = 1 - E = 25.201479
 18 states - n = 0, l = 2 - E = 25.156046
 20 states - n = 1, l = 0 - E = 24.826845
-32 states - n = 0, l = 3 - E = 24.826768
+32 states - n = 0, l = 3 - E = 24.826768 REDO
 40 states - n = 1, l = 1 - E = 24.727879
 50 states - n = 1, l = 2 - E = 24.727862
 52 states - n = 2, l = 0 - E = 24.727862
@@ -118,15 +118,13 @@ the ground state energy of the system is ```E = 24.265 MeV```. Building up a bas
 while Heiko's matrix elements give,
 
 ```
-2  states - n = 0, l = 0 - E = 
-8  states - n = 0, l = 1 - E = 
-18 states - n = 0, l = 2 - E = 
-20 states - n = 1, l = 0 - E = 
-32 states - n = 0, l = 3 - E = 
-40 states - n = 1, l = 1 - E = 
-50 states - n = 1, l = 2 - E = 
-52 states - n = 2, l = 0 - E = 
+2  states - n = 0, l = 0 - E = 25.526560
+8  states - n = 0, l = 1 - E = 25.201498
+18 states - n = 0, l = 2 - E = 25.156066 
+20 states - n = 1, l = 0 - E = 24.826269
+34 states - n = 0, l = 3 - E = 24.823097
+40 states - n = 1, l = 1 - E = 24.710750
+50 states - n = 1, l = 2 - E = 24.695374
+52 states - n = 2, l = 0 - E = 24.659119
 ```
 
-
-For 2 particles in 8 single particle m scheme basis states (n=0 l=0, n=0 l=1) gives ```E=25.2014(9) MeV``` where the uncertainty in the last digit comes from using Heiko vs. Morten's code. This needs to be reproduced in the j scheme code. 
