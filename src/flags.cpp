@@ -1,6 +1,6 @@
 #include "flags.h"
 #include "sym_routines.h"
-#include "aux.h"
+#include "auxiliary.h"
 #include <iomanip>
 
 

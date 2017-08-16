@@ -1,5 +1,5 @@
 #include "sym_routines.h"
-#include "aux.h"
+#include "auxiliary.h"
 
 
 int F3_3_matrix (const int i, const int k, const int ip, const int jp, const int kp, const int lp)

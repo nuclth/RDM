@@ -102,6 +102,31 @@ hb*w = 10 MeV
 b    = hb*c / sqr(hb*w*m) = 2.0364 fm
 ```
 
-the ground state energy of the system is ```E = 24.265 MeV```. 
+the ground state energy of the system is ```E = 24.265 MeV```. Building up a basis with only closed shells using Morten's matrix elements, the energy progression is:
+
+```
+2  states - n = 0, l = 0 - E = 25.526540
+8  states - n = 0, l = 1 - E = 25.201479
+18 states - n = 0, l = 2 - E = 25.156046
+20 states - n = 1, l = 0 - E = 24.826845
+32 states - n = 0, l = 3 - E = 24.826768
+40 states - n = 1, l = 1 - E = 24.727879
+50 states - n = 1, l = 2 - E = 24.727862
+52 states - n = 2, l = 0 - E = 24.727862
+```
+
+while Heiko's matrix elements give,
+
+```
+2  states - n = 0, l = 0 - E = 
+8  states - n = 0, l = 1 - E = 
+18 states - n = 0, l = 2 - E = 
+20 states - n = 1, l = 0 - E = 
+32 states - n = 0, l = 3 - E = 
+40 states - n = 1, l = 1 - E = 
+50 states - n = 1, l = 2 - E = 
+52 states - n = 2, l = 0 - E = 
+```
+
 
 For 2 particles in 8 single particle m scheme basis states (n=0 l=0, n=0 l=1) gives ```E=25.2014(9) MeV``` where the uncertainty in the last digit comes from using Heiko vs. Morten's code. This needs to be reproduced in the j scheme code. 

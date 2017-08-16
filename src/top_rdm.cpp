@@ -30,7 +30,7 @@ for the system.
 //#include "boost/cstdlib.hpp"
 
 #include "matrix_define.h"
-#include "aux.h"
+#include "auxiliary.h"
 #include "flags.h"
 #include "hamiltonian.h"
 

@@ -1,4 +1,4 @@
-#include "aux.h"
+#include "auxiliary.h"
 #include <sstream>
 #include <fstream>
 
