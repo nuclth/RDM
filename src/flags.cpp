@@ -145,10 +145,10 @@ void init_C_matrix (const con_flags flag_pass, std::ofstream & spda_out, const t
       double val1 = h1_mat [ip][jp] * -1.0;
 
       size_t n = ip + 1;
-        size_t m = jp + 1; 
+      size_t m = jp + 1; 
 
-        if (val1 != 0.)
-          spda_out << con_count << " " << 1 << " " << n << " " << m << " " << val1 << "\n";
+      if (val1 != 0. and n <= m)
+      	spda_out << con_count << " " << 1 << " " << n << " " << m << " " << val1 << "\n";
     }
     }
 
@@ -158,18 +158,18 @@ void init_C_matrix (const con_flags flag_pass, std::ofstream & spda_out, const t
 
   if (flag_pass.two_body_toggle)
   {
-      for (size_t ip = 0; ip < h2_len; ip++)      // loop over ith constraint matrix
+      for (size_t ip = 0;  ip < h2_len; ip++)      // loop over ith constraint matrix
       {
       for (size_t jp = ip; jp < h2_len; jp++)      // loop over jth constraint matrix
       {
 
         double val3 = h2_mat [ip][jp] * -1./2.;
 
-          size_t n = ip + 1;
-          size_t m = jp + 1; 
+        size_t n = ip + 1;
+        size_t m = jp + 1; 
 
-          if (val3 != 0.)
-          spda_out << con_count << " " << 3 << " " << n << " " << m << " " << val3 << "\n";
+        if (val3 != 0. and n <= m)
+        	spda_out << con_count << " " << 3 << " " << n << " " << m << " " << val3 << "\n";
 
       }
       }
@@ -210,7 +210,7 @@ void init_N_flag (std::ofstream & spda_out, const size_t bsize, size_t & con_cou
       size_t n = ip + 1;
       size_t m = kp + 1; 
 
-      if (val1 != 0.)
+      if (val1 != 0. and n <= m)
       	spda_out << con_count << " " << 1 << " " << n << " " << m << " " << val1 << "\n";
 
 
@@ -259,7 +259,7 @@ void init_O_flag (std::ofstream & spda_out, const size_t bsize, size_t & con_cou
       size_t n = k + 1;
       size_t m = l + 1; 
 
-      if (val1 != 0.)
+      if (val1 != 0. and n <= m)
         spda_out << con_count << " " << 1 << " " << n << " " << m << " " << val1 << "\n";
 
 
@@ -279,7 +279,7 @@ void init_O_flag (std::ofstream & spda_out, const size_t bsize, size_t & con_cou
       size_t n = k + 1;
       size_t m = l + 1; 
 
-      if (val2 != 0.)
+      if (val2 != 0. and n <= m)
         spda_out << con_count << " " << 2 << " " << n << " " << m << " " << val2 << "\n";
 
 

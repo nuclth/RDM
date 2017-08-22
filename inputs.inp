@@ -8,8 +8,8 @@
 10
 
 # input reference file for m-scheme
-me_files/test_index.dat
+me_files/nl_3_index.dat
 
 # input matrix file for m-scheme 
-me_files/test_mscheme.dat
+me_files/nl_3_me.dat
 
