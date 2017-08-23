@@ -333,7 +333,7 @@ void init_P_flag (std::ofstream & spda_out, const size_t bsize, size_t & con_cou
       size_t n = ip + 1;
       size_t m = kp + 1; 
 
-      if (val1 != 0.)
+      if (val1 != 0. and n <= m)
         spda_out << con_count << " " << 1 << " " << n << " " << m << " " << val1 << "\n";
 
 

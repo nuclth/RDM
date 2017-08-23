@@ -1,5 +1,5 @@
 # Size of the basis  
-40
+54
 
 # Number of particles
 2
@@ -8,8 +8,8 @@
 10
 
 # input reference file for m-scheme
-me_files/nl_3_index.dat
+me_files/spM.dat
 
 # input matrix file for m-scheme 
-me_files/nl_3_me.dat
+me_files/VM-scheme.dat
 
