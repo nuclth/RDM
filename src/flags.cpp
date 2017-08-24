@@ -15,7 +15,7 @@ These are the real numbers on the right hand side of the SDP.
 
 
 
-void init_con_values (const con_flags flag_pass, FILE * spda_out, const size_t bsize, const size_t particles)
+void init_con_values (const con_flags flag_pass, FILE * sdpa_out, const size_t bsize, const size_t particles)
 {
 
 //  size_t cmat_extent = F1_con.size();
@@ -23,8 +23,8 @@ void init_con_values (const con_flags flag_pass, FILE * spda_out, const size_t b
 
   // F1 Flag - N Trace condition
   if (flag_pass.N_flag)
-  	fprintf(spda_out, "%d ", particles);
-//    spda_out << particles << " ";
+  	fprintf(sdpa_out, "%lu ", particles);
+//    sdpa_out << particles << " ";
 
   // F2 Flag - Linear p q relations
   if (flag_pass.O_flag)
@@ -35,11 +35,11 @@ void init_con_values (const con_flags flag_pass, FILE * spda_out, const size_t b
     {
 
       if (i1 == i2)
-      	fprintf(spda_out, "%f ", 1.0);
-//        spda_out << 1. << " ";
+      	fprintf(sdpa_out, "%f ", 1.0);
+//        sdpa_out << 1. << " ";
       else
-      	fprintf(spda_out, "%f ", 0.0);
-//        spda_out << 0. << " ";
+      	fprintf(sdpa_out, "%f ", 0.0);
+//        sdpa_out << 0. << " ";
 
 
     }
@@ -55,8 +55,8 @@ void init_con_values (const con_flags flag_pass, FILE * spda_out, const size_t b
       for (size_t k = i; k < bsize; k++)      // loop over jth constraint matrix
       {
 
-//        spda_out << 0. << " ";
-      	  fprintf(spda_out, "%f ", 0.0);
+//        sdpa_out << 0. << " ";
+      	  fprintf(sdpa_out, "%f ", 0.0);
 
       }
       }
@@ -79,8 +79,8 @@ void init_con_values (const con_flags flag_pass, FILE * spda_out, const size_t b
 
         double val = kron_del(i,k)*kron_del(j,l) - kron_del(i,l)*kron_del(j,k);
 
-//        spda_out << val << " ";
-        fprintf(spda_out, "%f ", val);
+//        sdpa_out << val << " ";
+        fprintf(sdpa_out, "%f ", val);
 
       }
       }
@@ -105,8 +105,8 @@ void init_con_values (const con_flags flag_pass, FILE * spda_out, const size_t b
         if (j == l && k < i)
           continue;
 
-//        spda_out << 0. << " ";
-        fprintf(spda_out, "%f ", 0.0);
+//        sdpa_out << 0. << " ";
+        fprintf(sdpa_out, "%f ", 0.0);
 
       }
       }
@@ -115,8 +115,8 @@ void init_con_values (const con_flags flag_pass, FILE * spda_out, const size_t b
 
    }
 
-  fprintf(spda_out, "\n");
-//  spda_out << std::endl;
+  fprintf(sdpa_out, "\n");
+//  sdpa_out << std::endl;
 
 }
 
@@ -136,12 +136,12 @@ the negative energy.
 ***************************************************************/
 
 
-void init_C_matrix (const con_flags flag_pass, FILE * spda_out, const two_array & h1_mat, const two_array & h2_mat, size_t & con_count)
+void init_C_matrix (const con_flags flag_pass, FILE * sdpa_out, const two_array & h1_mat, const two_array & h2_mat, size_t & con_count)
 {
   size_t h1_len = h1_mat.size();
   size_t h2_len = h2_mat.size();
 
-//    spda_out << std::setprecision(16);
+//    sdpa_out << std::setprecision(16);
 
     for (size_t ip = 0;  ip < h1_len; ip++)
     {
@@ -154,8 +154,8 @@ void init_C_matrix (const con_flags flag_pass, FILE * spda_out, const two_array 
       size_t m = jp + 1; 
 
       if (val1 != 0. and n <= m)
-      	fprintf(spda_out, "%d %d %d %d %f\n", con_count, 1, n, m, val1);
-//      	spda_out << con_count << " " << 1 << " " << n << " " << m << " " << val1 << "\n";
+      	fprintf(sdpa_out, "%lu %u %lu %lu %f\n", con_count, 1, n, m, val1);
+//      	sdpa_out << con_count << " " << 1 << " " << n << " " << m << " " << val1 << "\n";
     }
     }
 
@@ -176,8 +176,8 @@ void init_C_matrix (const con_flags flag_pass, FILE * spda_out, const two_array 
         size_t m = jp + 1; 
 
         if (val3 != 0. and n <= m)
-          fprintf(spda_out, "%d %d %d %d %f\n", con_count, 3, n, m, val3);
-//        	spda_out << con_count << " " << 3 << " " << n << " " << m << " " << val3 << "\n";
+          fprintf(sdpa_out, "%lu %u %lu %lu %f\n", con_count, 3, n, m, val3);
+//        	sdpa_out << con_count << " " << 3 << " " << n << " " << m << " " << val3 << "\n";
 
       }
       }
@@ -203,7 +203,7 @@ matches the dimensions of the F0 constraint matrix.
 
 ***************************************************************/
 
-void init_N_flag (FILE * spda_out, const size_t bsize, size_t & con_count)
+void init_N_flag (FILE * sdpa_out, const size_t bsize, size_t & con_count)
 {
 
 
@@ -219,8 +219,8 @@ void init_N_flag (FILE * spda_out, const size_t bsize, size_t & con_count)
       size_t m = kp + 1; 
 
       if (val1 != 0. and n <= m)
-      	fprintf(spda_out, "%d %d %d %d %f\n", con_count, 1, n, m, val1);
-//      	spda_out << con_count << " " << 1 << " " << n << " " << m << " " << val1 << "\n";
+      	fprintf(sdpa_out, "%lu %u %lu %lu %f\n", con_count, 1, n, m, val1);
+//      	sdpa_out << con_count << " " << 1 << " " << n << " " << m << " " << val1 << "\n";
 
 
     }
@@ -246,7 +246,7 @@ F2_con.
 
 ***************************************************************/
 
-void init_O_flag (FILE * spda_out, const size_t bsize, size_t & con_count)
+void init_O_flag (FILE * sdpa_out, const size_t bsize, size_t & con_count)
 {
 
   std::ios_base::sync_with_stdio(false);
@@ -269,8 +269,8 @@ void init_O_flag (FILE * spda_out, const size_t bsize, size_t & con_count)
       size_t m = l + 1; 
 
       if (val1 != 0. and n <= m)
-        fprintf(spda_out, "%d %d %d %d %f\n", con_count, 1, n, m, val1);
-//        spda_out << con_count << " " << 1 << " " << n << " " << m << " " << val1 << "\n";
+        fprintf(sdpa_out, "%lu %u %lu %lu %f\n", con_count, 1, n, m, val1);
+//        sdpa_out << con_count << " " << 1 << " " << n << " " << m << " " << val1 << "\n";
 
 
     }
@@ -290,8 +290,8 @@ void init_O_flag (FILE * spda_out, const size_t bsize, size_t & con_count)
       size_t m = l + 1; 
 
       if (val2 != 0. and n <= m)
-      	fprintf(spda_out, "%d %d %d %d %f\n", con_count, 2, n, m, val2);
-//        spda_out << con_count << " " << 2 << " " << n << " " << m << " " << val2 << "\n";
+      	fprintf(sdpa_out, "%lu %u %lu %lu %f\n", con_count, 2, n, m, val2);
+//        sdpa_out << con_count << " " << 2 << " " << n << " " << m << " " << val2 << "\n";
 
 
     }
@@ -317,11 +317,14 @@ between the 2RDM partial trace and the 1RDM.
 ***************************************************************/
 
 
-void init_P_flag (FILE * spda_out, const size_t bsize, size_t & con_count, const size_t N)
+void init_P_flag (FILE * sdpa_out, const size_t bsize, size_t & con_count, const size_t N)
 {
 
   std::ios_base::sync_with_stdio(false);
 
+//  char buffer[120];
+
+//  setbuf (sdpa_out, buffer);
 
   for (size_t i = 0; i < bsize; i++)
   {
@@ -345,14 +348,20 @@ void init_P_flag (FILE * spda_out, const size_t bsize, size_t & con_count, const
       size_t m = kp + 1; 
 
       if (val1 != 0. and n <= m)
-        fprintf(spda_out, "%d %d %d %d %f\n", con_count, 1, n, m, val1);
-        //spda_out << con_count << " " << 1 << " " << n << " " << m << " " << val1 << "\n";
+      {
+        fprintf(sdpa_out, "%lu %u %lu %lu %f\n", con_count, 1, n, m, val1);
+//        fprintf(sdpa_out, buffer);
+//        fprintf(sdpa_out, "\n");
+      }
+//        fprintf(sdpa_out, "%d %d %d %d %f\n", con_count, 1, n, m, val1);
+        //sdpa_out << con_count << " " << 1 << " " << n << " " << m << " " << val1 << "\n";
 
 
 
     }
     }
 
+//    fprintf(sdpa_out, buffer);
 
 
     for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
@@ -381,14 +390,21 @@ void init_P_flag (FILE * spda_out, const size_t bsize, size_t & con_count, const
 
 
       if (val3 != 0. and n <= m)
-      	fprintf(spda_out, "%d %d %d %d %f\n", con_count, 3, n, m, val3);
-//        spda_out << con_count << " " << 3 << " " << n << " " << m << " " << val3 << "\n";
+      {
+      	fprintf (sdpa_out, "%lu %u %lu %lu %f\n", con_count, 3, n, m, val3);
+//      	fprintf (sdpa_out, buffer);
+//      	fprintf (sdpa_out, "\n");
+      }
+//      	fprintf(sdpa_out, "%d %d %d %d %f\n", con_count, 3, n, m, val3);
+//        sdpa_out << con_count << " " << 3 << " " << n << " " << m << " " << val3 << "\n";
 
 
     }
     }
     }
     }
+
+//    fprintf(sdpa_out, buffer);
 
     con_count++;
 
@@ -407,7 +423,7 @@ relations between the 1RDM, q, 2RDM, and Q.
 
 ***************************************************************/
 
-void init_Q_flag (std::ofstream & spda_out, const size_t bsize, size_t & con_count)
+void init_Q_flag (std::ofstream & sdpa_out, const size_t bsize, size_t & con_count)
 {
 
 
@@ -434,7 +450,7 @@ void init_Q_flag (std::ofstream & spda_out, const size_t bsize, size_t & con_cou
         size_t m = jp + 1; 
 
         if (val2 != 0.)
-          spda_out << con_count << " " << 2 << " " << n << " " << m << " " << val2 << "\n";
+          sdpa_out << con_count << " " << 2 << " " << n << " " << m << " " << val2 << "\n";
     }
   }
 
@@ -463,7 +479,7 @@ void init_Q_flag (std::ofstream & spda_out, const size_t bsize, size_t & con_cou
 
 
         if (val3 != 0. and n <= m)
-          spda_out << con_count << " " << 3 << " " << n << " " << m << " " << val3 << "\n";
+          sdpa_out << con_count << " " << 3 << " " << n << " " << m << " " << val3 << "\n";
 
 
   }
@@ -495,7 +511,7 @@ void init_Q_flag (std::ofstream & spda_out, const size_t bsize, size_t & con_cou
 
 
         if (val4 != 0. and n <= m)
-          spda_out << con_count << " " << 4 << " " << n << " " << m << " " << val4 << "\n";
+          sdpa_out << con_count << " " << 4 << " " << n << " " << m << " " << val4 << "\n";
 
 
   }
@@ -525,7 +541,7 @@ relations.
 
 ***************************************************************/
 
-void init_G_flag (std::ofstream & spda_out, const size_t bsize, size_t & con_count)
+void init_G_flag (std::ofstream & sdpa_out, const size_t bsize, size_t & con_count)
 {
 
 
@@ -555,7 +571,7 @@ void init_G_flag (std::ofstream & spda_out, const size_t bsize, size_t & con_cou
       size_t m = kp + 1; 
 
       if (val1 != 0.)
-        spda_out << con_count << " " << 1 << " " << n << " " << m << " " << val1 << "\n";
+        sdpa_out << con_count << " " << 1 << " " << n << " " << m << " " << val1 << "\n";
 
   
     }
@@ -585,7 +601,7 @@ void init_G_flag (std::ofstream & spda_out, const size_t bsize, size_t & con_cou
 
 
         if (val3 != 0. and n <= m)
-          spda_out << con_count << " " << 3 << " " << n << " " << m << " " << val3 << "\n";
+          sdpa_out << con_count << " " << 3 << " " << n << " " << m << " " << val3 << "\n";
 
     }
     }
@@ -612,7 +628,7 @@ void init_G_flag (std::ofstream & spda_out, const size_t bsize, size_t & con_cou
         size_t m = kp * bsize + lp + 1;
 
         if (val5 != 0. and n <= m)
-          spda_out << con_count << " " << 5 << " " << n << " " << m << " " << val5 << "\n";    
+          sdpa_out << con_count << " " << 5 << " " << n << " " << m << " " << val5 << "\n";    
 
     }
     }

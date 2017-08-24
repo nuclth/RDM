@@ -242,8 +242,8 @@ int main ()
 
   std::cout << "POTENTIAL COMPACTIFIED" << std::endl;
 
-  fprintf (sdpa_out, "%d\n", cons);
-  fprintf (sdpa_out, "%d\n", blocks);
+  fprintf (sdpa_out, "%lu\n", cons);
+  fprintf (sdpa_out, "%lu\n", blocks);
 
 //  sdpa_out << cons << std::endl;
 //  sdpa_out << blocks << std::endl;
@@ -251,19 +251,19 @@ int main ()
   if (N_flag)
   {
 //  	sdpa_out << bsize << " ";
-  	fprintf (sdpa_out, "%d ", bsize);
+  	fprintf (sdpa_out, "%lu ", bsize);
   }
 
   if (O_flag)
   {
 //  	sdpa_out << bsize << " ";
-  	fprintf (sdpa_out, "%d ", bsize);
+  	fprintf (sdpa_out, "%lu ", bsize);
   }
   
   if (two_body_toggle)
   {
 //  	sdpa_out << bsize * (bsize-1)/2 << " ";
-  	fprintf (sdpa_out, "%d ", bsize*(bsize-1)/2);
+  	fprintf (sdpa_out, "%lu ", bsize*(bsize-1)/2);
   }
 
   if (Q_flag)
