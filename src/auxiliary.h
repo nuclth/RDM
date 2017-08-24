@@ -27,7 +27,15 @@ struct con_flags
 };
 
 parameters read_in_inputs ();
-double kron_del(const size_t i, const size_t j);
+
+inline double kron_del(const size_t i, const size_t j)
+{
+  if (i == j)
+    return 1.;
+
+  return 0.;
+}
+
 template <typename Array> void print(std::ostream& os, const Array & A);
 template <> void print (std::ostream& os, const double & x);
 template <> void print (std::ostream& os, const int & x);

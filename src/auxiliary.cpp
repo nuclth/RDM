@@ -55,14 +55,14 @@ Kronecker delta function. Returns 1 if i=j and 0 otherwise.
 
 ***************************************************************/
 
-double kron_del(const size_t i, const size_t j)
+/*inline double kron_del(const size_t i, const size_t j)
 {
 
   if (i == j)
     return 1.;
 
   return 0.;
-}
+}*/
 
 /***************************************************************
 

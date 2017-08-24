@@ -322,7 +322,7 @@ void init_P_flag (FILE * sdpa_out, const size_t bsize, size_t & con_count, const
 
   std::ios_base::sync_with_stdio(false);
 
-//  char buffer[120];
+//  char buffer[120*bsize];
 
 //  setbuf (sdpa_out, buffer);
 
@@ -360,9 +360,6 @@ void init_P_flag (FILE * sdpa_out, const size_t bsize, size_t & con_count, const
 
     }
     }
-
-//    fprintf(sdpa_out, buffer);
-
 
     for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
     {
@@ -404,14 +401,12 @@ void init_P_flag (FILE * sdpa_out, const size_t bsize, size_t & con_count, const
     }
     }
 
-//    fprintf(sdpa_out, buffer);
-
     con_count++;
 
   }
   }
 
-
+//  fprintf(sdpa_out, buffer);
 
 }
 

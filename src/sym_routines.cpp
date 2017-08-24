@@ -2,14 +2,14 @@
 #include "auxiliary.h"
 
 
-int F3_3_matrix (const int i, const int k, const int ip, const int jp, const int kp, const int lp)
+/*inline int F3_3_matrix (const int i, const int k, const int ip, const int jp, const int kp, const int lp)
 {
   const int value = kron_del (i,ip) * kron_del (k,kp) * kron_del (jp, lp);
 
   return value;  
 }
 
-int F3_3_matrix_A (const int i, const int k, const int ip, const int jp, const int kp, const int lp)
+inline int F3_3_matrix_A (const int i, const int k, const int ip, const int jp, const int kp, const int lp)
 {
 	const int value = 
 	    F3_3_matrix (i, k, ip, jp, kp, lp) +  F3_3_matrix (i, k, kp, lp, ip, jp)
@@ -18,7 +18,7 @@ int F3_3_matrix_A (const int i, const int k, const int ip, const int jp, const i
       + F3_3_matrix (i, k, jp, ip, lp, kp) +  F3_3_matrix (i, k, lp, kp, jp, ip);
 
 	return value;
-}
+}*/
 
 
 
