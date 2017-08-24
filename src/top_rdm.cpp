@@ -123,10 +123,11 @@ int main ()
 
   const bool N_flag = true; // p START - TRACE CONDITION
   const bool O_flag = true; // q START - LINEAR RELATIONS
-  const bool P_flag = true; // P START - TRACE CONDITION
+  const bool P_flag = false; // P START - TRACE CONDITION
   const bool Q_flag = true; // Q START - LINEAR RELATIONS
   const bool G_flag = true; // G START - LINEAR REALTIONS
 
+  const bool NN_flag = true;
 
 
   if (!two_body_toggle and (P_flag or Q_flag or G_flag))
@@ -135,11 +136,11 @@ int main ()
   	return EXIT_FAILURE;
   }	
 
-  if (!P_flag and (Q_flag or G_flag))
+/*  if (!P_flag and (Q_flag or G_flag))
   {
     std::cerr << "ERROR: CANNOT INIT G OR Q FLAG WITHOUT P FLAG - GIVING UP" << std::endl;
     return EXIT_FAILURE;
-  }
+  }*/
 
 
   if (G_flag and !Q_flag)
@@ -159,6 +160,8 @@ int main ()
   flag_pass.Q_flag = Q_flag;
   flag_pass.G_flag = G_flag;
 
+  flag_pass.NN_flag = NN_flag;
+
   flag_pass.two_body_toggle = two_body_toggle;
   flag_pass.diag_toggle = diag_toggle;
 
@@ -166,6 +169,7 @@ int main ()
 
   const size_t F1num  = 1;
   const size_t F2num  = bsize * (bsize + 1)/2;
+  const size_t NN_num = 1;
   const size_t F3num  = bsize * (bsize + 1)/2;
   const size_t F7num  = Q_num;//bsize*bsize*bsize*bsize;
   const size_t F10num = G_num;//bsize*bsize*bsize*bsize;
@@ -210,6 +214,9 @@ int main ()
   if (two_body_toggle)
   	blocks++;
   
+  if (NN_flag)
+  	cons += NN_num;
+
   if (P_flag)
   	cons += F3num;
 
@@ -301,6 +308,12 @@ int main ()
   {
     init_O_flag (sdpa_out, bsize, con_count);
     std::cout << "O FLAG DONE" << std::endl;
+  }
+
+  if (NN_flag)
+  {
+  	init_NN_flag (sdpa_out, bsize, con_count);
+  	std::cout << "NN FLAG DONE" << std::endl;
   }
 
   if (P_flag)

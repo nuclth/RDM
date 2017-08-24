@@ -22,6 +22,9 @@ struct con_flags
 	bool P_flag;
   	bool Q_flag;
   	bool G_flag;
+
+  	bool NN_flag;
+
 	bool diag_toggle;
 	bool two_body_toggle;
 };

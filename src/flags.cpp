@@ -47,6 +47,10 @@ void init_con_values (const con_flags flag_pass, FILE * sdpa_out, const size_t b
    }
 
 
+   if (flag_pass.NN_flag)
+   	 fprintf(sdpa_out, "%lu ", particles*(particles-1)/2);
+
+
   // F3 Flag - P and p trace relation
    if (flag_pass.P_flag)
    {
@@ -307,6 +311,59 @@ void init_O_flag (FILE * sdpa_out, const size_t bsize, size_t & con_count)
 
 }
 
+/***************************************************************
+
+Function to create our constraint matrix to fix the trace of the
+2 matrix to be N(N-1)/2 for particle number N.
+
+***************************************************************/
+
+void init_NN_flag (FILE * sdpa_out, const size_t bsize, size_t & con_count)
+{
+
+
+    for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
+    {
+    for (size_t jp = ip; jp < bsize; jp++)      // loop over jth constraint matrix
+    {
+      if (ip >= jp)
+        continue;
+
+    for (size_t kp = 0; kp < bsize; kp++)    // loop over matrix row
+    {
+    for (size_t lp = kp; lp < bsize; lp++)    // loop over matrix column
+    {
+      if (kp >= lp)
+        continue;
+
+      size_t ips = ip + 1;
+      size_t jps = jp + 1;
+      size_t kps = kp + 1;
+      size_t lps = lp + 1;
+
+      size_t n = jps - ips + (2*bsize - ips) * (ips - 1)/2;
+      size_t m = lps - kps + (2*bsize - kps) * (kps - 1)/2;
+
+      double val3 = (1./4.) * F_NN_matrix_A (ip, jp, kp, lp);
+
+      if (val3 != 0. and n <= m)
+      {
+      	fprintf (sdpa_out, "%lu %u %lu %lu %f\n", con_count, 3, n, m, val3);
+//      	fprintf (sdpa_out, buffer);
+//      	fprintf (sdpa_out, "\n");
+      }
+//      	fprintf(sdpa_out, "%d %d %d %d %f\n", con_count, 3, n, m, val3);
+//        sdpa_out << con_count << " " << 3 << " " << n << " " << m << " " << val3 << "\n";
+
+
+    }
+    }
+    }
+    }
+
+
+    con_count++;
+}
 
 
 /***************************************************************
@@ -363,14 +420,14 @@ void init_P_flag (FILE * sdpa_out, const size_t bsize, size_t & con_count, const
 
     for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
     {
-    for (size_t jp = 0; jp < bsize; jp++)      // loop over jth constraint matrix
+    for (size_t jp = ip; jp < bsize; jp++)      // loop over jth constraint matrix
     {
       if (ip >= jp)
         continue;
 
     for (size_t kp = 0; kp < bsize; kp++)    // loop over matrix row
     {
-    for (size_t lp = 0; lp < bsize; lp++)    // loop over matrix column
+    for (size_t lp = kp; lp < bsize; lp++)    // loop over matrix column
     {
       if (kp >= lp)
         continue;

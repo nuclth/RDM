@@ -4,6 +4,22 @@
 #include "auxiliary.h"
 
 
+inline int F_NN_matrix (const int i, const int j, const int k, const int l)
+{
+	const int value = kron_del (i,k) * kron_del (j,l);
+
+	return value;
+}
+
+inline int F_NN_matrix_A (const int i, const int j, const int k, const int l)
+{
+	const int value =
+		F_NN_matrix (i, j, k, l) - F_NN_matrix (j, i, k, l)
+	  - F_NN_matrix (i, j, l, k) + F_NN_matrix (j, i, l, k);	
+
+	return value;
+}
+
 inline int F3_3_matrix (const int i, const int k, const int ip, const int jp, const int kp, const int lp)
 {
   const int value = kron_del (i,ip) * kron_del (k,kp) * kron_del (jp, lp);
