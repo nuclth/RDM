@@ -15,7 +15,7 @@ These are the real numbers on the right hand side of the SDP.
 
 
 
-void init_con_values (const con_flags flag_pass, std::ofstream & spda_out, const size_t bsize, const size_t particles)
+void init_con_values (const con_flags flag_pass, FILE * spda_out, const size_t bsize, const size_t particles)
 {
 
 //  size_t cmat_extent = F1_con.size();
@@ -23,7 +23,8 @@ void init_con_values (const con_flags flag_pass, std::ofstream & spda_out, const
 
   // F1 Flag - N Trace condition
   if (flag_pass.N_flag)
-    spda_out << particles << " ";
+  	fprintf(spda_out, "%d ", particles);
+//    spda_out << particles << " ";
 
   // F2 Flag - Linear p q relations
   if (flag_pass.O_flag)
@@ -34,9 +35,11 @@ void init_con_values (const con_flags flag_pass, std::ofstream & spda_out, const
     {
 
       if (i1 == i2)
-        spda_out << 1. << " ";
+      	fprintf(spda_out, "%f ", 1.0);
+//        spda_out << 1. << " ";
       else
-        spda_out << 0. << " ";
+      	fprintf(spda_out, "%f ", 0.0);
+//        spda_out << 0. << " ";
 
 
     }
@@ -52,7 +55,8 @@ void init_con_values (const con_flags flag_pass, std::ofstream & spda_out, const
       for (size_t k = i; k < bsize; k++)      // loop over jth constraint matrix
       {
 
-        spda_out << 0. << " ";
+//        spda_out << 0. << " ";
+      	  fprintf(spda_out, "%f ", 0.0);
 
       }
       }
@@ -73,9 +77,10 @@ void init_con_values (const con_flags flag_pass, std::ofstream & spda_out, const
         if (j < l && k <= i)
           continue;
 
-      double val = kron_del(i,k)*kron_del(j,l) - kron_del(i,l)*kron_del(j,k);
+        double val = kron_del(i,k)*kron_del(j,l) - kron_del(i,l)*kron_del(j,k);
 
-        spda_out << val << " ";
+//        spda_out << val << " ";
+        fprintf(spda_out, "%f ", val);
 
       }
       }
@@ -100,7 +105,8 @@ void init_con_values (const con_flags flag_pass, std::ofstream & spda_out, const
         if (j == l && k < i)
           continue;
 
-        spda_out << 0. << " ";
+//        spda_out << 0. << " ";
+        fprintf(spda_out, "%f ", 0.0);
 
       }
       }
@@ -109,8 +115,8 @@ void init_con_values (const con_flags flag_pass, std::ofstream & spda_out, const
 
    }
 
-
-  spda_out << std::endl;
+  fprintf(spda_out, "\n");
+//  spda_out << std::endl;
 
 }
 
@@ -130,12 +136,12 @@ the negative energy.
 ***************************************************************/
 
 
-void init_C_matrix (const con_flags flag_pass, std::ofstream & spda_out, const two_array & h1_mat, const two_array & h2_mat, size_t & con_count)
+void init_C_matrix (const con_flags flag_pass, FILE * spda_out, const two_array & h1_mat, const two_array & h2_mat, size_t & con_count)
 {
   size_t h1_len = h1_mat.size();
   size_t h2_len = h2_mat.size();
 
-    spda_out << std::setprecision(16);
+//    spda_out << std::setprecision(16);
 
     for (size_t ip = 0;  ip < h1_len; ip++)
     {
@@ -148,7 +154,8 @@ void init_C_matrix (const con_flags flag_pass, std::ofstream & spda_out, const t
       size_t m = jp + 1; 
 
       if (val1 != 0. and n <= m)
-      	spda_out << con_count << " " << 1 << " " << n << " " << m << " " << val1 << "\n";
+      	fprintf(spda_out, "%d %d %d %d %f\n", con_count, 1, n, m, val1);
+//      	spda_out << con_count << " " << 1 << " " << n << " " << m << " " << val1 << "\n";
     }
     }
 
@@ -169,7 +176,8 @@ void init_C_matrix (const con_flags flag_pass, std::ofstream & spda_out, const t
         size_t m = jp + 1; 
 
         if (val3 != 0. and n <= m)
-        	spda_out << con_count << " " << 3 << " " << n << " " << m << " " << val3 << "\n";
+          fprintf(spda_out, "%d %d %d %d %f\n", con_count, 3, n, m, val3);
+//        	spda_out << con_count << " " << 3 << " " << n << " " << m << " " << val3 << "\n";
 
       }
       }
@@ -195,7 +203,7 @@ matches the dimensions of the F0 constraint matrix.
 
 ***************************************************************/
 
-void init_N_flag (std::ofstream & spda_out, const size_t bsize, size_t & con_count)
+void init_N_flag (FILE * spda_out, const size_t bsize, size_t & con_count)
 {
 
 
@@ -211,7 +219,8 @@ void init_N_flag (std::ofstream & spda_out, const size_t bsize, size_t & con_cou
       size_t m = kp + 1; 
 
       if (val1 != 0. and n <= m)
-      	spda_out << con_count << " " << 1 << " " << n << " " << m << " " << val1 << "\n";
+      	fprintf(spda_out, "%d %d %d %d %f\n", con_count, 1, n, m, val1);
+//      	spda_out << con_count << " " << 1 << " " << n << " " << m << " " << val1 << "\n";
 
 
     }
@@ -237,7 +246,7 @@ F2_con.
 
 ***************************************************************/
 
-void init_O_flag (std::ofstream & spda_out, const size_t bsize, size_t & con_count)
+void init_O_flag (FILE * spda_out, const size_t bsize, size_t & con_count)
 {
 
   std::ios_base::sync_with_stdio(false);
@@ -260,7 +269,8 @@ void init_O_flag (std::ofstream & spda_out, const size_t bsize, size_t & con_cou
       size_t m = l + 1; 
 
       if (val1 != 0. and n <= m)
-        spda_out << con_count << " " << 1 << " " << n << " " << m << " " << val1 << "\n";
+        fprintf(spda_out, "%d %d %d %d %f\n", con_count, 1, n, m, val1);
+//        spda_out << con_count << " " << 1 << " " << n << " " << m << " " << val1 << "\n";
 
 
     }
@@ -280,7 +290,8 @@ void init_O_flag (std::ofstream & spda_out, const size_t bsize, size_t & con_cou
       size_t m = l + 1; 
 
       if (val2 != 0. and n <= m)
-        spda_out << con_count << " " << 2 << " " << n << " " << m << " " << val2 << "\n";
+      	fprintf(spda_out, "%d %d %d %d %f\n", con_count, 2, n, m, val2);
+//        spda_out << con_count << " " << 2 << " " << n << " " << m << " " << val2 << "\n";
 
 
     }
@@ -306,7 +317,7 @@ between the 2RDM partial trace and the 1RDM.
 ***************************************************************/
 
 
-void init_P_flag (std::ofstream & spda_out, const size_t bsize, size_t & con_count, const size_t N)
+void init_P_flag (FILE * spda_out, const size_t bsize, size_t & con_count, const size_t N)
 {
 
   std::ios_base::sync_with_stdio(false);
@@ -334,7 +345,8 @@ void init_P_flag (std::ofstream & spda_out, const size_t bsize, size_t & con_cou
       size_t m = kp + 1; 
 
       if (val1 != 0. and n <= m)
-        spda_out << con_count << " " << 1 << " " << n << " " << m << " " << val1 << "\n";
+        fprintf(spda_out, "%d %d %d %d %f\n", con_count, 1, n, m, val1);
+        //spda_out << con_count << " " << 1 << " " << n << " " << m << " " << val1 << "\n";
 
 
 
@@ -369,7 +381,8 @@ void init_P_flag (std::ofstream & spda_out, const size_t bsize, size_t & con_cou
 
 
       if (val3 != 0. and n <= m)
-        spda_out << con_count << " " << 3 << " " << n << " " << m << " " << val3 << "\n";
+      	fprintf(spda_out, "%d %d %d %d %f\n", con_count, 3, n, m, val3);
+//        spda_out << con_count << " " << 3 << " " << n << " " << m << " " << val3 << "\n";
 
 
     }

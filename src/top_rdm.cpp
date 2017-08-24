@@ -175,10 +175,20 @@ int main ()
 
 
   const std::string diag_file = "diagnostic_out/test_diag.dat";
-  const std::string spda_file = "sdp_files/test_sdp.dat-s";
+  const std::string sdpa_file = "sdp_files/test_sdp.dat-s";
 
   std::ofstream diag_out (diag_file);
-  std::ofstream spda_out (spda_file);
+//  std::ofstream sdpa_out (sdpa_file);
+
+
+//  const char * diag_char = (diag_file).c_str();
+  const char * sdpa_char = (sdpa_file).c_str();
+
+//  FILE * diag_out;
+  FILE * sdpa_out;
+
+//  diag_out = fopen (diag_char, "w");
+  sdpa_out = fopen (sdpa_char, "w");
 
 
 
@@ -232,74 +242,82 @@ int main ()
 
   std::cout << "POTENTIAL COMPACTIFIED" << std::endl;
 
-  spda_out << cons << std::endl;
-  spda_out << blocks << std::endl;
+  fprintf (sdpa_out, "%d\n", cons);
+  fprintf (sdpa_out, "%d\n", blocks);
+
+//  sdpa_out << cons << std::endl;
+//  sdpa_out << blocks << std::endl;
 
   if (N_flag)
   {
-  	spda_out << bsize << " ";
+//  	sdpa_out << bsize << " ";
+  	fprintf (sdpa_out, "%d ", bsize);
   }
 
   if (O_flag)
   {
-  	spda_out << bsize << " ";
+//  	sdpa_out << bsize << " ";
+  	fprintf (sdpa_out, "%d ", bsize);
   }
   
   if (two_body_toggle)
   {
-  	spda_out << bsize * (bsize-1)/2 << " ";
+//  	sdpa_out << bsize * (bsize-1)/2 << " ";
+  	fprintf (sdpa_out, "%d ", bsize*(bsize-1)/2);
   }
 
   if (Q_flag)
   {
-  	spda_out << bsize * (bsize-1)/2 << " ";
+  		std::cout << "Q UNFINISHED";
+//  	sdpa_out << bsize * (bsize-1)/2 << " ";
   }
 
   if (G_flag)
   {
-  	spda_out << bsize * bsize << " ";
+  		std::cout << "G UNFINISHED";
+//  	sdpa_out << bsize * bsize << " ";
   }
 
-  spda_out << std::endl;
+  fprintf (sdpa_out, "\n");
 
   
-  init_con_values (flag_pass, spda_out, bsize, particles);
+  init_con_values (flag_pass, sdpa_out, bsize, particles);
 
   size_t con_count = 0;
 
 
-  init_C_matrix (flag_pass, spda_out, h1_mat, comp_h2, con_count);
+  init_C_matrix (flag_pass, sdpa_out, h1_mat, comp_h2, con_count);
 
   std::cout << "C MATRIX DONE" << std::endl;
 
 
   if (N_flag)
   {
-    init_N_flag (spda_out, bsize, con_count);
+    init_N_flag (sdpa_out, bsize, con_count);
     std::cout << "N FLAG DONE" << std::endl;
   }
 
   if (O_flag)
   {
-    init_O_flag (spda_out, bsize, con_count);
+    init_O_flag (sdpa_out, bsize, con_count);
     std::cout << "O FLAG DONE" << std::endl;
   }
 
   if (P_flag)
   {
-    init_P_flag (spda_out, bsize, con_count, particles);
+    init_P_flag (sdpa_out, bsize, con_count, particles);
     std::cout << "P FLAG DONE" << std::endl;
   }
 
   if (Q_flag)
   {
-    init_Q_flag (spda_out, bsize, con_count);
+//    init_Q_flag (sdpa_out, bsize, con_count);
     std::cout << "Q FLAG DONE" << std::endl;
   }
 
   if (G_flag)
   {
-    init_G_flag (spda_out, bsize, con_count);
+//    init_G_flag (sdpa_out, bsize, con_count);
     std::cout << "G FLAG DONE" << std::endl;
   }
 
