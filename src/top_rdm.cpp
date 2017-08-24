@@ -124,8 +124,8 @@ int main ()
   const bool N_flag = true; // p START - TRACE CONDITION
   const bool O_flag = true; // q START - LINEAR RELATIONS
   const bool P_flag = true; // P START - TRACE CONDITION
-  const bool Q_flag = false; // Q START - LINEAR RELATIONS
-  const bool G_flag = false; // G START - LINEAR REALTIONS
+  const bool Q_flag = true; // Q START - LINEAR RELATIONS
+  const bool G_flag = true; // G START - LINEAR REALTIONS
 
 
 
@@ -268,14 +268,14 @@ int main ()
 
   if (Q_flag)
   {
-  		std::cout << "Q UNFINISHED";
+  	fprintf (sdpa_out, "%lu ", bsize*(bsize-1)/2);
 //  	sdpa_out << bsize * (bsize-1)/2 << " ";
   }
 
   if (G_flag)
   {
-  		std::cout << "G UNFINISHED";
-//  	sdpa_out << bsize * bsize << " ";
+  	fprintf (sdpa_out, "%lu ", bsize*bsize);
+  	//  	sdpa_out << bsize * bsize << " ";
   }
 
   fprintf (sdpa_out, "\n");
@@ -311,13 +311,13 @@ int main ()
 
   if (Q_flag)
   {
-//    init_Q_flag (sdpa_out, bsize, con_count);
+    init_Q_flag (sdpa_out, bsize, con_count);
     std::cout << "Q FLAG DONE" << std::endl;
   }
 
   if (G_flag)
   {
-//    init_G_flag (sdpa_out, bsize, con_count);
+    init_G_flag (sdpa_out, bsize, con_count);
     std::cout << "G FLAG DONE" << std::endl;
   }
 

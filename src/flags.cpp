@@ -418,7 +418,7 @@ relations between the 1RDM, q, 2RDM, and Q.
 
 ***************************************************************/
 
-void init_Q_flag (std::ofstream & sdpa_out, const size_t bsize, size_t & con_count)
+void init_Q_flag (FILE * sdpa_out, const size_t bsize, size_t & con_count)
 {
 
 
@@ -444,8 +444,9 @@ void init_Q_flag (std::ofstream & sdpa_out, const size_t bsize, size_t & con_cou
       size_t n = ip + 1;
         size_t m = jp + 1; 
 
-        if (val2 != 0.)
-          sdpa_out << con_count << " " << 2 << " " << n << " " << m << " " << val2 << "\n";
+        if (val2 != 0. and n <= m)
+          fprintf(sdpa_out, "%lu %u %lu %lu %f\n", con_count, 2, n, m, val2);
+//          sdpa_out << con_count << " " << 2 << " " << n << " " << m << " " << val2 << "\n";
     }
   }
 
@@ -474,7 +475,8 @@ void init_Q_flag (std::ofstream & sdpa_out, const size_t bsize, size_t & con_cou
 
 
         if (val3 != 0. and n <= m)
-          sdpa_out << con_count << " " << 3 << " " << n << " " << m << " " << val3 << "\n";
+        	fprintf(sdpa_out, "%lu %u %lu %lu %f\n", con_count, 3, n, m, val3);
+//          sdpa_out << con_count << " " << 3 << " " << n << " " << m << " " << val3 << "\n";
 
 
   }
@@ -497,16 +499,17 @@ void init_Q_flag (std::ofstream & sdpa_out, const size_t bsize, size_t & con_cou
       double val4 = (-1./8.) * F7_4_matrix_A (i, j, k, l, ip, jp, kp, lp);
 
       size_t ips = ip + 1;
-        size_t jps = jp + 1;
-        size_t kps = kp + 1;
-        size_t lps = lp + 1;
+      size_t jps = jp + 1;
+      size_t kps = kp + 1;
+      size_t lps = lp + 1;
 
-        size_t n = jps - ips + (2*bsize - ips) * (ips - 1)/2;
-        size_t m = lps - kps + (2*bsize - kps) * (kps - 1)/2;
+      size_t n = jps - ips + (2*bsize - ips) * (ips - 1)/2;
+      size_t m = lps - kps + (2*bsize - kps) * (kps - 1)/2;
 
 
-        if (val4 != 0. and n <= m)
-          sdpa_out << con_count << " " << 4 << " " << n << " " << m << " " << val4 << "\n";
+      if (val4 != 0. and n <= m)
+          fprintf(sdpa_out, "%lu %u %lu %lu %f\n", con_count, 4, n, m, val4);
+//          sdpa_out << con_count << " " << 4 << " " << n << " " << m << " " << val4 << "\n";
 
 
   }
@@ -536,7 +539,7 @@ relations.
 
 ***************************************************************/
 
-void init_G_flag (std::ofstream & sdpa_out, const size_t bsize, size_t & con_count)
+void init_G_flag (FILE * sdpa_out, const size_t bsize, size_t & con_count)
 {
 
 
@@ -565,8 +568,9 @@ void init_G_flag (std::ofstream & sdpa_out, const size_t bsize, size_t & con_cou
       size_t n = ip + 1;
       size_t m = kp + 1; 
 
-      if (val1 != 0.)
-        sdpa_out << con_count << " " << 1 << " " << n << " " << m << " " << val1 << "\n";
+      if (val1 != 0. and n <= m)
+        fprintf(sdpa_out, "%lu %u %lu %lu %f\n", con_count, 1, n, m, val1);      	
+//        sdpa_out << con_count << " " << 1 << " " << n << " " << m << " " << val1 << "\n";
 
   
     }
@@ -596,7 +600,8 @@ void init_G_flag (std::ofstream & sdpa_out, const size_t bsize, size_t & con_cou
 
 
         if (val3 != 0. and n <= m)
-          sdpa_out << con_count << " " << 3 << " " << n << " " << m << " " << val3 << "\n";
+          fprintf(sdpa_out, "%lu %u %lu %lu %f\n", con_count, 3, n, m, val3);
+//          sdpa_out << con_count << " " << 3 << " " << n << " " << m << " " << val3 << "\n";
 
     }
     }
@@ -623,7 +628,8 @@ void init_G_flag (std::ofstream & sdpa_out, const size_t bsize, size_t & con_cou
         size_t m = kp * bsize + lp + 1;
 
         if (val5 != 0. and n <= m)
-          sdpa_out << con_count << " " << 5 << " " << n << " " << m << " " << val5 << "\n";    
+          fprintf(sdpa_out, "%lu %u %lu %lu %f\n", con_count, 5, n, m, val5);
+//          sdpa_out << con_count << " " << 5 << " " << n << " " << m << " " << val5 << "\n";    
 
     }
     }

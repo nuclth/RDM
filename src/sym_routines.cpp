@@ -23,7 +23,7 @@ inline int F3_3_matrix_A (const int i, const int k, const int ip, const int jp, 
 
 
 
-int F7_2_matrix (const int i, const int j, const int k, const int l, const int ip, const int jp)
+/*int F7_2_matrix (const int i, const int j, const int k, const int l, const int ip, const int jp)
 {
   const int value = 
         kron_del(j,l)*kron_del(i,ip)*kron_del(k,jp)
@@ -73,14 +73,14 @@ int F7_4_matrix_A (const int i, const int j, const int k, const int l, const int
 
   return value;  
 }
+*/
 
 
 
 
 
 
-
-int F10_1_matrix (const int i, const int j, const int k, const int l, const int ip, const int kp)
+/*int F10_1_matrix (const int i, const int j, const int k, const int l, const int ip, const int kp)
 {
   const int value = kron_del(j,l) * kron_del(i,ip)*kron_del(k,kp);
 
@@ -114,4 +114,4 @@ int F10_3_matrix_A (const int i, const int j, const int k, const int l, const in
     + F10_3_matrix (i, j, k, l, jp, ip, lp, kp) +  F10_3_matrix (i, j, k, l, lp, kp, jp, ip);
 
   return value;
-}
+}*/
