@@ -128,3 +128,17 @@ while Heiko's matrix elements give,
 52 states - n = 2, l = 0 - E = 24.659119
 ```
 
+**UPDATE**: Morten's matrix elements are given above for the triangular (Nmax truncation) model space. Going to a larger space or using square (Emax truncation) model space reproduces Heiko's numbers.
+
+More benchmarks using 2 matrix full trace condition (NN). 2 particles in 8 basis states (Heiko code):
+
+```
+P        - E = 25.201496
+P NN     - E = 25.201496
+P NN Q   - E = 25.201496
+P NN Q G - E = 25.201496
+
+NN       - E = 23.027203
+NN Q     - E = 25.198266
+NN Q G   - E = 25.201496
+```
