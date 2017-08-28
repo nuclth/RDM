@@ -93,6 +93,62 @@ Doesn't work yet.
 
 ## Benchmarks
 
+Calculations done here with parameters,
+
+```
+hb*c = 197.326 MeV-fm
+m    = 938.92 MeV
+hb*w = 10 MeV
+b    = hb*c / sqr(hb*w*m) = 2.0364 fm
+```
+
+using the **test_index.dat** and **test_mscheme_20.dat** data files (from Heiko's code).
+
+Exact diagonlization of the m scheme Hamiltonian gives the energy:
+
+
+```
+2  states - n = 0, l = 0 - E = 25.5266
+8  states - n = 0, l = 1 - E = 25.2015
+18 states - n = 0, l = 2 - E = 25.1561
+20 states - n = 1, l = 0 - E = 24.9853
+26 states - n = 1, l = 1 - E = 24.927
+36 states - n = 1, l = 2 - E = 24.9188 
+38 states - n = 2, l = 0 - E = 24.9043
+44 states - n = 2, l = 1 - E = 24.8995
+54 states - n = 2, l = 2 - E = 24.8984
+```
+
+while the SDP formulation with P condition gives:
+
+```
+2  states - n = 0, l = 0 - E = 25.52655
+8  states - n = 0, l = 1 - E = 25.20149 
+18 states - n = 0, l = 2 - E = 25.15606 
+20 states - n = 1, l = 0 - E = 24.82686
+26 states - n = 0, l = 3 - E = 24.71367
+36 states - n = 1, l = 1 - E = 24.69817
+38 states - n = 1, l = 2 - E = 24.66184
+44 states - n = 2, l = 0 - E = 
+54 states - n = 2, l = 0 - E = 
+```
+
+The SDP formulation with PQ condition gives:
+
+```
+2  states - n = 0, l = 0 - E = 
+8  states - n = 0, l = 1 - E = 
+18 states - n = 0, l = 2 - E = 
+20 states - n = 1, l = 0 - E = 24.82686
+26 states - n = 0, l = 3 - E = 
+36 states - n = 1, l = 1 - E = 
+38 states - n = 1, l = 2 - E = 
+44 states - n = 2, l = 0 - E = 
+54 states - n = 2, l = 0 - E = 
+```
+
+## Benchmarks OLD
+
 For 2 particles interacting via Minnesota potential (with usual parameters, **add paper ref**) and choice of:
 
 ```

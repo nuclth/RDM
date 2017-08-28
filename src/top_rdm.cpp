@@ -127,7 +127,7 @@ int main ()
   const bool Q_flag = true; // Q START - LINEAR RELATIONS
   const bool G_flag = true; // G START - LINEAR REALTIONS
 
-  const bool NN_flag = true;
+  const bool NN_flag = false;
 
 
   if (!two_body_toggle and (P_flag or Q_flag or G_flag))
