@@ -16,4 +16,7 @@ void init_P_flag (FILE * spda_out, const size_t bsize, size_t & con_count, const
 void init_Q_flag (FILE * spda_out, const size_t bsize, size_t & con_count);
 void init_G_flag (FILE * spda_out, const size_t bsize, size_t & con_count);
 
+void init_T2_flag (FILE * spda_out, const size_t bsize, size_t & con_count);
+
+
 #endif

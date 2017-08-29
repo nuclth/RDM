@@ -123,4 +123,74 @@ inline int F10_3_matrix_A (const int i, const int j, const int k, const int l, c
   return value;
 }
 
+
+inline double T2_1_matrix (const int i, const int j, const int k, const int l, const int m, const int n, const int ip, const int lp)
+{
+	const double value = 
+		(1./2.) * kron_del (i, ip) * kron_del (l, lp) *
+		( kron_del (j, m) * kron_del (k, n) - kron_del (k, m) * kron_del (j, n) 
+		- kron_del (j, n) * kron_del (k, m)	+ kron_del (k, n) * kron_del (j, m) );
+
+	return value;
+}
+
+
+inline double T2_3_matrix (const int i, const int j, const int k, const int l, const int m, const int n, const int ip, const int jp, const int kp, const int lp)
+{
+	const double value = 
+		(1./2.) * kron_del (i, l) *
+		( kron_del (ip, m) * kron_del (jp, n) * kron_del (kp, j) * kron_del (lp, k)
+		- kron_del (ip, m) * kron_del (jp, n) * kron_del (kp, k) * kron_del (lp, j)
+		- kron_del (ip, n) * kron_del (jp, m) * kron_del (kp, j) * kron_del (lp, k)
+		+ kron_del (ip, n) * kron_del (jp, m) * kron_del (kp, k) * kron_del (lp, j) ) 
+		-
+		2. *
+		( kron_del (j, m) * kron_del (ip, i) * kron_del (jp, n) * kron_del (kp, l) * kron_del (lp, k)
+		- kron_del (k, m) * kron_del (ip, i) * kron_del (jp, n) * kron_del (kp, l) * kron_del (lp, j)
+		- kron_del (j, n) * kron_del (ip, i) * kron_del (jp, m) * kron_del (kp, l) * kron_del (lp, k)
+		+ kron_del (k, n) * kron_del (ip, i) * kron_del (jp, m) * kron_del (kp, l) * kron_del (lp, j) );
+
+	return value;
+}
+
+inline double T2_1_matrix_S (const int i, const int j, const int k, const int l, const int m, const int n, const int ip, const int lp)
+{
+	const double value = (1./2.) * 
+		( T2_1_matrix (i, j, k, l, m, n, ip, lp) + T2_1_matrix (i, j, k, l, m, n, lp, ip) ); 
+
+	return value;
+}
+
+
+inline double T2_3_matrix_A (const int i, const int j, const int k, const int l, const int m, const int n, const int ip, const int jp, const int kp, const int lp)
+{
+	const double value = (1./8.) *
+		( T2_3_matrix (i, j, k, l, m, n, ip, jp, kp, lp) + T2_3_matrix (i, j, k, l, m, n, kp, lp, ip, jp) 
+		- T2_3_matrix (i, j, k, l, m, n, jp, ip, kp, lp) + T2_3_matrix (i, j, k, l, m, n, kp, lp, jp, ip) 
+		- T2_3_matrix (i, j, k, l, m, n, ip, jp, lp, kp) + T2_3_matrix (i, j, k, l, m, n, lp, kp, ip, jp)
+		+ T2_3_matrix (i, j, k, l, m, n, jp, ip, lp, kp) + T2_3_matrix (i, j, k, l, m, n, lp, kp, jp, ip) );
+
+	return value;
+}
+
+
+inline double T2_6_matrix (const int i, const int j, const int k, const int l, const int m, const int n, const int ip, const int jp, const int kp, const int lp, const int mp, const int np)
+{
+	const double value = (-1.) *
+		( kron_del (i, ip) * kron_del (j, jp) * kron_del (k, kp) * kron_del (l, lp) * kron_del (m, mp) * kron_del (n ,np) );
+
+	return value;
+}
+
+inline double T2_6_matrix_A (const int i, const int j, const int k, const int l, const int m, const int n, const int ip, const int jp, const int kp, const int lp, const int mp, const int np)
+{
+	const double value = (1./8.) * 
+		( T2_6_matrix (i, j, k, l, m, n, ip, jp, kp, lp, mp, np) + T2_6_matrix (i, j, k, l, m, n, lp, mp, np, ip, jp, kp)
+		- T2_6_matrix (i, j, k, l, m, n, jp, ip, kp, lp, mp, np) + T2_6_matrix (i, j, k, l, m, n, lp, mp, np, jp, ip, kp) 
+		- T2_6_matrix (i, j, k, l, m, n, ip, jp, kp, mp, lp, np) + T2_6_matrix (i, j, k, l, m, n, mp, lp, np, ip, jp, kp)
+		+ T2_6_matrix (i, j, k, l, m, n, jp, ip, kp, mp, lp, np) + T2_6_matrix (i, j, k, l, m, n, mp, lp, np, jp, ip, kp));
+
+		return value;
+}
+
 #endif

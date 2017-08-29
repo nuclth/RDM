@@ -121,13 +121,16 @@ int main ()
 
   // START CONSTRAINT FLAG DEFINE
 
-  const bool N_flag = true; // p START - TRACE CONDITION
-  const bool O_flag = true; // q START - LINEAR RELATIONS
-  const bool P_flag = true; // P START - TRACE CONDITION
-  const bool Q_flag = true; // Q START - LINEAR RELATIONS
-  const bool G_flag = true; // G START - LINEAR REALTIONS
+  const bool N_flag  = true; // p START - TRACE CONDITION
+  const bool O_flag  = true; // q START - LINEAR RELATIONS
+  const bool P_flag  = true; // P START - TRACE CONDITION
+  const bool Q_flag  = true; // Q START - LINEAR RELATIONS
+  const bool G_flag  = true; // G START - LINEAR REALTIONSi
 
-  const bool NN_flag = false;
+  const bool T1_flag = false;
+  const bool T2_flag = true;
+
+  const bool NN_flag = true;
 
 
   if (!two_body_toggle and (P_flag or Q_flag or G_flag))
@@ -154,11 +157,13 @@ int main ()
 
   struct con_flags flag_pass;
 
-  flag_pass.N_flag = N_flag;
-  flag_pass.O_flag = O_flag;
-  flag_pass.P_flag = P_flag;
-  flag_pass.Q_flag = Q_flag;
-  flag_pass.G_flag = G_flag;
+  flag_pass.N_flag  = N_flag;
+  flag_pass.O_flag  = O_flag;
+  flag_pass.P_flag  = P_flag;
+  flag_pass.Q_flag  = Q_flag;
+  flag_pass.G_flag  = G_flag;
+  flag_pass.T1_flag = T1_flag;
+  flag_pass.T2_flag = T2_flag;
 
   flag_pass.NN_flag = NN_flag;
 
@@ -173,6 +178,9 @@ int main ()
   const size_t F3num  = bsize * (bsize + 1)/2;
   const size_t F7num  = Q_num;//bsize*bsize*bsize*bsize;
   const size_t F10num = G_num;//bsize*bsize*bsize*bsize;
+
+  const size_t T1_num = 1;
+  const size_t T2_num = T2_count (bsize);
 
 
 
@@ -232,7 +240,17 @@ int main ()
   	blocks++;
   }
 
+  if (T1_flag)
+  {
+  	cons += T1_num;
+  	blocks++;
+  }
 
+  if (T2_flag)
+  {
+  	cons += T2_num;
+  	blocks++;
+  }
 
 
   two_array ref_m (boost::extents[bsize][7]);
@@ -256,34 +274,25 @@ int main ()
 //  sdpa_out << blocks << std::endl;
 
   if (N_flag)
-  {
-//  	sdpa_out << bsize << " ";
   	fprintf (sdpa_out, "%lu ", bsize);
-  }
 
   if (O_flag)
-  {
-//  	sdpa_out << bsize << " ";
   	fprintf (sdpa_out, "%lu ", bsize);
-  }
   
   if (two_body_toggle)
-  {
-//  	sdpa_out << bsize * (bsize-1)/2 << " ";
   	fprintf (sdpa_out, "%lu ", bsize*(bsize-1)/2);
-  }
 
   if (Q_flag)
-  {
   	fprintf (sdpa_out, "%lu ", bsize*(bsize-1)/2);
-//  	sdpa_out << bsize * (bsize-1)/2 << " ";
-  }
 
   if (G_flag)
-  {
   	fprintf (sdpa_out, "%lu ", bsize*bsize);
-  	//  	sdpa_out << bsize * bsize << " ";
-  }
+
+
+
+  if (T2_flag)
+  	fprintf (sdpa_out, "%lu ", T2_DIM_count (bsize));
+
 
   fprintf (sdpa_out, "\n");
 
@@ -334,6 +343,16 @@ int main ()
     std::cout << "G FLAG DONE" << std::endl;
   }
 
+  if (T1_flag)
+  {
+  	std::cout << "T1 FLAG DONE" << std::endl;
+  }
+
+  if (T2_flag)
+  {
+  	init_T2_flag (sdpa_out, bsize, con_count);
+  	std::cout << "T2 FLAG DONE" << std::endl;
+  }
 
   return EXIT_SUCCESS;
 

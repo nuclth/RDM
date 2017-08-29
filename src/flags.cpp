@@ -48,7 +48,7 @@ void init_con_values (const con_flags flag_pass, FILE * sdpa_out, const size_t b
 
 
    if (flag_pass.NN_flag)
-   	 fprintf(sdpa_out, "%lu ", particles*(particles-1)/2);
+   	 fprintf(sdpa_out, "%f ", (double)particles*(particles-1)/2);
 
 
   // F3 Flag - P and p trace relation
@@ -81,7 +81,7 @@ void init_con_values (const con_flags flag_pass, FILE * sdpa_out, const size_t b
         if (j < l && k <= i)
           continue;
 
-        double val = kron_del(i,k)*kron_del(j,l) - kron_del(i,l)*kron_del(j,k);
+        double val = (double) (kron_del(i,k)*kron_del(j,l) - kron_del(i,l)*kron_del(j,k));
 
 //        sdpa_out << val << " ";
         fprintf(sdpa_out, "%f ", val);
@@ -119,9 +119,34 @@ void init_con_values (const con_flags flag_pass, FILE * sdpa_out, const size_t b
 
    }
 
+   if (flag_pass.T2_flag)
+   {
+	  	for (size_t i = 0;     i < bsize; i++)      
+	 	{
+	 	for (size_t j = i+1;   j < bsize; j++)     
+	 	{
+	  	for (size_t k = 0;     k < bsize; k++)   
+	  	{
+	  	for (size_t l = 0;     l < bsize; l++)   
+	  	{
+	  	for (size_t m = l+1;   m < bsize; m++)   
+	  	{
+	  	for (size_t n = 0;     n < bsize; n++)    
+	  	{
+	  		fprintf(sdpa_out, "%f ", 0.0);
+	  	}
+	  	}
+		}
+		}
+		}
+		}
+
+   }
+
   fprintf(sdpa_out, "\n");
 //  sdpa_out << std::endl;
 
+  return;
 }
 
 
@@ -189,6 +214,8 @@ void init_C_matrix (const con_flags flag_pass, FILE * sdpa_out, const two_array 
 
   con_count++;
 
+
+  return;
 }
 
 
@@ -232,6 +259,9 @@ void init_N_flag (FILE * sdpa_out, const size_t bsize, size_t & con_count)
 
 
     con_count++;
+
+
+    return;
 }
 
 
@@ -308,7 +338,7 @@ void init_O_flag (FILE * sdpa_out, const size_t bsize, size_t & con_count)
   }
   }
 
-
+  return;
 }
 
 /***************************************************************
@@ -363,6 +393,9 @@ void init_NN_flag (FILE * sdpa_out, const size_t bsize, size_t & con_count)
 
 
     con_count++;
+
+
+    return;
 }
 
 
@@ -465,6 +498,7 @@ void init_P_flag (FILE * sdpa_out, const size_t bsize, size_t & con_count, const
 
 //  fprintf(sdpa_out, buffer);
 
+  return;
 }
 
 
@@ -584,7 +618,7 @@ void init_Q_flag (FILE * sdpa_out, const size_t bsize, size_t & con_count)
   }
 
 
-
+  return;
 }
 
 
@@ -663,7 +697,7 @@ void init_G_flag (FILE * sdpa_out, const size_t bsize, size_t & con_count)
     }
     }
     }
-  }
+ 	}
 
 
 
@@ -700,7 +734,126 @@ void init_G_flag (FILE * sdpa_out, const size_t bsize, size_t & con_count)
   }
   }
 
+  return;
 }
+
+/***************************************************************
+
+Function to create our 3 index conditions for T2.
+
+***************************************************************/
+
+
+void init_T2_flag (FILE * sdpa_out, const size_t bsize, size_t & con_count)
+{
+  	for (size_t i = 0;   i < bsize; i++)      
+ 	{
+ 	for (size_t j = i+1; j < bsize; j++)     
+ 	{
+  	for (size_t k = 0;   k < bsize; k++)   
+  	{
+  	for (size_t l = 0;   l < bsize; l++)   
+  	{
+  	for (size_t m = l+1; m < bsize; m++)   
+  	{
+  	for (size_t n = 0;   n < bsize; n++)    
+  	{
+
+	    for (size_t ip = 0;  ip < bsize; ip++)      // loop over ith constraint matrix
+	    {
+	    for (size_t jp = ip; jp < bsize; jp++)      // loop over jth constraint matrix
+	    {
+	    	double val1 = T2_1_matrix_S (i, j, k, l, m, n, ip, jp);	
+
+    	  	size_t r = ip + 1;
+    		size_t s = jp + 1; 
+
+      		if (val1 != 0. and r <= s)
+        		fprintf(sdpa_out, "%lu %u %lu %lu %f\n", con_count, 1, r, s, val1); 
+	    }
+		}
+
+
+	    for (size_t ip = 0;    ip < bsize; ip++)      // loop over ith constraint matrix
+	    {
+	    for (size_t jp = ip+1; jp < bsize; jp++)      // loop over jth constraint matrix
+	    {
+	    for (size_t kp = 0;    kp < bsize; kp++)    // loop over matrix row
+	    {
+	    for (size_t lp = kp+1; lp < bsize; lp++)    // loop over matrix column
+	    {
+ 
+	        double val3 = T2_3_matrix_A (i, j, k, l, m, n, ip, jp, kp, lp);
+
+	        size_t ips = ip + 1;
+	        size_t jps = jp + 1;
+	        size_t kps = kp + 1;
+	        size_t lps = lp + 1;
+
+	        size_t r = jps - ips + (2*bsize - ips) * (ips - 1)/2;
+	        size_t s = lps - kps + (2*bsize - kps) * (kps - 1)/2;
+
+
+	        if (val3 != 0. and r <= s)
+	          fprintf(sdpa_out, "%lu %u %lu %lu %f\n", con_count, 3, r, s, val3);
+	//          sdpa_out << con_count << " " << 3 << " " << n << " " << m << " " << val3 << "\n";
+
+	    }
+		}
+	    }
+	    }
+
+	    size_t r = 0;
+	    	 	
+	    for (size_t ip = 0;    ip < bsize; ip++)      // loop over ith constraint matrix
+	    {
+	    for (size_t jp = ip+1; jp < bsize; jp++)      // loop over jth constraint matrix
+	    {
+	    for (size_t kp = 0;    kp < bsize; kp++)    // loop over matrix row
+	    {
+
+	    r++;
+
+	    size_t s = 0;
+
+	    for (size_t lp = 0;    lp < bsize; lp++)    // loop over matrix column
+	    {
+	    for (size_t mp = lp+1; mp < bsize; mp++)
+	    {
+	    for (size_t np = 0;    np < bsize; np++)
+	    {
+ 
+	        double val6 = T2_6_matrix_A (i, j, k, l, m, n, ip, jp, kp, lp, mp, np);
+
+	        
+	        s++;
+//	        size_t r = ip * bsize * bsize + jp * bsize + kp + 1;
+//	        size_t s = lp * bsize * bsize + mp * bsize + np + 1;
+
+
+	        if (val6 != 0. and r <= s)
+	          fprintf(sdpa_out, "%lu %u %lu %lu %f\n", con_count, 6, r, s, val6);
+	//          sdpa_out << con_count << " " << 3 << " " << n << " " << m << " " << val3 << "\n";
+
+	    }
+		}
+	    }
+	    }
+		}
+		}
+
+  		con_count++;
+  	}
+  	}
+	}
+	}
+	}
+	}
+
+	return;
+}
+
+
 /*
 
   for (size_t i = 0; i < bsize; i++)      // loop over ith constraint matrix
