@@ -124,8 +124,8 @@ int main ()
   const bool N_flag  = true; // p START - TRACE CONDITION
   const bool O_flag  = true; // q START - LINEAR RELATIONS
   const bool P_flag  = true; // P START - TRACE CONDITION
-  const bool Q_flag  = false; // Q START - LINEAR RELATIONS
-  const bool G_flag  = false; // G START - LINEAR REALTIONSi
+  const bool Q_flag  = true; // Q START - LINEAR RELATIONS
+  const bool G_flag  = true; // G START - LINEAR REALTIONSi
 
   const bool T1_flag = false;
   const bool T2_flag = true;

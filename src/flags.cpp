@@ -832,7 +832,7 @@ void init_T2_flag (FILE * sdpa_out, const size_t bsize, size_t & con_count)
 
 
 	        if (val6 != 0. and r <= s)
-	          fprintf(sdpa_out, "%lu %u %lu %lu %f\n", con_count, 4, r, s, val6);
+	          fprintf(sdpa_out, "%lu %u %lu %lu %f\n", con_count, 6, r, s, val6);
 	//          sdpa_out << con_count << " " << 3 << " " << n << " " << m << " " << val3 << "\n";
 
 	    }
