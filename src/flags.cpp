@@ -748,15 +748,15 @@ void init_T2_flag (FILE * sdpa_out, const size_t bsize, size_t & con_count)
 {
   	for (size_t i = 0;   i < bsize; i++)      
  	{
- 	for (size_t j = i+1; j < bsize; j++)     
+ 	for (size_t j = 0;   j < bsize; j++)     
  	{
-  	for (size_t k = 0;   k < bsize; k++)   
+  	for (size_t k = j+1; k < bsize; k++)   
   	{
   	for (size_t l = 0;   l < bsize; l++)   
   	{
-  	for (size_t m = l+1; m < bsize; m++)   
+  	for (size_t m = 0;   m < bsize; m++)   
   	{
-  	for (size_t n = 0;   n < bsize; n++)    
+  	for (size_t n = m+1; n < bsize; n++)    
   	{
 
 	    for (size_t ip = 0;  ip < bsize; ip++)      // loop over ith constraint matrix
@@ -807,9 +807,9 @@ void init_T2_flag (FILE * sdpa_out, const size_t bsize, size_t & con_count)
 	    	 	
 	    for (size_t ip = 0;    ip < bsize; ip++)      // loop over ith constraint matrix
 	    {
-	    for (size_t jp = ip+1; jp < bsize; jp++)      // loop over jth constraint matrix
+	    for (size_t jp = 0;    jp < bsize; jp++)      // loop over jth constraint matrix
 	    {
-	    for (size_t kp = 0;    kp < bsize; kp++)    // loop over matrix row
+	    for (size_t kp = jp+1; kp < bsize; kp++)    // loop over matrix row
 	    {
 
 	    r++;
@@ -818,9 +818,9 @@ void init_T2_flag (FILE * sdpa_out, const size_t bsize, size_t & con_count)
 
 	    for (size_t lp = 0;    lp < bsize; lp++)    // loop over matrix column
 	    {
-	    for (size_t mp = lp+1; mp < bsize; mp++)
+	    for (size_t mp = 0;    mp < bsize; mp++)
 	    {
-	    for (size_t np = 0;    np < bsize; np++)
+	    for (size_t np = mp+1; np < bsize; np++)
 	    {
  
 	        double val6 = T2_6_matrix_A (i, j, k, l, m, n, ip, jp, kp, lp, mp, np);

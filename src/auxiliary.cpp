@@ -55,15 +55,15 @@ size_t T2_count (const size_t bsize)
 
   	for (size_t i = 0;   i < bsize; i++)      
  	{
- 	for (size_t j = i+1; j < bsize; j++)     
+ 	for (size_t j = 0;   j < bsize; j++)     
  	{
-  	for (size_t k = 0;   k < bsize; k++)   
+  	for (size_t k = j+1; k < bsize; k++)   
   	{
   	for (size_t l = 0;   l < bsize; l++)   
   	{
-  	for (size_t m = l+1; m < bsize; m++)   
+  	for (size_t m = 0;   m < bsize; m++)   
   	{
-  	for (size_t n = 0;   n < bsize; n++)    
+  	for (size_t n = m+1; n < bsize; n++)    
   	{
   		T2_num++;
   	}
@@ -83,9 +83,9 @@ size_t T2_DIM_count (const size_t bsize)
 
 	    for (size_t ip = 0;    ip < bsize; ip++)      // loop over ith constraint matrix
 	    {
-	    for (size_t jp = ip+1; jp < bsize; jp++)      // loop over jth constraint matrix
+	    for (size_t jp = 0;    jp < bsize; jp++)      // loop over jth constraint matrix
 	    {
-	    for (size_t kp = 0;    kp < bsize; kp++)    // loop over matrix row
+	    for (size_t kp = jp+1; kp < bsize; kp++)    // loop over matrix row
 	    {
 
 	    	dim++;

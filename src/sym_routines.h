@@ -186,9 +186,9 @@ inline double T2_6_matrix_A (const int i, const int j, const int k, const int l,
 {
 	const double value = (1./8.) * 
 		( T2_6_matrix (i, j, k, l, m, n, ip, jp, kp, lp, mp, np) + T2_6_matrix (i, j, k, l, m, n, lp, mp, np, ip, jp, kp)
-		- T2_6_matrix (i, j, k, l, m, n, jp, ip, kp, lp, mp, np) + T2_6_matrix (i, j, k, l, m, n, lp, mp, np, jp, ip, kp) 
-		- T2_6_matrix (i, j, k, l, m, n, ip, jp, kp, mp, lp, np) + T2_6_matrix (i, j, k, l, m, n, mp, lp, np, ip, jp, kp)
-		+ T2_6_matrix (i, j, k, l, m, n, jp, ip, kp, mp, lp, np) + T2_6_matrix (i, j, k, l, m, n, mp, lp, np, jp, ip, kp));
+		- T2_6_matrix (i, j, k, l, m, n, ip, kp, jp, lp, mp, np) + T2_6_matrix (i, j, k, l, m, n, lp, mp, np, ip, kp, jp) 
+		- T2_6_matrix (i, j, k, l, m, n, ip, jp, kp, lp, np, mp) + T2_6_matrix (i, j, k, l, m, n, lp, np, mp, ip, jp, kp)
+		+ T2_6_matrix (i, j, k, l, m, n, ip, kp, jp, lp, np, mp) + T2_6_matrix (i, j, k, l, m, n, lp, np, mp, ip, kp, jp));
 
 		return value;
 }
