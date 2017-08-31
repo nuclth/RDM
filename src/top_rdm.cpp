@@ -80,14 +80,14 @@ int main ()
 
   for (size_t i = 0; i < bsize; i++)      // loop over ith constraint matrix
   {
-  for (size_t j = i+1; j < bsize; j++)      // loop over jth constraint matrix
+  for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
   {
-  for (size_t k = i; k < bsize; k++)    // loop over matrix row
+  for (size_t k = 0; k < bsize; k++)    // loop over matrix row
   {
-  for (size_t l = k+1; l < bsize; l++)    // loop over matrix column
+  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
   {
-    if (j < l && k <= i)
-      continue;
+    //if (j < l && k <= i)
+      //continue;
 
     Q_num++;
   }
@@ -123,14 +123,14 @@ int main ()
 
   const bool N_flag  = true; // p START - TRACE CONDITION
   const bool O_flag  = true; // q START - LINEAR RELATIONS
-  const bool P_flag  = false; // P START - TRACE CONDITION
-  const bool Q_flag  = false; // Q START - LINEAR RELATIONS
+  const bool P_flag  = true; // P START - TRACE CONDITION
+  const bool Q_flag  = true; // Q START - LINEAR RELATIONS
   const bool G_flag  = false; // G START - LINEAR REALTIONSi
 
   const bool T1_flag = false;
   const bool T2_flag = false;
 
-  const bool NN_flag = true;
+  const bool NN_flag = false;
 
 
   if (!two_body_toggle and (P_flag or Q_flag or G_flag))

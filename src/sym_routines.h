@@ -4,21 +4,22 @@
 #include "auxiliary.h"
 
 
-inline double F_NN_matrix (const int i, const int j, const int k, const int l)
+inline int F_NN_matrix (const int i, const int j, const int k, const int l)
 {
-	const double value = kron_del (i,k) * kron_del (j,l);
+	const int value = kron_del (i,k) * kron_del (j,l);
 
 	return value;
 }
 
 inline double F_NN_matrix_A (const int i, const int j, const int k, const int l)
 {
-	const double value = (1./8.) * 
-		( F_NN_matrix (i, j, k, l) + F_NN_matrix (k, l, i, j)
+	const double value = (1./2.) * 
+		( F_NN_matrix (i, j, k, l) + F_NN_matrix (k, l, i, j) );
+/*
 		- F_NN_matrix (j, i, k, l) - F_NN_matrix (k, l, j, i)
 		- F_NN_matrix (i, j, l, k) - F_NN_matrix (l, k, i, j)
 		+ F_NN_matrix (j, i, l, k) + F_NN_matrix (l, k, j, i) );
-
+*/
 	return value;
 }
 
@@ -29,14 +30,15 @@ inline int F3_3_matrix (const int i, const int k, const int ip, const int jp, co
   return value;  
 }
 
-inline int F3_3_matrix_A (const int i, const int k, const int ip, const int jp, const int kp, const int lp)
+inline double F3_3_matrix_A (const int i, const int k, const int ip, const int jp, const int kp, const int lp)
 {
-	const int value = 
-	    F3_3_matrix (i, k, ip, jp, kp, lp) +  F3_3_matrix (i, k, kp, lp, ip, jp)
-      - F3_3_matrix (i, k, jp, ip, kp, lp) -  F3_3_matrix (i, k, kp, lp, jp, ip)
-      - F3_3_matrix (i, k, ip, jp, lp, kp) -  F3_3_matrix (i, k, lp, kp, ip, jp)
-      + F3_3_matrix (i, k, jp, ip, lp, kp) +  F3_3_matrix (i, k, lp, kp, jp, ip);
-
+	const double value = (1./2.) *
+	    ( F3_3_matrix (i, k, ip, jp, kp, lp) +  F3_3_matrix (i, k, kp, lp, ip, jp) );
+	/*
+        - F3_3_matrix (i, k, jp, ip, kp, lp) -  F3_3_matrix (i, k, kp, lp, jp, ip)
+        - F3_3_matrix (i, k, ip, jp, lp, kp) -  F3_3_matrix (i, k, lp, kp, ip, jp)
+        + F3_3_matrix (i, k, jp, ip, lp, kp) +  F3_3_matrix (i, k, lp, kp, jp, ip) );
+	*/
 	return value;
 }
 
@@ -68,25 +70,27 @@ inline int F7_4_matrix (const int i, const int j, const int k, const int l, cons
   return value; 
 }
 
-inline int F7_3_matrix_A (const int i, const int j, const int k, const int l, const int ip, const int jp, const int kp, const int lp)
+inline double F7_3_matrix_A (const int i, const int j, const int k, const int l, const int ip, const int jp, const int kp, const int lp)
 {
-    const int value =
-	  F7_3_matrix (i, j, k, l, ip, jp, kp, lp) +  F7_3_matrix (i, j, k, l, kp, lp, ip, jp)
+    const double value = (1./2.) *
+	  ( F7_3_matrix (i, j, k, l, ip, jp, kp, lp) +  F7_3_matrix (i, j, k, l, kp, lp, ip, jp) );
+	  /*
   	- F7_3_matrix (i, j, k, l, jp, ip, kp, lp) -  F7_3_matrix (i, j, k, l, kp, lp, jp, ip)
     - F7_3_matrix (i, j, k, l, ip, jp, lp, kp) -  F7_3_matrix (i, j, k, l, lp, kp, ip, jp)
     + F7_3_matrix (i, j, k, l, jp, ip, lp, kp) +  F7_3_matrix (i, j, k, l, lp, kp, jp, ip);
-
+*/
 	return value;
 }
 
-inline int F7_4_matrix_A (const int i, const int j, const int k, const int l, const int ip, const int jp, const int kp, const int lp)
+inline double F7_4_matrix_A (const int i, const int j, const int k, const int l, const int ip, const int jp, const int kp, const int lp)
 {
-  const int value = 
-        F7_4_matrix (i, j, k, l, ip, jp, kp, lp) +  F7_4_matrix (i, j, k, l, kp, lp, ip, jp)
+  const double value = (1./2.) *
+        ( F7_4_matrix (i, j, k, l, ip, jp, kp, lp) +  F7_4_matrix (i, j, k, l, kp, lp, ip, jp) );
+        /*
       - F7_4_matrix (i, j, k, l, jp, ip, kp, lp) -  F7_4_matrix (i, j, k, l, kp, lp, jp, ip)
       - F7_4_matrix (i, j, k, l, ip, jp, lp, kp) -  F7_4_matrix (i, j, k, l, lp, kp, ip, jp)
       + F7_4_matrix (i, j, k, l, jp, ip, lp, kp) +  F7_4_matrix (i, j, k, l, lp, kp, jp, ip);
-
+*/
   return value;  
 }
 

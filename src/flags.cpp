@@ -48,7 +48,7 @@ void init_con_values (const con_flags flag_pass, FILE * sdpa_out, const size_t b
 
 
    if (flag_pass.NN_flag)
-   	 fprintf(sdpa_out, "%f ", (double)particles*(particles-1)/2);
+   	 fprintf(sdpa_out, "%f ", (double)particles*(particles-1));
 
 
   // F3 Flag - P and p trace relation
@@ -72,14 +72,14 @@ void init_con_values (const con_flags flag_pass, FILE * sdpa_out, const size_t b
    {
       for (size_t i = 0;   i < bsize; i++)      // loop over ith constraint matrix
       {
-      for (size_t j = i+1; j < bsize; j++)      // loop over jth constraint matrix
+      for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
       {
-      for (size_t k = i;   k < bsize; k++)    // loop over matrix row
+      for (size_t k = 0;   k < bsize; k++)    // loop over matrix row
       {
-      for (size_t l = k+1; l < bsize; l++)    // loop over matrix column
+      for (size_t l = 0; l < bsize; l++)    // loop over matrix column
       {
-        if (j < l && k <= i)
-          continue;
+        //if (j < l && k <= i)
+          //continue;
 
         double val = (double) (kron_del(i,k)*kron_del(j,l) - kron_del(i,l)*kron_del(j,k));
 
@@ -430,7 +430,7 @@ void init_P_flag (FILE * sdpa_out, const size_t bsize, size_t & con_count, const
 
 
       double val1 = 
-      -1.0 * (N - 1.0) / 4.0 * (
+      -1.0 * (N - 1.0) / 2.0 * (
         kron_del(i,ip)*kron_del(k,kp) + kron_del(k,ip)*kron_del(i,kp)
         );
 
@@ -473,7 +473,7 @@ void init_P_flag (FILE * sdpa_out, const size_t bsize, size_t & con_count, const
       size_t n = jps - ips + (2*bsize - ips) * (ips - 1)/2;
       size_t m = lps - kps + (2*bsize - kps) * (kps - 1)/2;
 
-      double val3 = 1./8. * F3_3_matrix_A (i, k, ip, jp, kp, lp);
+      double val3 = F3_3_matrix_A (i, k, ip, jp, kp, lp);
 
 
       if (val3 != 0. and n <= m)
@@ -515,14 +515,14 @@ void init_Q_flag (FILE * sdpa_out, const size_t bsize, size_t & con_count)
 
   for (size_t i = 0;   i < bsize; i++)      // loop over ith constraint matrix
   {
-  for (size_t j = i+1; j < bsize; j++)      // loop over jth constraint matrix
+  for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
   {
-  for (size_t k = i;   k < bsize; k++)    // loop over matrix row
+  for (size_t k = 0;   k < bsize; k++)    // loop over matrix row
   {
-  for (size_t l = k+1; l < bsize; l++)    // loop over matrix column
+  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
   {
-    if (j < l && k <= i)
-      continue;
+//    if (j < l && k <= i)
+//      continue;
 
     
     for (size_t ip = 0;  ip < bsize; ip++)      // loop over ith constraint matrix
@@ -553,7 +553,7 @@ void init_Q_flag (FILE * sdpa_out, const size_t bsize, size_t & con_count)
   //        continue;
 
 
-      double val3 = (1./4.) * F7_3_matrix_A (i, j, k, l, ip, jp, kp, lp);
+      double val3 =  F7_3_matrix_A (i, j, k, l, ip, jp, kp, lp);
 
 
         size_t ips = ip + 1;
@@ -587,7 +587,7 @@ void init_Q_flag (FILE * sdpa_out, const size_t bsize, size_t & con_count)
 //      if (jp < lp && kp <= ip)
 //          continue;
 
-      double val4 = (-1./8.) * F7_4_matrix_A (i, j, k, l, ip, jp, kp, lp);
+      double val4 = -1.0 * F7_4_matrix_A (i, j, k, l, ip, jp, kp, lp);
 
       size_t ips = ip + 1;
       size_t jps = jp + 1;
