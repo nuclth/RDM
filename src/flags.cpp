@@ -352,14 +352,14 @@ void init_NN_flag (FILE * sdpa_out, const size_t bsize, size_t & con_count)
 {
 
 
-    for (size_t ip = 0; ip < bsize; ip++)      // loop over ith constraint matrix
+    for (size_t ip = 0;  ip < bsize; ip++)      // loop over ith constraint matrix
     {
     for (size_t jp = ip; jp < bsize; jp++)      // loop over jth constraint matrix
     {
       if (ip >= jp)
         continue;
 
-    for (size_t kp = 0; kp < bsize; kp++)    // loop over matrix row
+    for (size_t kp = 0;  kp < bsize; kp++)    // loop over matrix row
     {
     for (size_t lp = kp; lp < bsize; lp++)    // loop over matrix column
     {
@@ -374,7 +374,7 @@ void init_NN_flag (FILE * sdpa_out, const size_t bsize, size_t & con_count)
       size_t n = jps - ips + (2*bsize - ips) * (ips - 1)/2;
       size_t m = lps - kps + (2*bsize - kps) * (kps - 1)/2;
 
-      double val3 = (1./4.) * F_NN_matrix_A (ip, jp, kp, lp);
+      double val3 = F_NN_matrix_A (ip, jp, kp, lp);
 
       if (val3 != 0. and n <= m)
       {
