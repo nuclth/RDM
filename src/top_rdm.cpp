@@ -103,11 +103,11 @@ int main ()
   {
   for (size_t k = 0; k < bsize; k++)    // loop over matrix row
   {
-  for (size_t l = j; l < bsize; l++)    // loop over matrix column
+  for (size_t l = 0; l < bsize; l++)    // loop over matrix column
   {
     
-    if (j == l && k < i)
-      continue;
+//    if (j == l && k < i)
+//      continue;
 
     G_num++;
   }
@@ -125,7 +125,7 @@ int main ()
   const bool O_flag  = true; // q START - LINEAR RELATIONS
   const bool P_flag  = true; // P START - TRACE CONDITION
   const bool Q_flag  = true; // Q START - LINEAR RELATIONS
-  const bool G_flag  = false; // G START - LINEAR REALTIONSi
+  const bool G_flag  = true; // G START - LINEAR REALTIONSi
 
   const bool T1_flag = false;
   const bool T2_flag = false;
@@ -175,7 +175,7 @@ int main ()
   const size_t F1num  = 1;
   const size_t F2num  = bsize * (bsize + 1)/2;
   const size_t NN_num = 1;
-  const size_t F3num  = bsize * (bsize + 1)/2;
+  const size_t F3num  = bsize * bsize; //(bsize + 1)/2;
   const size_t F7num  = Q_num;//bsize*bsize*bsize*bsize;
   const size_t F10num = G_num;//bsize*bsize*bsize*bsize;
 
@@ -261,7 +261,7 @@ int main ()
 
   std::cout << "HAMILTONIAN BUILT" << std::endl;
 
-  two_array comp_h2 (boost::extents[bsize*(bsize-1)/2][bsize*(bsize-1)/2]);
+  two_array comp_h2 (boost::extents[bsize*bsize][bsize*bsize]);
 
   compactify_h2 (ref_m, comp_h2, h2_mat, diag_out, diag_toggle);
 
@@ -280,10 +280,10 @@ int main ()
   	fprintf (sdpa_out, "%lu ", bsize);
   
   if (two_body_toggle)
-  	fprintf (sdpa_out, "%lu ", bsize*(bsize-1)/2);
+  	fprintf (sdpa_out, "%lu ", bsize*bsize);
 
   if (Q_flag)
-  	fprintf (sdpa_out, "%lu ", bsize*(bsize-1)/2);
+  	fprintf (sdpa_out, "%lu ", bsize*bsize);
 
   if (G_flag)
   	fprintf (sdpa_out, "%lu ", bsize*bsize);

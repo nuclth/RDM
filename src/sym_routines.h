@@ -42,30 +42,30 @@ inline double F3_3_matrix_A (const int i, const int k, const int ip, const int j
 	return value;
 }
 
-inline int F7_2_matrix (const int i, const int j, const int k, const int l, const int ip, const int jp)
+inline int F7_1_matrix (const int i, const int j, const int k, const int l, const int ip, const int jp)
 {
   const int value = 
-        kron_del(j,l)*kron_del(i,ip)*kron_del(k,jp)
-        -
         kron_del(j,k)*kron_del(i,ip)*kron_del(l,jp)
         -
-        kron_del(i,l)*kron_del(j,ip)*kron_del(k,jp)
+        kron_del(j,l)*kron_del(i,ip)*kron_del(k,jp)
+        -
+        kron_del(i,k)*kron_del(j,ip)*kron_del(l,jp)
         +
-        kron_del(i,k)*kron_del(j,ip)*kron_del(l,jp);
+        kron_del(i,l)*kron_del(j,ip)*kron_del(k,jp);
 
   return value;
 }
 
 inline int F7_3_matrix (const int i, const int j, const int k, const int l, const int ip, const int jp, const int kp, const int lp)
 {
-  const int value = kron_del (i,ip) * kron_del (j,jp) * kron_del (k,kp) * kron_del (l,lp);
+  const int value = kron_del (i,ip) * kron_del (j,jp) * kron_del (l,kp) * kron_del (k,lp);
 
   return value; 
 }
 
 inline int F7_4_matrix (const int i, const int j, const int k, const int l, const int ip, const int jp, const int kp, const int lp)
 {
-  const int value = kron_del (l,ip) * kron_del (k,jp) * kron_del (j,kp) * kron_del (i,lp);
+  const int value = kron_del (l,ip) * kron_del (k,jp) * kron_del (i,kp) * kron_del (j,lp);
 
   return value; 
 }
