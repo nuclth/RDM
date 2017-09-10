@@ -1,5 +1,5 @@
 # Size of the basis  
-2
+54
 
 # Number of particles
 2
@@ -8,7 +8,7 @@
 10
 
 # input reference file for m-scheme
-me_files/test_index.dat
+me_files/index_backup.dat
 
 # input matrix file for m-scheme 
 me_files/test_mscheme_20.dat
