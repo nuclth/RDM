@@ -117,6 +117,9 @@ Exact diagonlization of the m scheme Hamiltonian gives the energy:
 38 states - n = 2, l = 0 - E = 24.6618
 44 states - n = 2, l = 1 - E = 24.6492
 54 states - n = 2, l = 2 - E = 24.6475
+56 states - n = 3, l = 0 - E = 24.6448
+62 states - n = 3, l = 1 - E = 24.6413
+72 states - n = 3, l = 2 - E = 24.6351
 ```
 
 while the SDP formulation with P condition gives:
