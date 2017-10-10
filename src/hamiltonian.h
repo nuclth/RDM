@@ -15,5 +15,10 @@ void compactify_h2 (const two_array & ref_m, two_array & comp_h2, five_array & h
 void read_in_reference_m_scheme (two_array & ref_m, const std::string m_ref_file, std::ofstream & diag_out, const bool diag_toggle);
 void read_in_matrix_m_scheme (const two_array & ref_m, five_array & h2_mat, const std::string m_mat_file);
 
+double find_obme_me (const double n1, const double n2, const double l, const double j, const double mj, two_array & obme);
+int get_obme_lines ();
+void read_in_obme (two_array & obme);
+
+//template <> void print (std::ostream& os, const double & x);
 
 #endif

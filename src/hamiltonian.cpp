@@ -3,6 +3,13 @@
 #include <fstream>
 
 
+/*
+template<> void print<double>(std::ostream& os, const double & x)
+{
+  os << x << "\t";
+}
+*/
+
 
 /***************************************************************
 
@@ -19,18 +26,161 @@ void populate_1body (const two_array & ref_m, two_array & h1_mat, const double h
 
 	size_t mat_length = h1_mat.size();
 
+  int obme_size = get_obme_lines();
+
+  std::cout << "OBME SIZE " << obme_size << "\n";
+
+  two_array obme (boost::extents[obme_size][6]);
+
+  read_in_obme (obme);
 
 	for (size_t i = 0; i < mat_length; ++i)
   {
-    double n = ref_m [i][1];
-    double l = ref_m [i][2];
+    double n1  = ref_m [i][1];
+    double l1  = ref_m [i][2];
+    double j1  = ref_m [i][3];
+    double mj1 = ref_m [i][4];
 
-		h1_mat[i][i] = (2.*n + l + 1.5) * hw;
+  for (size_t j = 0; j < mat_length; ++j)
+  {
+    double n2  = ref_m [j][1];
+    double l2  = ref_m [j][2];
+    double j2  = ref_m [j][3];
+    double mj2 = ref_m [j][4];
+
+    double matrix_element = 0.;
+
+    if (l1 == l2 and j1 == j2 and mj1 == mj2) matrix_element = find_obme_me (n1, n2, l1, j1, mj1, obme);
+
+		h1_mat[i][j] = matrix_element;
+  }
   }
 
 }
 
 
+double find_obme_me (const double n1, const double n2, const double l, const double j, const double mj, two_array & obme)
+{
+  size_t mat_extent = obme.size();
+
+  for (size_t i = 0; i < mat_extent; i++)
+  {
+    double obme_n1 = obme [i][0];
+    double obme_n2 = obme [i][1];
+    double obme_l  = obme [i][2];
+    double obme_j  = obme [i][3];
+    double obme_mj = obme [i][4];
+    double obme_me = obme [i][5];
+
+
+    if (n1 == obme_n1 and n2 == obme_n2 and l == obme_l and j == obme_j and mj == obme_mj)
+      return obme_me;
+  }
+
+
+  return 0.;
+}
+
+
+int get_obme_lines ()
+{
+  const char * reference_file = "me_files/one-body-ME_hw20.dat";
+  // input file stream for m_scheme
+  std::ifstream ref_in (reference_file);
+ 
+  size_t total_lines = 0;
+  std::string dummy;
+
+  // find total number of defined reference lines
+  while (std::getline (ref_in, dummy)) ++total_lines;
+
+
+  // clear the file stream, reset to read in the elements
+  ref_in.clear();
+  ref_in.seekg (0, std::ios::beg);
+
+  return total_lines;
+}
+
+
+/***************************************************************
+
+
+ Function to read in the data file for the one-body matrix elements.
+
+
+***************************************************************/
+
+
+void read_in_obme (two_array & obme)
+{
+  const char * m_reference_file = "me_files/one-body-ME_hw20.dat";
+  // input file stream for m_scheme
+  std::ifstream ref_in (m_reference_file);
+ 
+  size_t total_lines = 0;
+  std::string dummy;
+  double n1, n2, l, j, mj, me;
+
+  // find total number of defined reference lines
+  while (std::getline (ref_in, dummy))
+  ++total_lines;
+
+
+  // clear the file stream, reset to read in the elements
+  ref_in.clear();
+  ref_in.seekg (0, std::ios::beg);
+
+  size_t ref_size = obme.size();
+  size_t ele_in = 0;
+
+  // read in and assign the references line by line
+  // to the matrix ref_m
+  for (size_t i = 0; i < total_lines; i++)
+  {
+  std::string orbit_dummy_1;
+  std::string orbit_dummy_2;
+  std::getline (ref_in, dummy);
+
+  if (!dummy.length() || dummy[0] == '#')     // skip zero length lines and lines that start with #
+    continue;
+
+  std::stringstream ss;
+
+  ss << dummy;            // read in the line to stringstream ss
+
+  // MORTEN VS. HEIKO READ IN FILE FORMAT
+
+//  ss >> orbit_dummy_1 >> orbit_dummy_2 >> ref_num >> n >> l >> j >> m_j >> tz;  // assign values of the line
+
+  ss >> n1 >> n2 >> l >> j >> mj >> me;  // assign values of the line
+
+//  std::cout << ref_num << " " << n << " " << l << " " << j << " " << m_j << " " << tz << "\n";
+
+
+  // only extract neutron-neutron states
+
+    obme [ele_in][0] = n1;    // reference number of the line
+    obme [ele_in][1] = n2;          // principle quantum number
+    obme [ele_in][2] = l;          // orbital angular mom.
+    obme [ele_in][3] = j;    // total angular mom.
+    obme [ele_in][4] = mj;  // total angular mom. projection
+    obme [ele_in][5] = me;         // isospin projection (should all be -1.0)
+    ele_in++;
+
+  if (ele_in >= ref_size)
+    break;
+
+  }
+  
+  for (size_t q = 0; q < ref_size; q++)
+  {
+    std::cout << obme[q][0] << " " << obme[q][1] << " " << obme[q][2] << " " << obme[q][3] << " " << obme[q][4] << " " << obme[q][5];
+    std::cout << "\n";
+  }
+
+  return;
+}
 
 
 /***************************************************************

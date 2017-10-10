@@ -143,10 +143,6 @@ void print(std::ostream& os, const Array & A)
 ***************************************************************/
 
 
-template<> void print<double>(std::ostream& os, const double & x)
-{
-  os << x << "\t";
-}
 
 template<> void print<int>(std::ostream& os, const int & x)
 {

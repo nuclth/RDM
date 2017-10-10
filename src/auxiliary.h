@@ -43,7 +43,7 @@ inline double kron_del(const size_t i, const size_t j)
 }
 
 template <typename Array> void print(std::ostream& os, const Array & A);
-template <> void print (std::ostream& os, const double & x);
+
 template <> void print (std::ostream& os, const int & x);
 size_t T2_count (const size_t bsize);
 size_t T2_DIM_count (const size_t bsize);
