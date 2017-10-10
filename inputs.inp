@@ -8,8 +8,8 @@
 10
 
 # input reference file for m-scheme
-me_files/index_backup.dat
+me_files/spm_25.dat
 
 # input matrix file for m-scheme 
-me_files/test_mscheme_20.dat
+me_files/vm-scheme_25.dat
 

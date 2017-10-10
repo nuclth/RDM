@@ -84,7 +84,7 @@ double find_obme_me (const double n1, const double n2, const double l, const dou
 
 int get_obme_lines ()
 {
-  const char * reference_file = "me_files/one-body-ME_hw20.dat";
+  const char * reference_file = "me_files/one-body-ME_hw25.dat";
   // input file stream for m_scheme
   std::ifstream ref_in (reference_file);
  
@@ -114,7 +114,7 @@ int get_obme_lines ()
 
 void read_in_obme (two_array & obme)
 {
-  const char * m_reference_file = "me_files/one-body-ME_hw20.dat";
+  const char * m_reference_file = "me_files/one-body-ME_hw25.dat";
   // input file stream for m_scheme
   std::ifstream ref_in (m_reference_file);
  
@@ -149,16 +149,11 @@ void read_in_obme (two_array & obme)
 
   ss << dummy;            // read in the line to stringstream ss
 
-  // MORTEN VS. HEIKO READ IN FILE FORMAT
-
-//  ss >> orbit_dummy_1 >> orbit_dummy_2 >> ref_num >> n >> l >> j >> m_j >> tz;  // assign values of the line
 
   ss >> n1 >> n2 >> l >> j >> mj >> me;  // assign values of the line
 
-//  std::cout << ref_num << " " << n << " " << l << " " << j << " " << m_j << " " << tz << "\n";
 
 
-  // only extract neutron-neutron states
 
     obme [ele_in][0] = n1;    // reference number of the line
     obme [ele_in][1] = n2;          // principle quantum number
@@ -376,9 +371,9 @@ void read_in_reference_m_scheme (two_array & ref_m, const std::string m_ref_file
 
   // MORTEN VS. HEIKO READ IN FILE FORMAT
 
-//  ss >> orbit_dummy_1 >> orbit_dummy_2 >> ref_num >> n >> l >> j >> m_j >> tz;  // assign values of the line
+  ss >> orbit_dummy_1 >> orbit_dummy_2 >> ref_num >> n >> l >> j >> m_j >> tz;  // assign values of the line
 
-  ss >> ref_num >> n >> l >> j >> m_j >> tz;  // assign values of the line
+//  ss >> ref_num >> n >> l >> j >> m_j >> tz;  // assign values of the line
 
 //  std::cout << ref_num << " " << n << " " << l << " " << j << " " << m_j << " " << tz << "\n";
 
