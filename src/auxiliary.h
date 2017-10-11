@@ -12,6 +12,7 @@ struct parameters
 	double hw;
     std::string m_ref;
     std::string m_mat;
+    std::string obme_ref;
 };
 
 // struct to hold the constraint flag toggles

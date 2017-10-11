@@ -69,7 +69,7 @@ int main ()
   const double hw = input_params.hw;					     // hbar * omega 
   const std::string m_ref = input_params.m_ref;    // single particle reference file - m scheme
   const std::string m_mat = input_params.m_mat;    // m scheme matrix elements
-
+  const std::string obme_ref = input_params.obme_ref;
 
 
   std::cout << ("Building system... ") << std::endl;
@@ -257,15 +257,18 @@ int main ()
   two_array h1_mat(boost::extents[bsize][bsize]);
   five_array h2_mat(boost::extents[bsize][bsize][bsize][bsize][5]);
 
-  fullm_populate_hamiltonian (ref_m, h1_mat, h2_mat, m_ref, m_mat, hw, diag_out, diag_toggle);
+  fullm_populate_hamiltonian (ref_m, h1_mat, h2_mat, m_ref, obme_ref, m_mat, hw, diag_out, diag_toggle, two_body_toggle);
 
   std::cout << "HAMILTONIAN BUILT" << std::endl;
 
   two_array comp_h2 (boost::extents[bsize*(bsize-1)/2][bsize*(bsize-1)/2]);
 
-  compactify_h2 (ref_m, comp_h2, h2_mat, diag_out, diag_toggle);
+  if (two_body_toggle) 
+  {
+  	compactify_h2 (ref_m, comp_h2, h2_mat, diag_out, diag_toggle);
 
-  std::cout << "POTENTIAL COMPACTIFIED" << std::endl;
+  	std::cout << "POTENTIAL COMPACTIFIED" << std::endl;
+  }
 
   fprintf (sdpa_out, "%lu\n", cons);
   fprintf (sdpa_out, "%lu\n", blocks);

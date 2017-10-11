@@ -38,7 +38,10 @@ parameters read_in_inputs ()
 	if (counter == 3)
 	  ss >> input.m_ref;
 
-  	if (counter == 4)
+  if (counter == 4)
+    ss >> input.obme_ref;
+
+  if (counter == 5)
       ss >> input.m_mat;
 
 

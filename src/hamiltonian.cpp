@@ -21,18 +21,18 @@ template<> void print<double>(std::ostream& os, const double & x)
 ***************************************************************/
 
 
-void populate_1body (const two_array & ref_m, two_array & h1_mat, const double hw)
+void populate_1body (const two_array & ref_m, two_array & h1_mat, const std::string obme_filename)
 {
 
 	size_t mat_length = h1_mat.size();
 
-  int obme_size = get_obme_lines();
+  int obme_size = get_obme_lines(obme_filename);
 
   std::cout << "OBME SIZE " << obme_size << "\n";
 
   two_array obme (boost::extents[obme_size][6]);
 
-  read_in_obme (obme);
+  read_in_obme (obme, obme_filename);
 
 	for (size_t i = 0; i < mat_length; ++i)
   {
@@ -82,9 +82,9 @@ double find_obme_me (const double n1, const double n2, const double l, const dou
 }
 
 
-int get_obme_lines ()
+int get_obme_lines (const std::string obme_filename)
 {
-  const char * reference_file = "me_files/one-body-ME_hw25.dat";
+  const char * reference_file = obme_filename.c_str();
   // input file stream for m_scheme
   std::ifstream ref_in (reference_file);
  
@@ -112,9 +112,9 @@ int get_obme_lines ()
 ***************************************************************/
 
 
-void read_in_obme (two_array & obme)
+void read_in_obme (two_array & obme, const std::string obme_filename)
 {
-  const char * m_reference_file = "me_files/one-body-ME_hw25.dat";
+  const char * m_reference_file = obme_filename.c_str();
   // input file stream for m_scheme
   std::ifstream ref_in (m_reference_file);
  
@@ -187,17 +187,20 @@ populate 2-body matrix elements.
 ***************************************************************/
 
 
-void fullm_populate_hamiltonian (two_array & ref_m, two_array & h1_mat, five_array & h2_mat, const std::string reference_file, const std::string matrix_file, const double hw, std::ofstream & diag_out, const bool diag_toggle) 
+void fullm_populate_hamiltonian (two_array & ref_m, two_array & h1_mat, five_array & h2_mat, const std::string reference_file, const std::string obme_filename, const std::string matrix_file, const double hw, std::ofstream & diag_out, const bool diag_toggle, const bool two_body_toggle) 
 {
 
   try
   {
     read_in_reference_m_scheme (ref_m, reference_file, diag_out, diag_toggle);
     std::cout << "REFERENCE READ" << std::endl;
-    populate_1body (ref_m, h1_mat, hw);
+    populate_1body (ref_m, h1_mat, obme_filename);
     std::cout << "1 BODY POPULATED" << std::endl;
-    read_in_matrix_m_scheme (ref_m, h2_mat, matrix_file);
-    std::cout << "2 BODY POPULATED" << std::endl;
+    if (two_body_toggle)
+    {
+      read_in_matrix_m_scheme (ref_m, h2_mat, matrix_file);
+      std::cout << "2 BODY POPULATED" << std::endl;
+    }
   }
 
   catch (const char * msg)
