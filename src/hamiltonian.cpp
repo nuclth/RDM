@@ -217,6 +217,97 @@ void fullm_populate_hamiltonian (two_array & ref_m, two_array & h1_mat, five_arr
 
 ***************************************************************/
 
+size_t total_tbme_states (const std::string tbme_filename)
+{
+  const char * ref_file = tbme_filename.c_str();
+  std::ifstream ref_in (ref_file);
+ 
+  size_t total_lines = 0;
+  std::string dummy;
+
+  // find total number of defined reference lines
+  while (std::getline (ref_in, dummy)) ++total_lines;
+
+  return total_lines;
+}
+
+/***************************************************************
+
+
+
+***************************************************************/
+
+void readin_ref_tbme (two_array ref_tbme, const std::string tbme_filename)
+{
+
+  const char * ref_file = tbme_filename.c_str();
+  // input file stream for m_scheme
+  std::ifstream ref_in (ref_file);
+ 
+  size_t total_lines = 0;
+  std::string dummy;
+  double num, n1, l1, j1, mj1, n2, l2, j2, mj2;
+
+  // find total number of defined reference lines
+  while (std::getline (ref_in, dummy))
+  ++total_lines;
+
+
+  // clear the file stream, reset to read in the elements
+  ref_in.clear();
+  ref_in.seekg (0, std::ios::beg);
+
+  size_t ref_size = ref_tbme.size();
+  size_t ele_in = 0;
+
+  // read in and assign the references line by line
+  // to the matrix ref_m
+  for (size_t i = 0; i < total_lines; i++)
+  {
+  	std::getline (ref_in, dummy);
+
+  	if (!dummy.length() || dummy[0] == '#')     // skip zero length lines and lines that start with #
+    	continue;
+
+  	std::stringstream ss;
+
+ 	ss << dummy;            // read in the line to stringstream ss
+
+
+  	ss >> num >> n1 >> l1 >> j1 >> mj1 >> n2 >> l2 >> j2 >> mj2;  // assign values of the line
+
+
+    ref_tbme [ele_in][0] = num;    // reference number of the line
+
+    ref_tbme [ele_in][1] = n1;          // principle quantum number
+    ref_tbme [ele_in][2] = l1;          // orbital angular mom.
+    ref_tbme [ele_in][3] = j1;    // total angular mom.
+    ref_tbme [ele_in][4] = mj1;   // total angular mom. projection
+
+    ref_tbme [ele_in][5] = n2;          // principle quantum number
+    ref_tbme [ele_in][6] = l2;          // orbital angular mom.
+    ref_tbme [ele_in][7] = j2;    // total angular mom.
+    ref_tbme [ele_in][8] = mj2;   // total angular mom. projection
+
+    ele_in++;
+
+    if (ele_in >= ref_size)
+    	break;
+
+  }
+  
+
+  return;
+
+}
+
+
+/***************************************************************
+
+
+
+***************************************************************/
+
 
 void compactify_h2 (const two_array & ref_m, two_array & comp_h2, five_array & h2_mat, std::ofstream & diag_out, const bool diag_toggle)
 {

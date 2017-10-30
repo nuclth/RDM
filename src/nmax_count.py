@@ -7,6 +7,7 @@ Created on Sun Oct 29 11:03:52 2017
 """
 
 import pandas as pd
+import numpy as np
 
 def nmax_count (nmax, sp_list, tb_list):
     """Wrapper function to call the single-particle basis
@@ -46,8 +47,16 @@ def create_sp_list (nmax, sp_list):
             mj = -j
             continue
       
-        # take the smaller of incrementing n or l
-        (n, l, ncount) = increment_nl (n, l, ncount)
+        if 2*n + (l+1) <= nmax:
+            l += 1
+            j = abs (l-1/2)
+            mj = -j
+            continue
+        
+        n += 1
+        l = 0
+   
+        ncount = 2*n
     
         # reset j,mj for new n,l values
         j = abs (l - 1/2)
@@ -102,6 +111,9 @@ def create_tb_list (nmax, sp_list, tb_list):
     
 
 def increment_nl (n, l, ncount):
+    """Function to increment either n or l in the single-particle space
+    depending on which is lower energy. Incrementing n resets l back to 
+    zero."""
     
     n_incr = 2 * (n + 1)
     l_incr = 2 * n + (l + 1)
@@ -137,5 +149,8 @@ if __name__ == '__main__':
     tb_list.n2 = tb_list.n2.astype(int)
     tb_list.l2 = tb_list.l2.astype(int)
     
+    np.savetxt('../me_files/python_sp.dat', sp_list.values, fmt='%6.2f')
+    np.savetxt('../me_files/python_tb.dat', tb_list.values, fmt='%6.2f')
+
     print(sp_list) ; print ('\n')
     print(tb_list)

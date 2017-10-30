@@ -255,13 +255,20 @@ int main ()
 
   two_array ref_m (boost::extents[bsize][7]);
   two_array h1_mat(boost::extents[bsize][bsize]);
-  five_array h2_mat(boost::extents[bsize][bsize][bsize][bsize][5]);
+
+  tbme_size = total_tbme_states (tbme_filename)
+
+  two_array ref_tbme (boost::extents[tbme_size][9])
+  two_array comp_h2 (boost::extents[tbme_size][tbme_size])
+
+
+//  five_array h2_mat(boost::extents[bsize][bsize][bsize][bsize][5]);
 
   fullm_populate_hamiltonian (ref_m, h1_mat, h2_mat, m_ref, obme_ref, m_mat, hw, diag_out, diag_toggle, two_body_toggle);
 
   std::cout << "HAMILTONIAN BUILT" << std::endl;
 
-  two_array comp_h2 (boost::extents[bsize*(bsize-1)/2][bsize*(bsize-1)/2]);
+//  two_array comp_h2 (boost::extents[bsize*(bsize-1)/2][bsize*(bsize-1)/2]);
 
   if (two_body_toggle) 
   {
@@ -283,10 +290,10 @@ int main ()
   	fprintf (sdpa_out, "%lu ", bsize);
   
   if (two_body_toggle)
-  	fprintf (sdpa_out, "%lu ", bsize*(bsize-1)/2);
+  	fprintf (sdpa_out, "%lu ", tbme_size);
 
   if (Q_flag)
-  	fprintf (sdpa_out, "%lu ", bsize*(bsize-1)/2);
+  	fprintf (sdpa_out, "%lu ", tbme_size);
 
   if (G_flag)
   	fprintf (sdpa_out, "%lu ", bsize*bsize);
