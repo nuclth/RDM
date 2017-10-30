@@ -196,7 +196,7 @@ void fullm_populate_hamiltonian (two_array & array_ref_obme, two_array & array_r
 {
 
     read_in_reference_m_scheme (array_ref_obme, ref_obme);
-    std::cout << "REFERENCE READ" << std::endl;
+    std::cout << "OBME REFERENCE READ" << std::endl;
     populate_1body (array_ref_obme, h1_mat, me_obme);
     std::cout << "1 BODY POPULATED" << std::endl;
     if (two_body_toggle)
@@ -327,8 +327,8 @@ void populate_2body (const two_array & ref_m, const two_array & ref_tbme, two_ar
   const size_t obme_size = ref_m.size();
   const size_t tbme_size = h2_mat.size();
 
-  std::cout << "OBME SIZE " << obme_size << std::endl;
-  std::cout << "TBME SIZE " << tbme_size << std::endl;
+//  std::cout << "OBME SIZE " << obme_size << std::endl;
+//  std::cout << "TBME SIZE " << tbme_size << std::endl;
 
 
   // set the size of the m_scheme holder

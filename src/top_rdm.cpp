@@ -306,7 +306,7 @@ int main ()
   fprintf (sdpa_out, "\n");
 
   
-  init_con_values (flag_pass, sdpa_out, bsize, particles);
+  init_con_values (flag_pass, sdpa_out, bsize, tbme_size, particles);
 
   size_t con_count = 0;
 

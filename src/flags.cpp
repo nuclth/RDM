@@ -15,7 +15,7 @@ These are the real numbers on the right hand side of the SDP.
 
 
 
-void init_con_values (const con_flags flag_pass, FILE * sdpa_out, const size_t bsize, const size_t particles)
+void init_con_values (const con_flags flag_pass, FILE * sdpa_out, const size_t bsize, const size_t tbme_size, const size_t particles)
 {
 
 //  size_t cmat_extent = F1_con.size();
@@ -54,9 +54,9 @@ void init_con_values (const con_flags flag_pass, FILE * sdpa_out, const size_t b
   // F3 Flag - P and p trace relation
    if (flag_pass.P_flag)
    {
-      for (size_t i = 0; i < bsize; i++)      // loop over ith constraint matrix
+      for (size_t i = 0; i < tbme_size; i++)      // loop over ith constraint matrix
       {
-      for (size_t k = i; k < bsize; k++)      // loop over jth constraint matrix
+      for (size_t k = i; k < tbme_size; k++)      // loop over jth constraint matrix
       {
 
 //        sdpa_out << 0. << " ";
