@@ -24,7 +24,7 @@ template<> void print<double>(std::ostream& os, const double & x)
 void populate_1body (const two_array & ref_m, two_array & h1_mat, const std::string obme_filename)
 {
 
-	size_t mat_length = h1_mat.size();
+  size_t mat_length = h1_mat.size();
 
   int obme_size = get_obme_lines(obme_filename);
 
@@ -34,7 +34,7 @@ void populate_1body (const two_array & ref_m, two_array & h1_mat, const std::str
 
   read_in_obme (obme, obme_filename);
 
-	for (size_t i = 0; i < mat_length; ++i)
+  for (size_t i = 0; i < mat_length; ++i)
   {
     double n1  = ref_m [i][1];
     double l1  = ref_m [i][2];
@@ -52,12 +52,17 @@ void populate_1body (const two_array & ref_m, two_array & h1_mat, const std::str
 
     if (l1 == l2 and j1 == j2 and mj1 == mj2) matrix_element = find_obme_me (n1, n2, l1, j1, mj1, obme);
 
-		h1_mat[i][j] = matrix_element;
+	h1_mat[i][j] = matrix_element;
   }
   }
 
 }
 
+/***************************************************************
+
+
+
+***************************************************************/
 
 double find_obme_me (const double n1, const double n2, const double l, const double j, const double mj, two_array & obme)
 {
@@ -81,6 +86,11 @@ double find_obme_me (const double n1, const double n2, const double l, const dou
   return 0.;
 }
 
+/***************************************************************
+
+
+
+***************************************************************/
 
 int get_obme_lines (const std::string obme_filename)
 {
@@ -168,11 +178,6 @@ void read_in_obme (two_array & obme, const std::string obme_filename)
 
   }
   
-  for (size_t q = 0; q < ref_size; q++)
-  {
-    std::cout << obme[q][0] << " " << obme[q][1] << " " << obme[q][2] << " " << obme[q][3] << " " << obme[q][4] << " " << obme[q][5];
-    std::cout << "\n";
-  }
 
   return;
 }
@@ -187,27 +192,20 @@ populate 2-body matrix elements.
 ***************************************************************/
 
 
-void fullm_populate_hamiltonian (two_array & ref_m, two_array & h1_mat, five_array & h2_mat, const std::string reference_file, const std::string obme_filename, const std::string matrix_file, const double hw, std::ofstream & diag_out, const bool diag_toggle, const bool two_body_toggle) 
+void fullm_populate_hamiltonian (two_array & array_ref_obme, two_array & array_ref_tbme, two_array & h1_mat, two_array & h2_mat, const std::string ref_obme, const std::string me_obme, const std::string ref_tbme, const std::string me_tbme, const bool two_body_toggle) 
 {
 
-  try
-  {
-    read_in_reference_m_scheme (ref_m, reference_file, diag_out, diag_toggle);
+    read_in_reference_m_scheme (array_ref_obme, ref_obme);
     std::cout << "REFERENCE READ" << std::endl;
-    populate_1body (ref_m, h1_mat, obme_filename);
+    populate_1body (array_ref_obme, h1_mat, me_obme);
     std::cout << "1 BODY POPULATED" << std::endl;
     if (two_body_toggle)
     {
-      read_in_matrix_m_scheme (ref_m, h2_mat, matrix_file);
+      readin_ref_tbme (array_ref_tbme, ref_tbme);
+      populate_2body (array_ref_obme, array_ref_tbme, h2_mat, me_tbme);
       std::cout << "2 BODY POPULATED" << std::endl;
     }
-  }
 
-  catch (const char * msg)
-  {
-    std::cerr << msg << std::endl;  
-  }
- 
 }
 
 
@@ -237,7 +235,7 @@ size_t total_tbme_states (const std::string tbme_filename)
 
 ***************************************************************/
 
-void readin_ref_tbme (two_array ref_tbme, const std::string tbme_filename)
+void readin_ref_tbme (two_array & ref_tbme, const std::string tbme_filename)
 {
 
   const char * ref_file = tbme_filename.c_str();
@@ -301,6 +299,161 @@ void readin_ref_tbme (two_array ref_tbme, const std::string tbme_filename)
 
 }
 
+/***************************************************************
+
+
+
+***************************************************************/
+
+void populate_2body (const two_array & ref_m, const two_array & ref_tbme, two_array & h2_mat, const std::string me_tbme)
+{
+  // input file stream
+  const char * matrix_file = (me_tbme).c_str();
+  std::ifstream matrix_in (matrix_file);
+
+  size_t total_lines = 0;
+  std::string dummy;
+  int alpha, beta, gamma, delta;
+  double value;
+
+  // get the total number of lines in the matrix elements file
+  while(std::getline(matrix_in, dummy))  ++total_lines;
+ 
+  // clear and reset the file stream
+  matrix_in.clear();
+  matrix_in.seekg(0, std::ios::beg);
+
+  const size_t obme_size = ref_m.size();
+  const size_t tbme_size = h2_mat.size();
+
+  // set the size of the m_scheme holder
+  //m_scheme_matrix.set_size (m_size, m_size);
+
+
+  int i,j,k,l;
+
+  for (size_t n = 0; n < total_lines; n++)
+  {
+	  std::getline (matrix_in, dummy);
+
+	  if (!dummy.length() || dummy[0] == '#')
+	    continue;
+
+	  i = -1;
+	  j = -1;
+	  k = -1;
+	  l = -1;
+
+	  bool h1 = false;
+	  bool h2 = false;
+	  bool h3 = false;
+	  bool h4 = false;
+
+	  int n1;
+	  int n2;
+	  int n3;
+	  int n4;
+
+	  int l1;
+	  int l2;
+	  int l3;
+	  int l4;
+
+	  double j1;
+	  double j2;
+	  double j3;
+	  double j4;
+
+	  double mj1;
+	  double mj2;
+	  double mj3;
+	  double mj4;
+
+
+	  std::stringstream ss;
+
+	  ss << dummy;
+
+	  ss >> alpha >> beta >> gamma >> delta >> value;
+
+	  // check to see if alpha, beta, gamma, delta we're reading in
+	  // matches the reference numbers in our reference matrix
+	  // if yes --> read it in, otherwise discard it
+
+	  for (size_t w = 0; w < obme_size; w++)
+	  {
+	    if (alpha == ref_m[w][0]) 
+	    {
+	      h1  = true;
+	      n1  = ref_m[w][1];
+	      l1  = ref_m[w][2];
+	      j1  = ref_m[w][3];
+	      mj1 = ref_m[w][4];
+	    }
+
+	    if (beta == ref_m[w][0]) 
+	    {
+	      h2 = true;
+	      n2  = ref_m[w][1];
+	      l2  = ref_m[w][2];
+	      j2  = ref_m[w][3];
+	      mj2 = ref_m[w][4];
+	    }
+
+	    if (gamma == ref_m[w][0]) 
+	    {
+	      h3 = true;
+	      n3  = ref_m[w][1];
+	      l3  = ref_m[w][2];
+	      j3  = ref_m[w][3];
+	      mj3 = ref_m[w][4];
+	    }
+
+	    if (delta == ref_m[w][0]) 
+	    {
+	      h4 = true;
+	      n4  = ref_m[w][1];
+	      l4  = ref_m[w][2];
+	      j4  = ref_m[w][3];
+	      mj4 = ref_m[w][4];
+	    }
+	  }
+	  
+	  if (h1 and h2 and h3 and h4)
+	  {
+	  	size_t left = -1;
+	  	size_t right = -1;
+
+	  	for (size_t loop = 0; loop < tbme_size; loop++)
+	  	{
+	  		int n1_loop  = ref_tbme[loop][1];
+	  		int l1_loop  = ref_tbme[loop][2];
+	  		double j1_loop  = ref_tbme[loop][3];
+	  		double mj1_loop = ref_tbme[loop][4];
+
+	  		int n2_loop  = ref_tbme[loop][5];
+	  		int l2_loop  = ref_tbme[loop][6];
+	  		double j2_loop  = ref_tbme[loop][7];
+	  		double mj2_loop = ref_tbme[loop][8];
+
+	  		if (n1 == n1_loop and n2 == n2_loop and l1 == l1_loop and l2 == l2_loop and j1 == j1_loop and j2 == j2_loop and mj1 == mj1_loop and mj2 == mj2_loop)
+	  			left = ref_tbme[loop][0] - 1;
+
+
+	  		if (n3 == n1_loop and n4 == n2_loop and l3 == l1_loop and l4 == l2_loop and j3 == j1_loop and j4 == j2_loop and mj3 == mj1_loop and mj4 == mj2_loop)
+	  			right = ref_tbme[loop][0] - 1;
+
+	  		h2_mat [left][right] = value;
+	  	}
+	  }
+
+
+
+  }
+
+  return;
+
+}
 
 /***************************************************************
 
@@ -423,7 +576,7 @@ void compactify_h2 (const two_array & ref_m, two_array & comp_h2, five_array & h
 ***************************************************************/
 
 
-void read_in_reference_m_scheme (two_array & ref_m, const std::string m_ref_file, std::ofstream & diag_out, const bool diag_toggle)
+void read_in_reference_m_scheme (two_array & ref_m, const std::string m_ref_file)
 {
   const char * m_reference_file = (m_ref_file).c_str();
   // input file stream for m_scheme
@@ -490,14 +643,7 @@ void read_in_reference_m_scheme (two_array & ref_m, const std::string m_ref_file
 
   }
   
-  
-  
-  if(diag_toggle)
-  {
-    diag_out << "Single particle orbitals pulled from REF file" << std::endl << std::endl;
-//    print(diag_out, ref_m);            // print the resulting matrix
-    diag_out << std::endl << std::endl;
-  }
+
 
 
   return;

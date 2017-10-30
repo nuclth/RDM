@@ -1,18 +1,18 @@
 # Size of the basis  
-18
+70
 
 # Number of particles
-4
+2
 
-# value for hbar * omega of the Harmonic oscillator
-10
-
-# input reference file for m-scheme
-me_files/spm.dat
+# input obme reference file
+me_files/nmax4_spm.dat
 
 # input obme matrix elements file
-me_files/one-body-ME-hw10.dat
+me_files/nmax4_obme_hw25.dat
 
-# input matrix file for m-scheme 
-me_files/vm-scheme-hw10.dat
+# input tbme reference file
+me_files/nmax4_python_tb.dat
+
+# input tbme matrix elements file
+me_files/nmax4_tbme_hw25.dat
 

@@ -33,17 +33,16 @@ parameters read_in_inputs ()
 	  ss >> input.particles;
 
 	if (counter == 2)
-	  ss >> input.hw;
+	  ss >> input.ref_obme;
 
-	if (counter == 3)
-	  ss >> input.m_ref;
+ 	if (counter == 3)
+      ss >> input.me_obme;
 
-  if (counter == 4)
-    ss >> input.obme_ref;
+  	if (counter == 4)
+      ss >> input.ref_tbme;
 
-  if (counter == 5)
-      ss >> input.m_mat;
-
+  	if (counter == 5)
+  	  ss >> input.me_tbme;
 
 	counter++;					// increase the counter after reading in a parameter	
   }

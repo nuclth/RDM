@@ -137,7 +137,7 @@ if __name__ == '__main__':
                                      'n2', 'l2', 'j2', 'mj2'])
 
 
-    (sp_list, tb_list) = nmax_count(10, sp_list, tb_list)
+    (sp_list, tb_list) = nmax_count(4, sp_list, tb_list)
 
     sp_list.number = sp_list.number.astype(int)
     sp_list.n = sp_list.n.astype(int)
@@ -149,8 +149,8 @@ if __name__ == '__main__':
     tb_list.n2 = tb_list.n2.astype(int)
     tb_list.l2 = tb_list.l2.astype(int)
     
-    np.savetxt('../me_files/python_sp.dat', sp_list.values, fmt='%6.2f')
-    np.savetxt('../me_files/python_tb.dat', tb_list.values, fmt='%6.2f')
+    np.savetxt('../me_files/nmax4_python_sp.dat', sp_list.values, fmt='%6.2f')
+    np.savetxt('../me_files/nmax4_python_tb.dat', tb_list.values, fmt='%6.2f')
 
     print(sp_list) ; print ('\n')
     print(tb_list)

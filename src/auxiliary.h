@@ -9,10 +9,10 @@ struct parameters
 {
 	size_t basis;
 	size_t particles;
-	double hw;
-    std::string m_ref;
-    std::string m_mat;
-    std::string obme_ref;
+    std::string ref_obme;
+    std::string me_obme;
+    std::string ref_tbme;
+    std::string me_tbme;
 };
 
 // struct to hold the constraint flag toggles

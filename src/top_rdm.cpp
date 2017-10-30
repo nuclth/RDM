@@ -62,15 +62,12 @@ int main ()
   input_params = read_in_inputs (); 					     // read in the values from inputs.inp, store in input_params	
 
   // Now create/copy input parameters for ease of reading the code into newly defined local variables
-
-
-  const size_t bsize = input_params.basis;	   // the size of the HO basis used
-  const size_t particles = input_params.particles;		 // the number of neutrons (particles) in the trap
-  const double hw = input_params.hw;					     // hbar * omega 
-  const std::string m_ref = input_params.m_ref;    // single particle reference file - m scheme
-  const std::string m_mat = input_params.m_mat;    // m scheme matrix elements
-  const std::string obme_ref = input_params.obme_ref;
-
+  const size_t bsize = input_params.basis;	   
+  const size_t particles = input_params.particles;		 
+  const std::string ref_obme = input_params.ref_obme;    
+  const std::string me_obme = input_params.me_obme;   
+  const std::string ref_tbme = input_params.ref_tbme;
+  const std::string me_tbme = input_params.me_tbme;
 
   std::cout << ("Building system... ") << std::endl;
 
@@ -117,7 +114,7 @@ int main ()
 
   // define flags for all different combinations of conditions in RDM
   const bool two_body_toggle = true;
-  const bool diag_toggle = false;
+
 
   // START CONSTRAINT FLAG DEFINE
 
@@ -139,11 +136,11 @@ int main ()
   	return EXIT_FAILURE;
   }	
 
-/*  if (!P_flag and (Q_flag or G_flag))
+  if (!P_flag and (Q_flag or G_flag))
   {
     std::cerr << "ERROR: CANNOT INIT G OR Q FLAG WITHOUT P FLAG - GIVING UP" << std::endl;
     return EXIT_FAILURE;
-  }*/
+  }
 
 
   if (G_flag and !Q_flag)
@@ -168,7 +165,6 @@ int main ()
   flag_pass.NN_flag = NN_flag;
 
   flag_pass.two_body_toggle = two_body_toggle;
-  flag_pass.diag_toggle = diag_toggle;
 
 
 
@@ -253,29 +249,29 @@ int main ()
   }
 
 
-  two_array ref_m (boost::extents[bsize][7]);
+  two_array array_ref_obme (boost::extents[bsize][7]);
   two_array h1_mat(boost::extents[bsize][bsize]);
 
-  tbme_size = total_tbme_states (tbme_filename)
+  size_t tbme_size = total_tbme_states (ref_tbme);
 
-  two_array ref_tbme (boost::extents[tbme_size][9])
-  two_array comp_h2 (boost::extents[tbme_size][tbme_size])
+  two_array array_ref_tbme (boost::extents[tbme_size][9]);
+  two_array h2_mat (boost::extents[tbme_size][tbme_size]);
 
 
 //  five_array h2_mat(boost::extents[bsize][bsize][bsize][bsize][5]);
 
-  fullm_populate_hamiltonian (ref_m, h1_mat, h2_mat, m_ref, obme_ref, m_mat, hw, diag_out, diag_toggle, two_body_toggle);
+  fullm_populate_hamiltonian (array_ref_obme, array_ref_tbme, h1_mat, h2_mat, ref_obme, me_obme, ref_tbme, me_tbme, two_body_toggle);
 
   std::cout << "HAMILTONIAN BUILT" << std::endl;
 
 //  two_array comp_h2 (boost::extents[bsize*(bsize-1)/2][bsize*(bsize-1)/2]);
 
-  if (two_body_toggle) 
-  {
-  	compactify_h2 (ref_m, comp_h2, h2_mat, diag_out, diag_toggle);
-
-  	std::cout << "POTENTIAL COMPACTIFIED" << std::endl;
-  }
+//  if (two_body_toggle) 
+//  {
+//  	compactify_h2 (ref_m, comp_h2, h2_mat, diag_out, diag_toggle);
+//
+//  	std::cout << "POTENTIAL COMPACTIFIED" << std::endl;
+//  }
 
   fprintf (sdpa_out, "%lu\n", cons);
   fprintf (sdpa_out, "%lu\n", blocks);
@@ -312,7 +308,7 @@ int main ()
   size_t con_count = 0;
 
 
-  init_C_matrix (flag_pass, sdpa_out, h1_mat, comp_h2, con_count);
+  init_C_matrix (flag_pass, sdpa_out, h1_mat, h2_mat, con_count);
 
   std::cout << "C MATRIX DONE" << std::endl;
 
