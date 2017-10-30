@@ -1,6 +1,9 @@
 # Size of the basis  
 70
 
+# nmax for basis size
+4
+
 # Number of particles
 2
 

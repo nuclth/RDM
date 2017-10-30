@@ -30,18 +30,21 @@ parameters read_in_inputs ()
 	  ss >> input.basis;
 
 	if (counter == 1)
-	  ss >> input.particles;
+	  ss >> input.nmax;
 
 	if (counter == 2)
+	  ss >> input.particles;
+
+	if (counter == 3)
 	  ss >> input.ref_obme;
 
- 	if (counter == 3)
+ 	if (counter == 4)
       ss >> input.me_obme;
 
-  	if (counter == 4)
+  	if (counter == 5)
       ss >> input.ref_tbme;
 
-  	if (counter == 5)
+  	if (counter == 6)
   	  ss >> input.me_tbme;
 
 	counter++;					// increase the counter after reading in a parameter	

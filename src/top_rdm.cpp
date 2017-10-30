@@ -62,7 +62,8 @@ int main ()
   input_params = read_in_inputs (); 					     // read in the values from inputs.inp, store in input_params	
 
   // Now create/copy input parameters for ease of reading the code into newly defined local variables
-  const size_t bsize = input_params.basis;	   
+  const size_t bsize = input_params.basis;
+  const size_t nmax  = input_params.nmax;	   
   const size_t particles = input_params.particles;		 
   const std::string ref_obme = input_params.ref_obme;    
   const std::string me_obme = input_params.me_obme;   
@@ -70,6 +71,8 @@ int main ()
   const std::string me_tbme = input_params.me_tbme;
 
   std::cout << ("Building system... ") << std::endl;
+
+  size_t tbme_size = total_tbme_states (ref_tbme);
 
 
 
@@ -171,7 +174,7 @@ int main ()
   const size_t F1num  = 1;
   const size_t F2num  = bsize * (bsize + 1)/2;
   const size_t NN_num = 1;
-  const size_t F3num  = bsize * (bsize + 1)/2;
+  const size_t F3num  = tbme_size * (tbme_size + 1)/2;
   const size_t F7num  = Q_num;//bsize*bsize*bsize*bsize;
   const size_t F10num = G_num;//bsize*bsize*bsize*bsize;
 
@@ -252,7 +255,7 @@ int main ()
   two_array array_ref_obme (boost::extents[bsize][7]);
   two_array h1_mat(boost::extents[bsize][bsize]);
 
-  size_t tbme_size = total_tbme_states (ref_tbme);
+//  std::cout << "TBME SIZE: " << tbme_size << std::endl;
 
   two_array array_ref_tbme (boost::extents[tbme_size][9]);
   two_array h2_mat (boost::extents[tbme_size][tbme_size]);
@@ -260,7 +263,7 @@ int main ()
 
 //  five_array h2_mat(boost::extents[bsize][bsize][bsize][bsize][5]);
 
-  fullm_populate_hamiltonian (array_ref_obme, array_ref_tbme, h1_mat, h2_mat, ref_obme, me_obme, ref_tbme, me_tbme, two_body_toggle);
+  fullm_populate_hamiltonian (array_ref_obme, array_ref_tbme, h1_mat, h2_mat, ref_obme, me_obme, ref_tbme, me_tbme, two_body_toggle, nmax);
 
   std::cout << "HAMILTONIAN BUILT" << std::endl;
 

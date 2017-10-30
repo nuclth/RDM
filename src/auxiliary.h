@@ -8,6 +8,7 @@
 struct parameters 
 {
 	size_t basis;
+	size_t nmax;
 	size_t particles;
     std::string ref_obme;
     std::string me_obme;

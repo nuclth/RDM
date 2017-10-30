@@ -28,7 +28,7 @@ void populate_1body (const two_array & ref_m, two_array & h1_mat, const std::str
 
   int obme_size = get_obme_lines(obme_filename);
 
-  std::cout << "OBME SIZE " << obme_size << "\n";
+//  std::cout << "OBME SIZE " << obme_size << "\n";
 
   two_array obme (boost::extents[obme_size][6]);
 
@@ -192,7 +192,7 @@ populate 2-body matrix elements.
 ***************************************************************/
 
 
-void fullm_populate_hamiltonian (two_array & array_ref_obme, two_array & array_ref_tbme, two_array & h1_mat, two_array & h2_mat, const std::string ref_obme, const std::string me_obme, const std::string ref_tbme, const std::string me_tbme, const bool two_body_toggle) 
+void fullm_populate_hamiltonian (two_array & array_ref_obme, two_array & array_ref_tbme, two_array & h1_mat, two_array & h2_mat, const std::string ref_obme, const std::string me_obme, const std::string ref_tbme, const std::string me_tbme, const bool two_body_toggle, const int nmax) 
 {
 
     read_in_reference_m_scheme (array_ref_obme, ref_obme);
@@ -202,7 +202,8 @@ void fullm_populate_hamiltonian (two_array & array_ref_obme, two_array & array_r
     if (two_body_toggle)
     {
       readin_ref_tbme (array_ref_tbme, ref_tbme);
-      populate_2body (array_ref_obme, array_ref_tbme, h2_mat, me_tbme);
+      std::cout << "TBME REFERENCE READ" << std::endl;
+      populate_2body (array_ref_obme, array_ref_tbme, h2_mat, me_tbme, nmax);
       std::cout << "2 BODY POPULATED" << std::endl;
     }
 
@@ -305,7 +306,7 @@ void readin_ref_tbme (two_array & ref_tbme, const std::string tbme_filename)
 
 ***************************************************************/
 
-void populate_2body (const two_array & ref_m, const two_array & ref_tbme, two_array & h2_mat, const std::string me_tbme)
+void populate_2body (const two_array & ref_m, const two_array & ref_tbme, two_array & h2_mat, const std::string me_tbme, const int nmax)
 {
   // input file stream
   const char * matrix_file = (me_tbme).c_str();
@@ -326,48 +327,48 @@ void populate_2body (const two_array & ref_m, const two_array & ref_tbme, two_ar
   const size_t obme_size = ref_m.size();
   const size_t tbme_size = h2_mat.size();
 
+  std::cout << "OBME SIZE " << obme_size << std::endl;
+  std::cout << "TBME SIZE " << tbme_size << std::endl;
+
+
   // set the size of the m_scheme holder
   //m_scheme_matrix.set_size (m_size, m_size);
 
 
-  int i,j,k,l;
-
   for (size_t n = 0; n < total_lines; n++)
   {
+//  	  std::cout << "LOOP TOP" << std::endl;
+
 	  std::getline (matrix_in, dummy);
 
 	  if (!dummy.length() || dummy[0] == '#')
 	    continue;
 
-	  i = -1;
-	  j = -1;
-	  k = -1;
-	  l = -1;
 
 	  bool h1 = false;
 	  bool h2 = false;
 	  bool h3 = false;
 	  bool h4 = false;
 
-	  int n1;
-	  int n2;
-	  int n3;
-	  int n4;
+	  int n1 = -1;
+	  int n2 = -1;
+	  int n3 = -1;
+	  int n4 = -1;
 
-	  int l1;
-	  int l2;
-	  int l3;
-	  int l4;
+	  int l1 = -1;
+	  int l2 = -1;
+	  int l3 = -1;
+	  int l4 = -1;
 
-	  double j1;
-	  double j2;
-	  double j3;
-	  double j4;
+	  double j1 = -1;
+	  double j2 = -1;
+	  double j3 = -1;
+	  double j4 = -1;
 
-	  double mj1;
-	  double mj2;
-	  double mj3;
-	  double mj4;
+	  double mj1 = -1;
+	  double mj2 = -1;
+	  double mj3 = -1;
+	  double mj4 = -1;
 
 
 	  std::stringstream ss;
@@ -421,8 +422,16 @@ void populate_2body (const two_array & ref_m, const two_array & ref_tbme, two_ar
 	  
 	  if (h1 and h2 and h3 and h4)
 	  {
-	  	size_t left = -1;
-	  	size_t right = -1;
+	  	int left = -10;
+	  	int right = -10;
+
+	  	if (nmax < (2*n1 + l1 + 2*n2 + l2) or nmax < (2*n3 + l3 + 2*n4 + l4))
+	  	{
+//	  	  std::cout << "HIT" << std::endl; 
+	  	  continue;
+	  	}
+
+//	  	std::cout << "HIT" << std::endl;
 
 	  	for (size_t loop = 0; loop < tbme_size; loop++)
 	  	{
@@ -436,15 +445,19 @@ void populate_2body (const two_array & ref_m, const two_array & ref_tbme, two_ar
 	  		double j2_loop  = ref_tbme[loop][7];
 	  		double mj2_loop = ref_tbme[loop][8];
 
-	  		if (n1 == n1_loop and n2 == n2_loop and l1 == l1_loop and l2 == l2_loop and j1 == j1_loop and j2 == j2_loop and mj1 == mj1_loop and mj2 == mj2_loop)
+	  		if (n1 == n1_loop and n2 == n2_loop and l1 == l1_loop and l2 == l2_loop 
+	  			and j1 == j1_loop and j2 == j2_loop and mj1 == mj1_loop and mj2 == mj2_loop)
 	  			left = ref_tbme[loop][0] - 1;
 
 
-	  		if (n3 == n1_loop and n4 == n2_loop and l3 == l1_loop and l4 == l2_loop and j3 == j1_loop and j4 == j2_loop and mj3 == mj1_loop and mj4 == mj2_loop)
+	  		if (n3 == n1_loop and n4 == n2_loop and l3 == l1_loop and l4 == l2_loop 
+	  			and j3 == j1_loop and j4 == j2_loop and mj3 == mj1_loop and mj4 == mj2_loop)
 	  			right = ref_tbme[loop][0] - 1;
-
-	  		h2_mat [left][right] = value;
 	  	}
+
+//	  	if (left < 0 or right < 0) std::cerr << "ERROR: BAD TBME MATRIX INDEX " << left << " " << right << std::endl;
+
+	  	if (left >= 0 and right >=0) h2_mat [left][right] = value;
 	  }
 
 
