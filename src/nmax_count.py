@@ -80,10 +80,14 @@ def create_tb_list (nmax, sp_list, tb_list):
     for orb1 in range (0, total_orbs):
         for orb2 in range (orb1+1, total_orbs):
             
+            sp1 = sp_list.iloc[orb1].number
+            
             n1  = sp_list.iloc[orb1].n
             l1  = sp_list.iloc[orb1].l
             j1  = sp_list.iloc[orb1].j
             mj1 = sp_list.iloc[orb1].mj
+
+            sp2 = sp_list.iloc[orb2].number
 
             n2  = sp_list.iloc[orb2].n
             l2  = sp_list.iloc[orb2].l
@@ -102,7 +106,8 @@ def create_tb_list (nmax, sp_list, tb_list):
             
             tb_list = tb_list.append({'number': num, 
                                       'n1': n1, 'l1': l1, 'j1': j1, 'mj1': mj1,
-                                      'n2': n2, 'l2': l2, 'j2': j2, 'mj2': mj2
+                                      'n2': n2, 'l2': l2, 'j2': j2, 'mj2': mj2,
+                                      'sp1' : sp1, 'sp2' : sp2
                                       }, ignore_index=True) 
     
             num +=1
@@ -134,10 +139,10 @@ if __name__ == '__main__':
     
     sp_list = pd.DataFrame(columns= ['number', 'n', 'l', 'j', 'mj'])
     tb_list = pd.DataFrame(columns= ['number', 'n1', 'l1', 'j1', 'mj1', 
-                                     'n2', 'l2', 'j2', 'mj2'])
+                                     'n2', 'l2', 'j2', 'mj2', 'sp1', 'sp2'])
 
 
-    (sp_list, tb_list) = nmax_count(4, sp_list, tb_list)
+    (sp_list, tb_list) = nmax_count(1, sp_list, tb_list)
 
     sp_list.number = sp_list.number.astype(int)
     sp_list.n = sp_list.n.astype(int)
@@ -149,8 +154,11 @@ if __name__ == '__main__':
     tb_list.n2 = tb_list.n2.astype(int)
     tb_list.l2 = tb_list.l2.astype(int)
     
-    np.savetxt('../me_files/nmax4_python_sp.dat', sp_list.values, fmt='%6.2f')
-    np.savetxt('../me_files/nmax4_python_tb.dat', tb_list.values, fmt='%6.2f')
+    tb_list.sp1 = tb_list.sp1.astype(int)
+    tb_list.sp2 = tb_list.sp2.astype(int)
+    
+    np.savetxt('../me_files/nmax1_python_sp.dat', sp_list.values, fmt='%6.2f')
+    np.savetxt('../me_files/nmax1_python_tb.dat', tb_list.values, fmt='%6.2f')
 
     print(sp_list) ; print ('\n')
     print(tb_list)
