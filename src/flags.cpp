@@ -15,7 +15,7 @@ These are the real numbers on the right hand side of the SDP.
 
 
 
-void init_con_values (const con_flags flag_pass, FILE * sdpa_out, const size_t bsize, const size_t tbme_size, const size_t particles)
+void init_con_values (const con_flags flag_pass, FILE * sdpa_out, const size_t bsize, const size_t tbme_size, const size_t particles, const size_t P_num)
 {
 
 //  size_t cmat_extent = F1_con.size();
@@ -54,15 +54,9 @@ void init_con_values (const con_flags flag_pass, FILE * sdpa_out, const size_t b
   // F3 Flag - P and p trace relation
    if (flag_pass.P_flag)
    {
-      for (size_t i = 0; i < tbme_size; i++)      // loop over ith constraint matrix
+      for (size_t i = 0; i < P_num; i++)      // loop over ith constraint matrix
       {
-      for (size_t k = i; k < tbme_size; k++)      // loop over jth constraint matrix
-      {
-
-//        sdpa_out << 0. << " ";
       	  fprintf(sdpa_out, "%f ", 0.0);
-
-      }
       }
    }
 
@@ -407,12 +401,13 @@ between the 2RDM partial trace and the 1RDM.
 ***************************************************************/
 
 
-void init_P_flag (FILE * sdpa_out, const size_t bsize, size_t & con_count, const size_t N)
+void init_P_flag (FILE * sdpa_out, const size_t bsize, size_t & con_count, const size_t N, const size_t tbme_size, 
+	const two_array & array_ref_tbme)
 {
 
-  std::ios_base::sync_with_stdio(false);
+//  std::ios_base::sync_with_stdio(false);
 
-  const std::string p_filename = "../flag_files/nmax3_python_Pflag.dat"
+  const std::string p_filename = "flag_files/nmax4_python_Pflag.dat";
 
   const char * p_file = p_filename.c_str();
   // input file stream for m_scheme
@@ -428,6 +423,8 @@ void init_P_flag (FILE * sdpa_out, const size_t bsize, size_t & con_count, const
 
  	ss << dummy;            // read in the line to stringstream ss
   	ss >> sp1 >> sp2;
+
+  	std::cout << "SPs: " << sp1 << " " << sp2 << std::endl;
 
   	for (size_t ip = 0; ip < bsize; ip++)
     {
@@ -449,6 +446,34 @@ void init_P_flag (FILE * sdpa_out, const size_t bsize, size_t & con_count, const
 
     }
     }
+
+    for (size_t ip = 0;  ip < tbme_size; ip++)      // loop over ith constraint matrix
+    {
+    for (size_t jp = ip; jp < tbme_size; jp++)      // loop over jth constraint matrix
+    {
+
+      size_t n = ip + 1;
+      size_t m = jp + 1;
+
+      size_t a = array_ref_tbme[ip][9];
+      size_t b = array_ref_tbme[ip][10];
+      size_t c = array_ref_tbme[jp][9];
+      size_t d = array_ref_tbme[jp][10];
+
+      double val3 = 1./8. * F3_3_matrix_A (sp1, sp2, a, b, c, d);
+
+
+      if (val3 != 0. and n <= m)
+      {
+      	fprintf (sdpa_out, "%lu %u %lu %lu %f\n", con_count, 3, n, m, val3);
+      }
+
+
+
+    }
+    }
+    
+    
 
 
   }

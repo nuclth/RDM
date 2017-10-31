@@ -658,8 +658,6 @@ void read_in_reference_m_scheme (two_array & ref_m, const std::string m_ref_file
   }
   
 
-
-
   return;
 }
 

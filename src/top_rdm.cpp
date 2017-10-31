@@ -47,7 +47,7 @@ for the system.
 #include <fstream>
 
 
-
+size_t count_P_cons (const std::string);
 
 /********************************************
 
@@ -76,6 +76,9 @@ int main ()
   two_array array_ref_tbme (boost::extents[tbme_size][11]);
   readin_ref_tbme (array_ref_tbme, ref_tbme);
 
+  const std::string p_filename = "flag_files/nmax4_python_Pflag.dat";
+
+  size_t P_num = count_P_cons (p_filename);
 
   size_t Q_num = 0;
 
@@ -175,17 +178,12 @@ int main ()
   const size_t F1num  = 1;
   const size_t F2num  = bsize * (bsize + 1)/2;
   const size_t NN_num = 1;
-  const size_t F3num  = P_flag_num (array_ref_tbme, tbme_size);//tbme_size * (tbme_size + 1)/2;
+  const size_t F3num  = P_num;//tbme_size * (tbme_size + 1)/2;
   const size_t F7num  = Q_num;//bsize*bsize*bsize*bsize;
   const size_t F10num = G_num;//bsize*bsize*bsize*bsize;
 
   const size_t T1_num = 1;
   const size_t T2_num = T2_count (bsize);
-
-
-  std::cout << "P_flag NUM " << F3num << std::endl;
-  return EXIT_SUCCESS;
-
 
   const std::string diag_file = "diagnostic_out/test_diag.dat";
   const std::string sdpa_file = "sdp_files/test_sdp.dat-s";
@@ -307,7 +305,7 @@ int main ()
   fprintf (sdpa_out, "\n");
 
   
-  init_con_values (flag_pass, sdpa_out, bsize, tbme_size, particles);
+  init_con_values (flag_pass, sdpa_out, bsize, tbme_size, particles, P_num);
 
   size_t con_count = 0;
 
@@ -337,7 +335,7 @@ int main ()
 
   if (P_flag)
   {
-    init_P_flag (sdpa_out, bsize, con_count, particles);
+    init_P_flag (sdpa_out, bsize, con_count, particles, tbme_size, array_ref_tbme);
     std::cout << "P FLAG DONE" << std::endl;
   }
 
@@ -375,3 +373,18 @@ END MAIN PROGRAM
 
 ************************************************/
 
+size_t count_P_cons (const std::string p_filename)
+{
+  const char * p_file = p_filename.c_str();
+  // input file stream for m_scheme
+  std::ifstream ref_in (p_file);
+ 
+  std::string dummy;
+
+  size_t P_num = 0;
+
+  // find total number of defined reference lines
+  while (std::getline (ref_in, dummy)) P_num++;
+
+  return P_num;
+}

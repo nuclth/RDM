@@ -161,7 +161,7 @@ if __name__ == '__main__':
     tb_list = pd.DataFrame(columns= ['number', 'n1', 'l1', 'j1', 'mj1', 
                                      'n2', 'l2', 'j2', 'mj2', 'sp1', 'sp2'])
 
-    nmax = 3
+    nmax = 6
 
     (sp_list, tb_list) = nmax_count(nmax, sp_list, tb_list)
 

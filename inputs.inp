@@ -1,21 +1,21 @@
 # Size of the basis  
-20
+168
 
 # nmax for basis size
-2
+6
 
 # Number of particles
 2
 
 # input obme reference file
-me_files/nmax2_spm.dat
+me_files/nmax6_spm.dat
 
 # input obme matrix elements file
-me_files/nmax2_obme_hw25.dat
+me_files/nmax6_obme_hw25.dat
 
 # input tbme reference file
-me_files/nmax2_python_tb.dat
+me_files/nmax6_python_tb.dat
 
 # input tbme matrix elements file
-me_files/nmax2_tbme_hw25.dat
+me_files/nmax6_tbme_hw25.dat
 
