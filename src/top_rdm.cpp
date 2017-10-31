@@ -73,7 +73,8 @@ int main ()
   std::cout << ("Building system... ") << std::endl;
 
   size_t tbme_size = total_tbme_states (ref_tbme);
-
+  two_array array_ref_tbme (boost::extents[tbme_size][11]);
+  readin_ref_tbme (array_ref_tbme, ref_tbme);
 
 
   size_t Q_num = 0;
@@ -174,7 +175,7 @@ int main ()
   const size_t F1num  = 1;
   const size_t F2num  = bsize * (bsize + 1)/2;
   const size_t NN_num = 1;
-  const size_t F3num  = tbme_size * (tbme_size + 1)/2;
+  const size_t F3num  = P_flag_num (array_ref_tbme, tbme_size);//tbme_size * (tbme_size + 1)/2;
   const size_t F7num  = Q_num;//bsize*bsize*bsize*bsize;
   const size_t F10num = G_num;//bsize*bsize*bsize*bsize;
 
@@ -182,7 +183,8 @@ int main ()
   const size_t T2_num = T2_count (bsize);
 
 
-
+  std::cout << "P_flag NUM " << F3num << std::endl;
+  return EXIT_SUCCESS;
 
 
   const std::string diag_file = "diagnostic_out/test_diag.dat";
@@ -257,7 +259,6 @@ int main ()
 
 //  std::cout << "TBME SIZE: " << tbme_size << std::endl;
 
-  two_array array_ref_tbme (boost::extents[tbme_size][9]);
   two_array h2_mat (boost::extents[tbme_size][tbme_size]);
 
 

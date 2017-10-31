@@ -201,7 +201,6 @@ void fullm_populate_hamiltonian (two_array & array_ref_obme, two_array & array_r
     std::cout << "1 BODY POPULATED" << std::endl;
     if (two_body_toggle)
     {
-      readin_ref_tbme (array_ref_tbme, ref_tbme);
       std::cout << "TBME REFERENCE READ" << std::endl;
       populate_2body (array_ref_obme, array_ref_tbme, h2_mat, me_tbme, nmax);
       std::cout << "2 BODY POPULATED" << std::endl;
@@ -245,7 +244,7 @@ void readin_ref_tbme (two_array & ref_tbme, const std::string tbme_filename)
  
   size_t total_lines = 0;
   std::string dummy;
-  double num, n1, l1, j1, mj1, n2, l2, j2, mj2;
+  double num, n1, l1, j1, mj1, n2, l2, j2, mj2, sp1, sp2;
 
   // find total number of defined reference lines
   while (std::getline (ref_in, dummy))
@@ -273,7 +272,7 @@ void readin_ref_tbme (two_array & ref_tbme, const std::string tbme_filename)
  	ss << dummy;            // read in the line to stringstream ss
 
 
-  	ss >> num >> n1 >> l1 >> j1 >> mj1 >> n2 >> l2 >> j2 >> mj2;  // assign values of the line
+  	ss >> num >> n1 >> l1 >> j1 >> mj1 >> n2 >> l2 >> j2 >> mj2 >> sp1 >> sp2;  // assign values of the line
 
 
     ref_tbme [ele_in][0] = num;    // reference number of the line
@@ -287,6 +286,8 @@ void readin_ref_tbme (two_array & ref_tbme, const std::string tbme_filename)
     ref_tbme [ele_in][6] = l2;          // orbital angular mom.
     ref_tbme [ele_in][7] = j2;    // total angular mom.
     ref_tbme [ele_in][8] = mj2;   // total angular mom. projection
+    ref_tbme [ele_in][9] = sp1;
+    ref_tbme [ele_in][10] = sp2;
 
     ele_in++;
 

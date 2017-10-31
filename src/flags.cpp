@@ -412,9 +412,51 @@ void init_P_flag (FILE * sdpa_out, const size_t bsize, size_t & con_count, const
 
   std::ios_base::sync_with_stdio(false);
 
+  const std::string p_filename = "../flag_files/nmax3_python_Pflag.dat"
+
+  const char * p_file = p_filename.c_str();
+  // input file stream for m_scheme
+  std::ifstream ref_in (p_file);
+ 
+  std::string dummy;
+  size_t sp1, sp2;
+
+  // find total number of defined reference lines
+  while (std::getline (ref_in, dummy))
+  {
+  	std::stringstream ss;
+
+ 	ss << dummy;            // read in the line to stringstream ss
+  	ss >> sp1 >> sp2;
+
+  	for (size_t ip = 0; ip < bsize; ip++)
+    {
+    for (size_t kp = ip; kp < bsize; kp++)
+    {
+
+
+      double val1 = -1.0 * (N - 1.0) / 4.0 * (
+        kron_del(sp1,ip)*kron_del(sp2,kp) + kron_del(sp2,ip)*kron_del(sp1,kp)
+        );
+
+      size_t n = ip + 1;
+      size_t m = kp + 1; 
+
+      if (val1 != 0. and n <= m)
+      {
+        fprintf(sdpa_out, "%lu %u %lu %lu %f\n", con_count, 1, n, m, val1);
+      }
+
+    }
+    }
+
+
+  }
 //  char buffer[120*bsize];
 
 //  setbuf (sdpa_out, buffer);
+
+/*
 
   for (size_t i = 0; i < bsize; i++)
   {
@@ -497,6 +539,9 @@ void init_P_flag (FILE * sdpa_out, const size_t bsize, size_t & con_count, const
   }
 
 //  fprintf(sdpa_out, buffer);
+
+
+*/
 
   return;
 }
@@ -932,3 +977,4 @@ void init_T2_flag (FILE * sdpa_out, const size_t bsize, size_t & con_count)
 
 }
 */
+
