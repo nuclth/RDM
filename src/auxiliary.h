@@ -14,6 +14,7 @@ struct parameters
     std::string me_obme;
     std::string ref_tbme;
     std::string me_tbme;
+    std::string pflag_info;
 };
 
 // struct to hold the constraint flag toggles

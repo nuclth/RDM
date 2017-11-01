@@ -402,14 +402,12 @@ between the 2RDM partial trace and the 1RDM.
 
 
 void init_P_flag (FILE * sdpa_out, const size_t bsize, size_t & con_count, const size_t N, const size_t tbme_size, 
-	const two_array & array_ref_tbme)
+	const two_array & array_ref_tbme, const std::string pflag_info)
 {
 
 //  std::ios_base::sync_with_stdio(false);
 
-  const std::string p_filename = "flag_files/nmax4_python_Pflag.dat";
-
-  const char * p_file = p_filename.c_str();
+  const char * p_file = pflag_info.c_str();
   // input file stream for m_scheme
   std::ifstream ref_in (p_file);
  

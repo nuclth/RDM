@@ -47,6 +47,9 @@ parameters read_in_inputs ()
   	if (counter == 6)
   	  ss >> input.me_tbme;
 
+  	if (counter == 7)
+  	  ss >> input.pflag_info;
+
 	counter++;					// increase the counter after reading in a parameter	
   }
 

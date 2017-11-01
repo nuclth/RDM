@@ -69,6 +69,7 @@ int main ()
   const std::string me_obme = input_params.me_obme;   
   const std::string ref_tbme = input_params.ref_tbme;
   const std::string me_tbme = input_params.me_tbme;
+  const std::string pflag_info = input_params.pflag_info;
 
   std::cout << ("Building system... ") << std::endl;
 
@@ -76,9 +77,7 @@ int main ()
   two_array array_ref_tbme (boost::extents[tbme_size][11]);
   readin_ref_tbme (array_ref_tbme, ref_tbme);
 
-  const std::string p_filename = "flag_files/nmax4_python_Pflag.dat";
-
-  size_t P_num = count_P_cons (p_filename);
+  size_t P_num = count_P_cons (pflag_info);
 
   size_t Q_num = 0;
 
