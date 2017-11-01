@@ -23,14 +23,16 @@ def create_sp_list (nmax, sp_list):
     """Function to create a list of single-particle orbitals for a given Nmax
     truncation in m-scheme harmonic oscillator basis."""
     
-    # initialize values    
+    # initialize values
+    new_ncount = True    
     ncount = 0
     num= 1
     n = 0
     l = 0
-    j = abs (l - 1/2)
+    j = 2 * abs (l + 1/2)
     mj = -j
-
+    icount = 0
+    l_list = []
 
     while nmax >= ncount:    
         # add new single-particle orbital to dataframe
@@ -41,34 +43,89 @@ def create_sp_list (nmax, sp_list):
     
         # cycle through mj and j values
         if mj < j:
-            mj += 1
+            mj += 2
             continue
     
-        if j < abs (l + 1/2):
-            j += 1
+        if j > 2 * abs (l - 1/2):
+            j = j - 2
             mj = -j
             continue
+
+ #       (n, l, ncount) = increment_nl (n, l, ncount)
+
+        if icount >= len(l_list) and not new_ncount:
+            new_ncount = True
+
+        if new_ncount:
+            new_ncount = False
+            ncount += 1
+            icount = 0
+            l_list = [a for a in range (ncount, -1, -2)]
+            n_list = [a for a in range (0, int(np.floor(ncount/2))+1, 1)]
       
-        if 2*n + (l+1) <= nmax:
-            l += 1
-            j = abs (l-1/2)
-            mj = -j
-            continue
+        if ncount > nmax:
+            break
         
-        n += 1
-        l = 0
-   
-        ncount = 2*n
-    
+#        print (icount)
+#        print (len(l_list))
+        
+        l = l_list[icount]
+        n = n_list[icount]
+        
+        icount += 1
+
         # reset j,mj for new n,l values
-        j = abs (l - 1/2)
+        j = 2 * abs (l + 1/2)
         mj = -j
     
         # break if we get above nmax
-        if ncount > nmax:
-            break
+#        if ncount > nmax:
+#            break
     
     return sp_list
+
+
+
+def increment_nl (n, l, ncount):
+    """Function to increment either n or l in the single-particle space
+    depending on which is lower energy. Incrementing n resets l back to 
+    zero."""
+    
+    ncount = 5
+    
+  
+    l_list = [a for a in range (ncount, -1, -2)]
+    n_list = [a for a in range (0, int(np.floor(ncount/2))+1, 1)]
+
+    print (len(l_list))
+    sys.exit()
+
+    for n1 in n_list:
+        for l1 in l_list:
+            print (l1)
+
+    print (n_list)
+    print (l_list)
+    sys.exit()
+    
+    if (2*(n+1) + l > ncount and 2*n + l + 1 > ncount): ncount += 1
+    
+    n_incr = 2 * (n + 1)
+    l_incr = 2 * n + (l + 1)
+    
+    if n_incr < l_incr:
+        n += 1
+        l = 0
+        ncount = n_incr
+        
+    else:
+        l += 1
+        ncount = l_incr
+    
+    return (n, l, ncount)
+
+
+
 
 def create_tb_list (nmax, sp_list, tb_list):
     """Function to create the two-particle basis set. Two loops are run over 
@@ -106,6 +163,12 @@ def create_tb_list (nmax, sp_list, tb_list):
             if ncount > nmax:
                 continue
             
+            mj1 *= 0.5
+            mj2 *= 0.5
+            
+            j1 *= 0.5
+            j2 *= 0.5
+            
             tb_list = tb_list.append({'number': num, 
                                       'n1': n1, 'l1': l1, 'j1': j1, 'mj1': mj1,
                                       'n2': n2, 'l2': l2, 'j2': j2, 'mj2': mj2,
@@ -115,26 +178,6 @@ def create_tb_list (nmax, sp_list, tb_list):
             num +=1
     
     return tb_list
-    
-
-def increment_nl (n, l, ncount):
-    """Function to increment either n or l in the single-particle space
-    depending on which is lower energy. Incrementing n resets l back to 
-    zero."""
-    
-    n_incr = 2 * (n + 1)
-    l_incr = 2 * n + (l + 1)
-    
-    if n_incr < l_incr:
-        n += 1
-        l = 0
-        ncount = n_incr
-        
-    else:
-        l += 1
-        ncount = l_incr
-    
-    return (n, l, ncount)
 
 
 def P_flag_num (tb_list):
@@ -161,13 +204,15 @@ if __name__ == '__main__':
     tb_list = pd.DataFrame(columns= ['number', 'n1', 'l1', 'j1', 'mj1', 
                                      'n2', 'l2', 'j2', 'mj2', 'sp1', 'sp2'])
 
-    nmax = 2
+    nmax = 6
 
     (sp_list, tb_list) = nmax_count(nmax, sp_list, tb_list)
 
     sp_list.number = sp_list.number.astype(int)
     sp_list.n = sp_list.n.astype(int)
     sp_list.l = sp_list.l.astype(int)
+    sp_list.j = sp_list.j.astype(int)
+    sp_list.mj = sp_list.mj.astype(int)
     
     tb_list.number = tb_list.number.astype(int)
     tb_list.n1 = tb_list.n1.astype(int)
@@ -179,7 +224,7 @@ if __name__ == '__main__':
     tb_list.sp2 = tb_list.sp2.astype(int)
     
     np.savetxt('../me_files/ref_files/nmax' + str(nmax) + 
-               '_python_sp.dat', sp_list.values, fmt='%6.2f')
+               '_python_sp.dat', sp_list.values, fmt='%6i')
     np.savetxt('../me_files/ref_files/nmax' + str(nmax) + 
                '_python_tb.dat', tb_list.values, fmt='%6.2f')
 

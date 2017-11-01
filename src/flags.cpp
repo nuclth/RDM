@@ -415,7 +415,7 @@ void init_P_flag (FILE * sdpa_out, const size_t bsize, size_t & con_count, const
   // find total number of defined reference lines
   while (std::getline (ref_in, dummy))
   {
-  	
+
 	if (!dummy.length() || dummy[0] == '#')     // skip zero length lines and lines that start with #
     	continue;
 
