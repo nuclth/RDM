@@ -161,7 +161,7 @@ if __name__ == '__main__':
     tb_list = pd.DataFrame(columns= ['number', 'n1', 'l1', 'j1', 'mj1', 
                                      'n2', 'l2', 'j2', 'mj2', 'sp1', 'sp2'])
 
-    nmax = 6
+    nmax = 2
 
     (sp_list, tb_list) = nmax_count(nmax, sp_list, tb_list)
 
@@ -178,9 +178,9 @@ if __name__ == '__main__':
     tb_list.sp1 = tb_list.sp1.astype(int)
     tb_list.sp2 = tb_list.sp2.astype(int)
     
-    np.savetxt('../me_files/nmax' + str(nmax) + 
+    np.savetxt('../me_files/ref_files/nmax' + str(nmax) + 
                '_python_sp.dat', sp_list.values, fmt='%6.2f')
-    np.savetxt('../me_files/nmax' + str(nmax) + 
+    np.savetxt('../me_files/ref_files/nmax' + str(nmax) + 
                '_python_tb.dat', tb_list.values, fmt='%6.2f')
 
 
@@ -190,7 +190,7 @@ if __name__ == '__main__':
     (Pnum, P_spterms) = P_flag_num (tb_list)
 
     np.savetxt('../flag_files/nmax' + str (nmax) +
-               '_python_Pflag.dat', P_spterms, fmt='%6i')
+               '_python_pflag.dat', P_spterms, fmt='%6i')
     
     print(sp_list) ; print ('\n')
     print(tb_list)

@@ -27,28 +27,13 @@ parameters read_in_inputs ()
 	ss << dummy;					// read in the line to the stringstream ss
 
 	if (counter == 0)				// read in parameters by the way they're ordered in "inputs.inp"
-	  ss >> input.basis;
+	  ss >> input.nmax;
 
 	if (counter == 1)
-	  ss >> input.nmax;
+	  ss >> input.basis_hw;
 
 	if (counter == 2)
 	  ss >> input.particles;
-
-	if (counter == 3)
-	  ss >> input.ref_obme;
-
- 	if (counter == 4)
-      ss >> input.me_obme;
-
-  	if (counter == 5)
-      ss >> input.ref_tbme;
-
-  	if (counter == 6)
-  	  ss >> input.me_tbme;
-
-  	if (counter == 7)
-  	  ss >> input.pflag_info;
 
 	counter++;					// increase the counter after reading in a parameter	
   }

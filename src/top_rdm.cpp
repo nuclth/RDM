@@ -46,8 +46,13 @@ for the system.
 #include <sstream>
 #include <fstream>
 
+using std::cout;
+using std::endl;
+
 
 size_t count_P_cons (const std::string);
+size_t total_tbme_states (const std::string tbme_filename);
+size_t total_obme_states (const std::string obme_filename);
 
 /********************************************
 
@@ -62,22 +67,59 @@ int main ()
   input_params = read_in_inputs (); 					     // read in the values from inputs.inp, store in input_params	
 
   // Now create/copy input parameters for ease of reading the code into newly defined local variables
-  const size_t bsize = input_params.basis;
-  const size_t nmax  = input_params.nmax;	   
+  const size_t nmax  = input_params.nmax;	
+  const size_t basis_hw = input_params.basis_hw;   
   const size_t particles = input_params.particles;		 
-  const std::string ref_obme = input_params.ref_obme;    
-  const std::string me_obme = input_params.me_obme;   
-  const std::string ref_tbme = input_params.ref_tbme;
-  const std::string me_tbme = input_params.me_tbme;
-  const std::string pflag_info = input_params.pflag_info;
 
   std::cout << ("Building system... ") << std::endl;
 
-  size_t tbme_size = total_tbme_states (ref_tbme);
+  // Create filenames from inputs
+  std::stringstream parser;
+  
+  parser << "me_files/ref_files/nmax" << nmax << "_spm.dat";
+  const std::string ref_obme = parser.str();
+
+  // clear parser and repeat for other files
+  parser.str("");
+  parser.clear();
+
+  parser << "me_files/obme/nmax" << nmax << "_obme_hw" << basis_hw << ".dat";
+  const std::string me_obme = parser.str();
+
+  parser.str("");
+  parser.clear();
+
+  parser << "me_files/ref_files/nmax" << nmax << "_python_tb.dat";
+  const std::string ref_tbme = parser.str();
+
+  parser.str("");
+  parser.clear();
+
+  parser << "me_files/tbme/nmax" << nmax << "_tbme_hw" << basis_hw << ".dat";
+  const std::string me_tbme = parser.str();
+
+  parser.str("");
+  parser.clear();
+
+  parser << "flag_files/nmax" << nmax << "_python_pflag.dat";
+  const std::string pflag_info = parser.str();
+
+  parser.str("");
+  parser.clear();
+
+
+  const size_t bsize = total_obme_states (ref_obme);
+  const size_t tbme_size = total_tbme_states (ref_tbme);
+
   two_array array_ref_tbme (boost::extents[tbme_size][11]);
   readin_ref_tbme (array_ref_tbme, ref_tbme);
 
-  size_t P_num = count_P_cons (pflag_info);
+  const size_t P_num = count_P_cons (pflag_info);
+
+  cout << "BSIZE: " << bsize << endl;
+  cout << "TBME SIZE: " << tbme_size << endl;
+  cout << "PNUM: " << P_num << endl << endl;
+  
 
   size_t Q_num = 0;
 
@@ -334,7 +376,7 @@ int main ()
 
   if (P_flag)
   {
-    init_P_flag (sdpa_out, bsize, con_count, particles, tbme_size, array_ref_tbme);
+    init_P_flag (sdpa_out, bsize, con_count, particles, tbme_size, array_ref_tbme, pflag_info);
     std::cout << "P FLAG DONE" << std::endl;
   }
 
@@ -383,7 +425,67 @@ size_t count_P_cons (const std::string p_filename)
   size_t P_num = 0;
 
   // find total number of defined reference lines
-  while (std::getline (ref_in, dummy)) P_num++;
+  while (std::getline (ref_in, dummy)) 
+  {
+	if (!dummy.length() || dummy[0] == '#')     // skip zero length lines and lines that start with #
+    	continue;
+
+  	++P_num;
+  }
 
   return P_num;
+}
+
+
+/***************************************************************
+
+
+
+***************************************************************/
+
+size_t total_tbme_states (const std::string tbme_filename)
+{
+  const char * ref_file = tbme_filename.c_str();
+  std::ifstream ref_in (ref_file);
+ 
+  size_t total_lines = 0;
+  std::string dummy;
+
+  // find total number of defined reference lines
+  while (std::getline (ref_in, dummy)) 
+  {
+	if (!dummy.length() || dummy[0] == '#')     // skip zero length lines and lines that start with #
+    	continue;
+
+  	++total_lines;
+  }
+
+  return total_lines;
+}
+
+
+/***************************************************************
+
+
+
+***************************************************************/
+
+size_t total_obme_states (const std::string ref_obme)
+{
+  const char * ref_file = ref_obme.c_str();
+  std::ifstream ref_in (ref_file);
+ 
+  size_t total_lines = 0;
+  std::string dummy;
+
+  // find total number of defined reference lines
+  while (std::getline (ref_in, dummy)) 
+  {
+	if (!dummy.length() || dummy[0] == '#')     // skip zero length lines and lines that start with #
+    	continue;
+
+  	++total_lines;
+  }
+
+  return total_lines;
 }

@@ -19,7 +19,7 @@ double find_obme_me (const double n1, const double n2, const double l, const dou
 int get_obme_lines (const std::string);
 void read_in_obme (two_array & obme, const std::string);
 
-size_t total_tbme_states (const std::string tbme_filename);
+
 void readin_ref_tbme (two_array & ref_tbme, const std::string tbme_filename);
 void populate_2body (const two_array & ref_m, const two_array & ref_tbme, two_array & h2_mat, const std::string me_tbme, const int nmax);
 

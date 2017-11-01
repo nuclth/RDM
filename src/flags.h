@@ -14,7 +14,7 @@ void init_O_flag (FILE * spda_out, const size_t bsize, size_t & con_count);
 void init_NN_flag (FILE * sdpa_out, const size_t bsize, size_t & con_count);
 
 void init_P_flag (FILE * sdpa_out, const size_t bsize, size_t & con_count, const size_t N, const size_t tbme_size, 
-	const two_array & array_ref_tbme);
+	const two_array & array_ref_tbme, const std::string);
 
 void init_Q_flag (FILE * spda_out, const size_t bsize, size_t & con_count);
 void init_G_flag (FILE * spda_out, const size_t bsize, size_t & con_count);

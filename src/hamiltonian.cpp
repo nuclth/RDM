@@ -209,25 +209,7 @@ void fullm_populate_hamiltonian (two_array & array_ref_obme, two_array & array_r
 }
 
 
-/***************************************************************
 
-
-
-***************************************************************/
-
-size_t total_tbme_states (const std::string tbme_filename)
-{
-  const char * ref_file = tbme_filename.c_str();
-  std::ifstream ref_in (ref_file);
- 
-  size_t total_lines = 0;
-  std::string dummy;
-
-  // find total number of defined reference lines
-  while (std::getline (ref_in, dummy)) ++total_lines;
-
-  return total_lines;
-}
 
 /***************************************************************
 

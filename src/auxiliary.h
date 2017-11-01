@@ -7,14 +7,9 @@
 // struct to hold the input file variables
 struct parameters 
 {
-	size_t basis;
+	size_t basis_hw;
 	size_t nmax;
 	size_t particles;
-    std::string ref_obme;
-    std::string me_obme;
-    std::string ref_tbme;
-    std::string me_tbme;
-    std::string pflag_info;
 };
 
 // struct to hold the constraint flag toggles

@@ -1,23 +1,8 @@
-# Size of the basis  
-168
+# nmax truncation for basis size
+4
 
-# nmax for basis size
-6
+# basis hw parameter
+15
 
 # Number of particles
 2
-
-# input obme reference file
-me_files/nmax6_spm.dat
-
-# input obme matrix elements file
-me_files/nmax6_obme_hw25.dat
-
-# input tbme reference file
-me_files/nmax6_python_tb.dat
-
-# input tbme matrix elements file
-me_files/nmax6_tbme_hw25.dat
-
-# input pflag info
-flag_files/nmax4_python_Pflag.dat

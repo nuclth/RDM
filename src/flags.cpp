@@ -184,8 +184,6 @@ void init_C_matrix (const con_flags flag_pass, FILE * sdpa_out, const two_array 
 
 
 
-
-
   if (flag_pass.two_body_toggle)
   {
       for (size_t ip = 0;  ip < h2_len; ip++)      // loop over ith constraint matrix
@@ -417,12 +415,16 @@ void init_P_flag (FILE * sdpa_out, const size_t bsize, size_t & con_count, const
   // find total number of defined reference lines
   while (std::getline (ref_in, dummy))
   {
+  	
+	if (!dummy.length() || dummy[0] == '#')     // skip zero length lines and lines that start with #
+    	continue;
+
   	std::stringstream ss;
 
  	ss << dummy;            // read in the line to stringstream ss
   	ss >> sp1 >> sp2;
 
-  	std::cout << "SPs: " << sp1 << " " << sp2 << std::endl;
+//  	std::cout << "SPs: " << sp1 << " " << sp2 << std::endl;
 
   	for (size_t ip = 0; ip < bsize; ip++)
     {
