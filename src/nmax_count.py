@@ -11,13 +11,6 @@ import sys
 import pandas as pd
 import numpy as np
 
-def nmax_count (nmax, sp_list, tb_list):
-    """Wrapper function to call the single-particle basis
-    creating function and then the two-particle basis creating function."""
-    sp_list = create_sp_list (nmax, sp_list)
-    tb_list = create_tb_list (nmax, sp_list, tb_list)
-    
-    return (sp_list, tb_list)
     
 def create_sp_list (nmax, sp_list):
     """Function to create a list of single-particle orbitals for a given Nmax
@@ -218,31 +211,71 @@ def sort_sp_l (sp_list):
     return shifted_list
 
 
-def sort_sp_j (sp_list):
-    pass
+def add_blocks (sp_list):
     
+  
+    n_list = sp_list[['n']]
+    n_list['blocks'] = -2
+
+    ncount = 1
     
-#    return shifted_list
+    for val1, val2 in zip(n_list.iterrows(), n_list.iloc[1:].iterrows()):
+        
+        n_set = val1[1][0]
+        n_nxt = val2[1][0]
+        
+        if n_set < n_nxt:
+            ncount += 1
+            val1[1][1] = -1
+        
+        if n_set == n_nxt:
+            ncount = 1
+            val1[1][1] = 1
+
+        if n_set > n_nxt:
+            val1[1][1] = ncount
+            ncount = 1
+  
+          
+    n_list.iloc[len(n_list)-1][1] = 1
+
+    sp_list['blocks'] = n_list['blocks']
     
-def sort_sp_mj (sp_list):
-    pass
+
     
+    return sp_list
 
 if __name__ == '__main__':
     
-    sp_list = pd.DataFrame(columns= ['number', 'n', 'l', 'j', 'mj', 'block'])
+    sp_list = pd.DataFrame(columns= ['number', 'n', 'l', 'j', 'mj'])
     tb_list = pd.DataFrame(columns= ['number', 'n1', 'l1', 'j1', 'mj1', 
                                      'n2', 'l2', 'j2', 'mj2', 'sp1', 'sp2'])
 
     nmax = 2
 
-    (sp_list, tb_list) = nmax_count(nmax, sp_list, tb_list)
+    sp_list = create_sp_list (nmax, sp_list)
+
 
     sp_list.number = sp_list.number.astype(int)
     sp_list.n = sp_list.n.astype(int)
     sp_list.l = sp_list.l.astype(int)
     sp_list.j = sp_list.j.astype(int)
     sp_list.mj = sp_list.mj.astype(int)
+
+    
+    sp_list = sort_sp (sp_list)
+    
+    sp_list = add_blocks (sp_list)
+    
+    print (sp_list)
+
+    
+    np.savetxt('../me_files/ref_files/nmax' + str(nmax) + 
+               '_python_sp.dat', sp_list.values, fmt='%6i')
+
+    sys.exit()
+    
+    tb_list = create_tb_list (nmax, sp_list, tb_list)
     
     tb_list.number = tb_list.number.astype(int)
     tb_list.n1 = tb_list.n1.astype(int)
@@ -253,17 +286,9 @@ if __name__ == '__main__':
     tb_list.sp1 = tb_list.sp1.astype(int)
     tb_list.sp2 = tb_list.sp2.astype(int)
     
-    sp_list = sort_sp (sp_list)
-    
-    print (sp_list)
-    sys.exit()
-    
-    np.savetxt('../me_files/ref_files/nmax' + str(nmax) + 
-               '_python_sp.dat', sp_list.values, fmt='%6i')
     np.savetxt('../me_files/ref_files/nmax' + str(nmax) + 
                '_python_tb.dat', tb_list.values, fmt='%6.2f')
-
-
+    
     print ('Memory size sp list {} bytes'.format(sys.getsizeof(sp_list)))
     print ('Memory size tb list {} bytes'.format(sys.getsizeof(tb_list)))
 

@@ -572,9 +572,9 @@ void compactify_h2 (const two_array & ref_m, two_array & comp_h2, five_array & h
 ***************************************************************/
 
 
-void read_in_reference_m_scheme (two_array & ref_m, const std::string m_ref_file)
+void read_in_reference_m_scheme (two_array & array_ref_obme, const std::string ref_obme)
 {
-  const char * m_reference_file = (m_ref_file).c_str();
+  const char * ref_file = (m_ref_file).c_str();
   // input file stream for m_scheme
   std::ifstream m_ref_in (m_reference_file);
  

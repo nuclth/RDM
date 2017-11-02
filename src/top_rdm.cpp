@@ -97,9 +97,15 @@ int main ()
   std::stringstream parser;
   
   parser << "me_files/ref_files/nmax" << nmax << "_spm.dat";
-  const std::string ref_obme = parser.str();
+  const std::string morten_spm = parser.str();
 
   // clear parser and repeat for other files
+  parser.str("");
+  parser.clear();
+
+  parser << "me_files/ref_files/nmax" << nmax << "_python_sp.dat";
+  const std::string ref_obme = parser.str();
+
   parser.str("");
   parser.clear();
 
