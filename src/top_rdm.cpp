@@ -63,6 +63,26 @@ BEGIN MAIN PROGRAM
 int main ()
 {
   
+  // define flags for all different combinations of conditions in RDM
+  const bool two_body_toggle = false;
+
+
+  // START CONSTRAINT FLAG DEFINE
+
+  const bool N_flag  = true; // p START - TRACE CONDITION
+  const bool O_flag  = true; // q START - LINEAR RELATIONS
+  const bool P_flag  = false; // P START - TRACE CONDITION
+  const bool Q_flag  = false; // Q START - LINEAR RELATIONS
+  const bool G_flag  = false; // G START - LINEAR REALTIONSi
+
+  const bool T1_flag = false;
+  const bool T2_flag = false;
+
+  const bool NN_flag = false;
+
+
+
+
   parameters input_params;						             // create a struct to hold user specified parameters
   input_params = read_in_inputs (); 					     // read in the values from inputs.inp, store in input_params	
 
@@ -109,12 +129,15 @@ int main ()
 
 
   const size_t bsize = total_obme_states (ref_obme);
+
   const size_t tbme_size = total_tbme_states (ref_tbme);
-
   two_array array_ref_tbme (boost::extents[tbme_size][11]);
-  readin_ref_tbme (array_ref_tbme, ref_tbme);
 
-  const size_t P_num = count_P_cons (pflag_info);
+  if (two_body_toggle) readin_ref_tbme (array_ref_tbme, ref_tbme);
+
+  size_t P_num = 0;
+
+  if (two_body_toggle) P_num = count_P_cons (pflag_info);
 
   cout << "BSIZE: " << bsize << endl;
   cout << "TBME SIZE: " << tbme_size << endl;
@@ -122,7 +145,7 @@ int main ()
   
 
   size_t Q_num = 0;
-
+/*
   for (size_t i = 0; i < bsize; i++)      // loop over ith constraint matrix
   {
   for (size_t j = i+1; j < bsize; j++)      // loop over jth constraint matrix
@@ -139,9 +162,9 @@ int main ()
   }
   }
   }
-
+*/
   size_t G_num = 0;
-
+/*
   for (size_t i = 0; i < bsize; i++)      // loop over ith constraint matrix
   {
   for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
@@ -159,23 +182,8 @@ int main ()
   }
   }
   }
+*/
 
-  // define flags for all different combinations of conditions in RDM
-  const bool two_body_toggle = true;
-
-
-  // START CONSTRAINT FLAG DEFINE
-
-  const bool N_flag  = true; // p START - TRACE CONDITION
-  const bool O_flag  = true; // q START - LINEAR RELATIONS
-  const bool P_flag  = true; // P START - TRACE CONDITION
-  const bool Q_flag  = false; // Q START - LINEAR RELATIONS
-  const bool G_flag  = false; // G START - LINEAR REALTIONSi
-
-  const bool T1_flag = false;
-  const bool T2_flag = false;
-
-  const bool NN_flag = false;
 
 
   if (!two_body_toggle and (P_flag or Q_flag or G_flag))
@@ -224,12 +232,15 @@ int main ()
   const size_t F10num = G_num;//bsize*bsize*bsize*bsize;
 
   const size_t T1_num = 1;
-  const size_t T2_num = T2_count (bsize);
+  const size_t T2_num = 1; //T2_count (bsize);
 
-  const std::string diag_file = "diagnostic_out/test_diag.dat";
+  std::cout << "TEST" << std::endl;
+
+
+//  const std::string diag_file = "diagnostic_out/test_diag.dat";
   const std::string sdpa_file = "sdp_files/test_sdp.dat-s";
 
-  std::ofstream diag_out (diag_file);
+//  std::ofstream diag_out (diag_file);
 //  std::ofstream sdpa_out (sdpa_file);
 
 

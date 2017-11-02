@@ -197,14 +197,44 @@ def P_flag_num (tb_list):
 
     return (count, repeats)
 
+def sort_sp (sp_list):
+    
+#    shifted_list = pd.DataFrame(columns= ['number', 'n', 'l', 'j', 'mj'])
+
+    sp_list = sp_list.sort_values(['j','mj'])
+    sp_list = sort_sp_l (sp_list)
+    
+    return sp_list
+
+
+def sort_sp_l (sp_list):
+    
+    even_parity = sp_list['l'] % 2 == 0
+    odd_parity = sp_list['l'] % 2 == 1
+    
+    shifted_list = sp_list[even_parity]
+    shifted_list = shifted_list.append(sp_list[odd_parity])
+
+    return shifted_list
+
+
+def sort_sp_j (sp_list):
+    pass
+    
+    
+#    return shifted_list
+    
+def sort_sp_mj (sp_list):
+    pass
+    
 
 if __name__ == '__main__':
     
-    sp_list = pd.DataFrame(columns= ['number', 'n', 'l', 'j', 'mj'])
+    sp_list = pd.DataFrame(columns= ['number', 'n', 'l', 'j', 'mj', 'block'])
     tb_list = pd.DataFrame(columns= ['number', 'n1', 'l1', 'j1', 'mj1', 
                                      'n2', 'l2', 'j2', 'mj2', 'sp1', 'sp2'])
 
-    nmax = 6
+    nmax = 2
 
     (sp_list, tb_list) = nmax_count(nmax, sp_list, tb_list)
 
@@ -222,6 +252,11 @@ if __name__ == '__main__':
     
     tb_list.sp1 = tb_list.sp1.astype(int)
     tb_list.sp2 = tb_list.sp2.astype(int)
+    
+    sp_list = sort_sp (sp_list)
+    
+    print (sp_list)
+    sys.exit()
     
     np.savetxt('../me_files/ref_files/nmax' + str(nmax) + 
                '_python_sp.dat', sp_list.values, fmt='%6i')
