@@ -267,9 +267,40 @@ matches the dimensions of the F0 constraint matrix.
 
 ***************************************************************/
 
-void init_N_flag (FILE * sdpa_out, const size_t bsize, size_t & con_count)
+void init_N_flag (FILE * sdpa_out, const size_t bsize, size_t & con_count, const std::string no_flag)
 {
 
+
+  const char * no_file = no_flag.c_str();
+  // input file stream for m_scheme
+  std::ifstream ref_in (no_file);
+ 
+  std::string dummy;
+  size_t b1, b2, m1, m2;
+
+  size_t bcount = 0;
+
+  // find total number of defined reference lines
+  while (std::getline (ref_in, dummy))
+  {
+
+	if (!dummy.length() || dummy[0] == '#')     // skip zero length lines and lines that start with #
+    	continue;
+
+  	std::stringstream ss;
+
+ 	ss << dummy;            // read in the line to stringstream ss
+  	ss >> b1 >> b2 >> m1 >> m2;
+
+  	double val1 = kron_del (m1, m2);
+
+  	if (b1 == 1 and b2 == 1) bcount++;
+
+    if (val1 != 0. and b1 <= b2)
+    	fprintf(sdpa_out, "%lu %lu %lu %lu %f\n", con_count, bcount, b1, b2, val1);
+  }
+
+/*
 
     for (size_t ip = 0;  ip < bsize; ip++)
     {
@@ -290,6 +321,9 @@ void init_N_flag (FILE * sdpa_out, const size_t bsize, size_t & con_count)
     }
     }
 
+
+
+*/
 
     con_count++;
 
@@ -313,9 +347,47 @@ F2_con.
 
 ***************************************************************/
 
-void init_O_flag (FILE * sdpa_out, const size_t bsize, size_t & con_count)
+void init_O_flag (FILE * sdpa_out, const size_t bsize, size_t & con_count, const std::string no_flag, const size_t obme_block_count)
 {
 
+  const char * no_file = no_flag.c_str();
+  // input file stream for m_scheme
+  std::ifstream ref_in (no_file);
+ 
+  std::string dummy;
+  size_t b1, b2, m1, m2;
+
+  size_t bcount1 = 0;
+  size_t bcount2 = obme_block_count;
+
+  // find total number of defined reference lines
+  while (std::getline (ref_in, dummy))
+  {
+
+	if (!dummy.length() || dummy[0] == '#')     // skip zero length lines and lines that start with #
+    	continue;
+
+  	std::stringstream ss;
+
+ 	ss << dummy;            // read in the line to stringstream ss
+  	ss >> b1 >> b2 >> m1 >> m2;
+
+
+  	if (b1 == 1 and b2 == 1)
+  	{
+  		bcount1++;
+  		bcount2++;
+  	}
+
+  	if (b1 <= b2)
+  	{
+    	fprintf(sdpa_out, "%lu %lu %lu %lu %f\n", con_count, bcount1, b1, b2, 1.0);
+    	fprintf(sdpa_out, "%lu %lu %lu %lu %f\n", con_count, bcount2, b1, b2, 1.0);
+  	}
+
+    con_count++;
+  }
+/*
   std::ios_base::sync_with_stdio(false);
 
 
@@ -364,12 +436,12 @@ void init_O_flag (FILE * sdpa_out, const size_t bsize, size_t & con_count)
     }
     }
 
+*/
 
+    //con_count++;
 
-    con_count++;
-
-  }
-  }
+//  }
+//  }
 
   return;
 }

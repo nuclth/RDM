@@ -410,13 +410,13 @@ int main ()
 
   if (N_flag)
   {
-    init_N_flag (sdpa_out, bsize, con_count);
+    init_N_flag (sdpa_out, bsize, con_count, no_flag);
     std::cout << "N FLAG DONE" << std::endl;
   }
 
   if (O_flag)
   {
-    init_O_flag (sdpa_out, bsize, con_count);
+    init_O_flag (sdpa_out, bsize, con_count, no_flag, NO_blocks);
     std::cout << "O FLAG DONE" << std::endl;
   }
 
