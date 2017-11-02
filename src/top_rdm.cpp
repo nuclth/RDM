@@ -55,6 +55,7 @@ size_t total_tbme_states (const std::string tbme_filename);
 size_t total_obme_states (const std::string obme_filename);
 
 size_t count_NO_blocks (const two_array & array_ref_obme);
+void populate_obme_blocks (one_array & obme_blocks, const two_array & array_ref_obme);
 
 /********************************************
 
@@ -128,6 +129,13 @@ int main ()
 
   parser.str("");
   parser.clear();
+
+  parser << "flag_files/nmax" << nmax << "_python_noflag.dat";
+  const std::string no_flag = parser.str();
+
+  parser.str("");
+  parser.clear();
+
 
   parser << "flag_files/nmax" << nmax << "_python_pflag.dat";
   const std::string pflag_info = parser.str();
@@ -293,6 +301,9 @@ int main ()
 
   size_t NO_blocks = count_NO_blocks (array_ref_obme);
 
+  one_array obme_blocks (boost::extents[NO_blocks]);
+
+  populate_obme_blocks (obme_blocks, array_ref_obme);
 
   size_t cons = 0;
   size_t blocks = 0;
@@ -392,7 +403,7 @@ int main ()
   size_t con_count = 0;
 
 
-  init_C_matrix (flag_pass, sdpa_out, h1_mat, h2_mat, con_count);
+  init_C_matrix (flag_pass, sdpa_out, h1_mat, h2_mat, con_count, obme_blocks, no_flag);
 
   std::cout << "C MATRIX DONE" << std::endl;
 
@@ -543,4 +554,20 @@ size_t count_NO_blocks (const two_array & array_ref_obme)
 	}
 
 	return count;
+}
+
+
+void populate_obme_blocks (one_array & obme_blocks, const two_array & array_ref_obme)
+{
+	size_t count = 0;
+	size_t states = array_ref_obme.size();
+
+	for (size_t loop = 0; loop < states; loop++) 
+	{
+		if (array_ref_obme[loop][5] > 0)
+		{
+			obme_blocks[count] = array_ref_obme[loop][5];
+			count++;
+		}
+	}
 }

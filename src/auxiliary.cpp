@@ -110,7 +110,7 @@ Kronecker delta function. Returns 1 if i=j and 0 otherwise.
 
 
 ***************************************************************/
-
+/*
 template <typename Array>
 void print(std::ostream& os, const Array & A)
 {
@@ -125,7 +125,7 @@ void print(std::ostream& os, const Array & A)
   os << "]";
   os << "\n";
 }
-
+*/
 /***************************************************************
 
 
@@ -135,11 +135,11 @@ void print(std::ostream& os, const Array & A)
 
 ***************************************************************/
 
-
+/*
 
 template<> void print<int>(std::ostream& os, const int & x)
 {
   os << x;
 }
 
-
+*/

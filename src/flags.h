@@ -7,7 +7,7 @@
 
 void init_con_values (const con_flags flag_pass, FILE * spda_out, const size_t bsize, const size_t tbme_size, const size_t particles, const size_t P_num);
 
-void init_C_matrix (const con_flags flag_pass, FILE * spda_out, const two_array & h1_mat, const two_array & h2_mat, size_t & con_count);
+void init_C_matrix (const con_flags flag_pass, FILE * spda_out, const two_array & h1_mat, const two_array & h2_mat, size_t & con_count, const one_array & obme_blocks, const std::string no_flag);
 
 void init_N_flag (FILE * spda_out, const size_t bsize, size_t & con_count);
 void init_O_flag (FILE * spda_out, const size_t bsize, size_t & con_count);

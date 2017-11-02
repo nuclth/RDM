@@ -21,9 +21,74 @@ template<> void print<double>(std::ostream& os, const double & x)
 ***************************************************************/
 
 
-void populate_1body (const two_array & ref_m, two_array & h1_mat, const std::string obme_filename)
+void populate_1body (const two_array & array_ref_obme, two_array & h1_mat, const std::string obme_filename, const int nmax)
 {
 
+  const char * ref_file = obme_filename.c_str();
+  // input file stream for m_scheme
+  std::ifstream ref_in (ref_file);
+ 
+  size_t total_lines = 0;
+  std::string dummy;
+  int n1, n2, l;
+  double j, mj, me;
+
+  // find total number of defined reference lines
+  while (std::getline (ref_in, dummy)) ++total_lines;
+
+  // clear the file stream, reset to read in the elements
+  ref_in.clear();
+  ref_in.seekg (0, std::ios::beg);
+
+  size_t obme_size = h1_mat.size();
+
+  // read in and assign the references line by line
+  // to the matrix ref_m
+  for (size_t i = 0; i < total_lines; i++)
+  {
+	std::getline (ref_in, dummy);
+
+  	if (!dummy.length() || dummy[0] == '#')     // skip zero length lines and lines that start with #
+    	continue;
+
+  	std::stringstream ss;
+
+  	ss << dummy;            // read in the line to stringstream ss
+
+
+  	ss >> n1 >> n2 >> l >> j >> mj >> me;  // assign values of the line
+
+  	if (nmax < n1 + l or nmax < n2 + l)
+  		continue;
+
+  	for (size_t loop1 = 0; loop1 < obme_size; loop1++)
+  	{
+  		int n1_ref     = array_ref_obme [loop1][1];
+  		int l1_ref     = array_ref_obme [loop1][2];
+  		double j1_ref  = array_ref_obme [loop1][3];
+  		double mj1_ref = array_ref_obme [loop1][4];
+  		int ele1       = array_ref_obme [loop1][6];
+
+  	for (size_t loop2 = 0; loop2 < obme_size; loop2++)
+  	{
+  		int n2_ref     = array_ref_obme [loop2][1];
+  		int l2_ref     = array_ref_obme [loop2][2];
+  		double j2_ref  = array_ref_obme [loop2][3];
+  		double mj2_ref = array_ref_obme [loop2][4];
+  		int ele2       = array_ref_obme [loop2][6];
+
+  		if (l1_ref != l2_ref or j1_ref != j2_ref or mj1_ref != mj2_ref)
+  			continue;
+
+  		if (n1 == n1_ref and n2 == n2_ref and l == l1_ref and j == j1_ref and mj == mj1_ref) h1_mat [ele1][ele2] = me;
+
+  		if (n2 == n1_ref and n1 == n2_ref and l == l1_ref and j == j1_ref and mj == mj1_ref) h1_mat [ele2][ele1] = me;
+
+  	}
+  	}
+
+  }
+/*
   size_t mat_length = h1_mat.size();
 
   int obme_size = get_obme_lines(obme_filename);
@@ -56,6 +121,21 @@ void populate_1body (const two_array & ref_m, two_array & h1_mat, const std::str
   }
   }
 
+
+*/
+
+/*
+  for (size_t loop1 = 0; loop1 < obme_size; loop1++)
+  {
+  for (size_t loop2 = loop1; loop2 < obme_size; loop2++)
+  {
+    std::cout << h1_mat [loop1][loop2] << " ";
+
+  }
+  std::cout << std::endl;
+  }
+
+  */
 }
 
 /***************************************************************
@@ -197,7 +277,7 @@ void fullm_populate_hamiltonian (two_array & array_ref_obme, two_array & array_r
 
     readin_ref_obme (array_ref_obme, ref_obme);
     std::cout << "OBME REFERENCE READ" << std::endl;
-    populate_1body (array_ref_obme, h1_mat, me_obme);
+    populate_1body (array_ref_obme, h1_mat, me_obme, nmax);
     std::cout << "1 BODY POPULATED" << std::endl;
     if (two_body_toggle)
     {
@@ -457,7 +537,7 @@ void populate_2body (const two_array & ref_m, const two_array & ref_tbme, two_ar
 
 ***************************************************************/
 
-
+/*
 void compactify_h2 (const two_array & ref_m, two_array & comp_h2, five_array & h2_mat, std::ofstream & diag_out, const bool diag_toggle)
 {
   const size_t bsize = h2_mat.size();
@@ -537,7 +617,7 @@ void compactify_h2 (const two_array & ref_m, two_array & comp_h2, five_array & h
             size_t right = lps - kps + (2*bsize - kps) * (kps - 1)/2 - 1;
 
 
-  /*         if (i == 0 && j == 4 && k == 0)
+           if (i == 0 && j == 4 && k == 0)
             {
             	std::cout << ref_m[l][1] << "\t" << ref_m[l][2] << "\n";
             }
@@ -546,7 +626,7 @@ void compactify_h2 (const two_array & ref_m, two_array & comp_h2, five_array & h
             {
             	std::cout << right << " " << l << " " << k << "\t" << value << "\n"; 
             }
-*/
+
 
 //            std::cout << value << std::endl;
 
@@ -560,8 +640,7 @@ void compactify_h2 (const two_array & ref_m, two_array & comp_h2, five_array & h
   if (diag_toggle)
     diag_out << std::endl << std::endl;
 }
-
-
+*/
 
 /***************************************************************
 
@@ -735,4 +814,44 @@ void read_in_matrix_m_scheme (const two_array & ref_m, five_array & h2_mat, cons
 //  print(std::cout, ref_m);
 
   return;
+}
+
+
+/***************************************************************
+
+
+ Function to print out an arbitrary multiarray
+
+
+***************************************************************/
+
+template <typename Array>
+void print(std::ostream& os, const Array & A)
+{
+  typename Array::const_iterator i;
+  os.precision(2);
+  os << "[";
+  for (i = A.begin(); i != A.end(); ++i) {
+    print(os, *i);
+//    if (boost::next(i) != A.end())
+//      os << ',' << "\t";
+  }
+  os << "]";
+  os << "\n";
+}
+
+/***************************************************************
+
+
+ Individual print functions depending on whether template takes 
+ double or int.
+
+
+***************************************************************/
+
+
+
+template<> void print<double>(std::ostream& os, const double & x)
+{
+  os << x;
 }

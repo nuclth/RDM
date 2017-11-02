@@ -159,12 +159,48 @@ the negative energy.
 ***************************************************************/
 
 
-void init_C_matrix (const con_flags flag_pass, FILE * sdpa_out, const two_array & h1_mat, const two_array & h2_mat, size_t & con_count)
+void init_C_matrix (const con_flags flag_pass, FILE * sdpa_out, const two_array & h1_mat, const two_array & h2_mat, size_t & con_count, const one_array & obme_blocks, const std::string no_flag)
 {
-  size_t h1_len = h1_mat.size();
+
+
+  const char * no_file = no_flag.c_str();
+  // input file stream for m_scheme
+  std::ifstream ref_in (no_file);
+ 
+  std::string dummy;
+  size_t b1, b2, m1, m2;
+
+  size_t bcount = 0;
+
+  // find total number of defined reference lines
+  while (std::getline (ref_in, dummy))
+  {
+
+	if (!dummy.length() || dummy[0] == '#')     // skip zero length lines and lines that start with #
+    	continue;
+
+  	std::stringstream ss;
+
+ 	ss << dummy;            // read in the line to stringstream ss
+  	ss >> b1 >> b2 >> m1 >> m2;
+
+  	double val1 = h1_mat [m1][m2] * -1.0;
+
+  	if (b1 == 1 and b2 == 1) bcount++;
+
+    if (val1 != 0. and b1 <= b2)
+    	fprintf(sdpa_out, "%lu %lu %lu %lu %f\n", con_count, bcount, b1, b2, val1);
+  }
+
+
+//  size_t h1_len = h1_mat.size();
+
+
   size_t h2_len = h2_mat.size();
 
-//    sdpa_out << std::setprecision(16);
+/*
+  size_t n = 0;
+  size_t m = 0;
 
     for (size_t ip = 0;  ip < h1_len; ip++)
     {
@@ -172,6 +208,11 @@ void init_C_matrix (const con_flags flag_pass, FILE * sdpa_out, const two_array 
     {
 
       double val1 = h1_mat [ip][jp] * -1.0;
+
+      if (jp >= block_val)
+      	continue;
+
+      if ()
 
       size_t n = ip + 1;
       size_t m = jp + 1; 
@@ -182,7 +223,7 @@ void init_C_matrix (const con_flags flag_pass, FILE * sdpa_out, const two_array 
     }
     }
 
-
+*/
 
   if (flag_pass.two_body_toggle)
   {

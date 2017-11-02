@@ -245,13 +245,42 @@ def add_blocks (sp_list):
     
     return sp_list
 
+
+def no_flag (sp_list):
+    
+    bsize = len (sp_list)
+    
+    sp_vals = pd.DataFrame(columns=['b1','b2','m1','m2'])
+
+    block_list = sp_list[['blocks']]
+    
+    m1 = -1
+    m2 = 0 
+    
+    for num in block_list['blocks']:
+        
+        if num < 1:
+            continue
+
+        for val1 in range (1, num+1, 1):
+            m1 += 1
+            m2 = m1
+            for val2 in range (val1, num+1, 1):
+                sp_vals = sp_vals.append({'b1': val1, 'b2': val2, 
+                                          'm1': m1, 'm2': m2}, ignore_index=True)
+                m2 += 1
+                
+         
+    return sp_vals
+
+
 if __name__ == '__main__':
     
     sp_list = pd.DataFrame(columns= ['number', 'n', 'l', 'j', 'mj'])
     tb_list = pd.DataFrame(columns= ['number', 'n1', 'l1', 'j1', 'mj1', 
                                      'n2', 'l2', 'j2', 'mj2', 'sp1', 'sp2'])
 
-    nmax = 4
+    nmax = 2
 
     sp_list = create_sp_list (nmax, sp_list)
 
@@ -267,11 +296,16 @@ if __name__ == '__main__':
     
     sp_list = add_blocks (sp_list)
     
-    print (sp_list)
+#    print (sp_list)
 
     
     np.savetxt('../me_files/ref_files/nmax' + str(nmax) + 
                '_python_sp.dat', sp_list.values, fmt='%6i')
+
+    no_terms = no_flag (sp_list)
+
+    np.savetxt('../flag_files/nmax' + str(nmax) + 
+               '_python_noflag.dat', no_terms, fmt='%6i')
 
     sys.exit()
     
