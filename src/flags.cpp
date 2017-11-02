@@ -15,7 +15,7 @@ These are the real numbers on the right hand side of the SDP.
 
 
 
-void init_con_values (const con_flags flag_pass, FILE * sdpa_out, const size_t bsize, const size_t tbme_size, const size_t particles, const size_t P_num)
+void init_con_values (const con_flags flag_pass, FILE * sdpa_out, const size_t bsize, const size_t tbme_size, const size_t particles, const size_t P_num, const std::string no_flag)
 {
 
 //  size_t cmat_extent = F1_con.size();
@@ -29,6 +29,32 @@ void init_con_values (const con_flags flag_pass, FILE * sdpa_out, const size_t b
   // F2 Flag - Linear p q relations
   if (flag_pass.O_flag)
   {
+
+	  const char * no_file = no_flag.c_str();
+	  // input file stream for m_scheme
+	  std::ifstream ref_in (no_file);
+	 
+	  std::string dummy;
+	  size_t b1, b2, m1, m2;
+
+	  // find total number of defined reference lines
+	  while (std::getline (ref_in, dummy))
+	  {
+
+		if (!dummy.length() || dummy[0] == '#')     // skip zero length lines and lines that start with #
+	    	continue;
+
+	  	std::stringstream ss;
+
+	 	ss << dummy;            // read in the line to stringstream ss
+	  	ss >> b1 >> b2 >> m1 >> m2;
+
+	    if (b1 == b2)
+      		fprintf(sdpa_out, "%f ", 1.0);
+	    else
+      		fprintf(sdpa_out, "%f ", 0.0);
+	  }
+/*
     for (size_t i1 = 0;  i1 < bsize; i1++)
     {
     for (size_t i2 = i1; i2 < bsize; i2++)
@@ -44,6 +70,8 @@ void init_con_values (const con_flags flag_pass, FILE * sdpa_out, const size_t b
 
     }
     }
+
+*/
    }
 
 

@@ -57,6 +57,8 @@ size_t total_obme_states (const std::string obme_filename);
 size_t count_NO_blocks (const two_array & array_ref_obme);
 void populate_obme_blocks (one_array & obme_blocks, const two_array & array_ref_obme);
 
+size_t count_no_flags (const std::string);
+
 /********************************************
 
 BEGIN MAIN PROGRAM
@@ -310,13 +312,13 @@ int main ()
 
   if (N_flag)
   {
-  	cons += F1num;
+  	cons += 1;
   	blocks+= NO_blocks;
   }
 
   if (O_flag)
   {
-  	cons += F2num;
+  	cons += count_no_flags (no_flag);
   	blocks+= NO_blocks;
   }
 
@@ -398,7 +400,7 @@ int main ()
   fprintf (sdpa_out, "\n");
 
   
-  init_con_values (flag_pass, sdpa_out, bsize, tbme_size, particles, P_num);
+  init_con_values (flag_pass, sdpa_out, bsize, tbme_size, particles, P_num, no_flag);
 
   size_t con_count = 0;
 
@@ -570,4 +572,27 @@ void populate_obme_blocks (one_array & obme_blocks, const two_array & array_ref_
 			count++;
 		}
 	}
+}
+
+
+size_t count_no_flags (const std::string no_flag)
+{
+	const char * no_file = no_flag.c_str();
+	// input file stream for m_scheme
+	std::ifstream ref_in (no_file);
+	 
+	std::string dummy;
+	size_t total_lines = 0;
+
+	// find total number of defined reference lines
+	while (std::getline (ref_in, dummy))
+	{
+
+		if (!dummy.length() || dummy[0] == '#')     // skip zero length lines and lines that start with #
+	    	continue;
+
+	    total_lines++;
+	}
+
+	return total_lines;
 }
