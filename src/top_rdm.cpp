@@ -54,6 +54,8 @@ size_t count_P_cons (const std::string);
 size_t total_tbme_states (const std::string tbme_filename);
 size_t total_obme_states (const std::string obme_filename);
 
+size_t count_NO_blocks (const two_array & array_ref_obme);
+
 /********************************************
 
 BEGIN MAIN PROGRAM
@@ -139,11 +141,18 @@ int main ()
   const size_t tbme_size = total_tbme_states (ref_tbme);
   two_array array_ref_tbme (boost::extents[tbme_size][11]);
 
+
+
+
   if (two_body_toggle) readin_ref_tbme (array_ref_tbme, ref_tbme);
 
   size_t P_num = 0;
 
   if (two_body_toggle) P_num = count_P_cons (pflag_info);
+
+
+
+
 
   cout << "BSIZE: " << bsize << endl;
   cout << "TBME SIZE: " << tbme_size << endl;
@@ -240,8 +249,6 @@ int main ()
   const size_t T1_num = 1;
   const size_t T2_num = 1; //T2_count (bsize);
 
-  std::cout << "TEST" << std::endl;
-
 
 //  const std::string diag_file = "diagnostic_out/test_diag.dat";
   const std::string sdpa_file = "sdp_files/test_sdp.dat-s";
@@ -260,6 +267,32 @@ int main ()
   sdpa_out = fopen (sdpa_char, "w");
 
 
+  two_array array_ref_obme (boost::extents[bsize][7]);
+  two_array h1_mat(boost::extents[bsize][bsize]);
+
+//  std::cout << "TBME SIZE: " << tbme_size << std::endl;
+
+  two_array h2_mat (boost::extents[tbme_size][tbme_size]);
+
+
+//  five_array h2_mat(boost::extents[bsize][bsize][bsize][bsize][5]);
+
+  fullm_populate_hamiltonian (array_ref_obme, array_ref_tbme, h1_mat, h2_mat, ref_obme, me_obme, ref_tbme, me_tbme, two_body_toggle, nmax);
+
+  std::cout << "HAMILTONIAN BUILT" << std::endl;
+
+//  two_array comp_h2 (boost::extents[bsize*(bsize-1)/2][bsize*(bsize-1)/2]);
+
+//  if (two_body_toggle) 
+//  {
+//  	compactify_h2 (ref_m, comp_h2, h2_mat, diag_out, diag_toggle);
+//
+//  	std::cout << "POTENTIAL COMPACTIFIED" << std::endl;
+//  }
+
+
+  size_t NO_blocks = count_NO_blocks (array_ref_obme);
+
 
   size_t cons = 0;
   size_t blocks = 0;
@@ -267,13 +300,13 @@ int main ()
   if (N_flag)
   {
   	cons += F1num;
-  	blocks++;
+  	blocks+= NO_blocks;
   }
 
   if (O_flag)
   {
   	cons += F2num;
-  	blocks++;
+  	blocks+= NO_blocks;
   }
 
   if (two_body_toggle)
@@ -309,30 +342,6 @@ int main ()
   	blocks++;
   }
 
-
-  two_array array_ref_obme (boost::extents[bsize][7]);
-  two_array h1_mat(boost::extents[bsize][bsize]);
-
-//  std::cout << "TBME SIZE: " << tbme_size << std::endl;
-
-  two_array h2_mat (boost::extents[tbme_size][tbme_size]);
-
-
-//  five_array h2_mat(boost::extents[bsize][bsize][bsize][bsize][5]);
-
-  fullm_populate_hamiltonian (array_ref_obme, array_ref_tbme, h1_mat, h2_mat, ref_obme, me_obme, ref_tbme, me_tbme, two_body_toggle, nmax);
-
-  std::cout << "HAMILTONIAN BUILT" << std::endl;
-
-//  two_array comp_h2 (boost::extents[bsize*(bsize-1)/2][bsize*(bsize-1)/2]);
-
-//  if (two_body_toggle) 
-//  {
-//  	compactify_h2 (ref_m, comp_h2, h2_mat, diag_out, diag_toggle);
-//
-//  	std::cout << "POTENTIAL COMPACTIFIED" << std::endl;
-//  }
-
   fprintf (sdpa_out, "%lu\n", cons);
   fprintf (sdpa_out, "%lu\n", blocks);
 
@@ -340,10 +349,25 @@ int main ()
 //  sdpa_out << blocks << std::endl;
 
   if (N_flag)
-  	fprintf (sdpa_out, "%lu ", bsize);
+  {
+  	for (size_t loop = 0; loop < bsize; loop++)
+  	{
+  		size_t block_size = array_ref_obme[loop][5];
+
+  		if (block_size > 0) fprintf (sdpa_out, "%lu ", block_size);
+  	}
+  }
+
 
   if (O_flag)
-  	fprintf (sdpa_out, "%lu ", bsize);
+  {
+  	for (size_t loop = 0; loop < bsize; loop++)
+  	{
+  		size_t block_size = array_ref_obme[loop][5];
+
+  		if (block_size > 0) fprintf (sdpa_out, "%lu ", block_size);
+  	}
+  }
   
   if (two_body_toggle)
   	fprintf (sdpa_out, "%lu ", tbme_size);
@@ -505,4 +529,18 @@ size_t total_obme_states (const std::string ref_obme)
   }
 
   return total_lines;
+}
+
+
+size_t count_NO_blocks (const two_array & array_ref_obme)
+{
+	size_t count = 0;
+	size_t states = array_ref_obme.size();
+
+	for (size_t loop = 0; loop < states; loop++) 
+	{
+		if (array_ref_obme[loop][5] > 0) count += 1;
+	}
+
+	return count;
 }

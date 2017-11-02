@@ -226,7 +226,7 @@ def add_blocks (sp_list):
         
         if n_set < n_nxt:
             ncount += 1
-            val1[1][1] = -1
+            val1[1][1] = 0
         
         if n_set == n_nxt:
             ncount = 1
@@ -251,7 +251,7 @@ if __name__ == '__main__':
     tb_list = pd.DataFrame(columns= ['number', 'n1', 'l1', 'j1', 'mj1', 
                                      'n2', 'l2', 'j2', 'mj2', 'sp1', 'sp2'])
 
-    nmax = 2
+    nmax = 4
 
     sp_list = create_sp_list (nmax, sp_list)
 
