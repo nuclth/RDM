@@ -173,22 +173,6 @@ def create_tb_list (nmax, sp_list, tb_list):
     return tb_list
 
 
-def P_flag_num (tb_list):
-    
-    sp_vals = pd.DataFrame({'sp1': tb_list.sp1, 'sp2':tb_list.sp2})
-
-    repeats = []
-    count = 0
-    
-
-    for i1, sp1, sp2 in zip(sp_vals.index, sp_vals.sp1, sp_vals.sp2):
-        for i2, sp3, sp4 in zip (sp_vals.index, sp_vals.sp1, sp_vals.sp2):
-            if sp2 == sp4 and i1 <= i2 and (sp1,sp3) not in repeats:
-                repeats.append((sp1, sp3))
-#                print (sp1, sp2, sp3, sp4)
-                count+=1
-
-    return (count, repeats)
 
 def sort_sp (sp_list):
     
@@ -207,6 +191,10 @@ def sort_sp_l (sp_list):
     
     shifted_list = sp_list[even_parity]
     shifted_list = shifted_list.append(sp_list[odd_parity])
+
+#    print (shifted_list)
+
+    shifted_list = shifted_list.reset_index(drop=True)
 
     return shifted_list
 
@@ -241,37 +229,201 @@ def add_blocks (sp_list):
 
     sp_list['blocks'] = n_list['blocks']
     
-
+    print (sp_list)
     
     return sp_list
 
+def sort_tb (tb_list):
+
+    even_parity = (tb_list['l1'] + tb_list['l2']) % 2 == 0
+    odd_parity  = (tb_list['l1'] + tb_list['l2']) % 2 == 1
+
+    num_even = sum (a for a in even_parity)
+    num_odd = sum (a for a in odd_parity)
+    
+#    print (num_even, num_odd)
+    
+    shifted_list = tb_list[even_parity]
+    shifted_list = shifted_list.append(tb_list[odd_parity])
+
+    shifted_list['blocks'] = 0
+    
+    shifted_list = shifted_list.reset_index(drop=True)
+    
+    shifted_list['blocks'][0] = num_even
+    shifted_list['blocks'][1] = num_odd
+
+
+    return shifted_list
 
 def no_flag (sp_list):
-    
-    bsize = len (sp_list)
-    
-    sp_vals = pd.DataFrame(columns=['b1','b2','m1','m2'])
+      
+    sp_vals = pd.DataFrame(columns=['b1','b2','m1','m2','sp1','sp2', 'block'])
 
     block_list = sp_list[['blocks']]
     
     m1 = -1
     m2 = 0 
+  
+    block = 0
+  
+    for num in block_list['blocks']:
+        
+        if num < 1:
+            continue
+
+        block += 1
+
+        for val1 in range (1, num+1, 1):
+            m1 += 1
+            m2 = m1
+            
+            sp_num1 = sp_list.iloc[m1].number
+            
+            
+            for val2 in range (val1, num+1, 1):
+                sp_num2 = sp_list.iloc[m2].number
+                sp_vals = sp_vals.append({'b1': val1, 'b2': val2, 
+                                          'm1': m1, 'm2': m2, 'sp1' : sp_num1,
+                                          'sp2' : sp_num2, 'block': block
+                                          }, ignore_index=True)
+                m2 += 1
+                
+                
+
+    return sp_vals
+
+
+
+
+def h2_flag (tb_list):
+    
+    sp_vals = pd.DataFrame(columns=['b1','b2','m1','m2',
+                                    'sp1','sp2','sp3','sp4', 'block'])
+
+    block_list = tb_list[['blocks']]
+    
+    m1 = -1
+    m2 = 0 
+    block = 0
     
     for num in block_list['blocks']:
         
         if num < 1:
             continue
 
+        block += 1
+
         for val1 in range (1, num+1, 1):
             m1 += 1
             m2 = m1
+            
+            sp1 = tb_list.iloc[m1].sp1
+            sp2 = tb_list.iloc[m1].sp2
+            
             for val2 in range (val1, num+1, 1):
+                sp3 = tb_list.iloc[m2].sp1
+                sp4 = tb_list.iloc[m2].sp2
                 sp_vals = sp_vals.append({'b1': val1, 'b2': val2, 
-                                          'm1': m1, 'm2': m2}, ignore_index=True)
+                                          'm1': m1, 'm2': m2, 'sp1': sp1,
+                                          'sp2': sp2, 'sp3':sp3, 
+                                          'sp4' : sp4, 'block': block
+                                          }, ignore_index=True)
                 m2 += 1
-                
+         
+#    print (sp_vals)
+#    sys.exit()
          
     return sp_vals
+
+
+def p_flag (no_flag, h2_flag):
+    
+    
+#    sp_vals = pd.DataFrame({'sp1': tb_list.sp1, 'sp2':tb_list.sp2})
+
+    sp_vals = pd.DataFrame(columns=['ob_b1','ob_b2','ob_block',
+                                    'tb_b1','tb_b2','tb_block','new'])
+    repeats = []
+    
+
+    for sp1, sp3 in zip(h2_flag.sp1, h2_flag.sp3):
+        
+        
+        if (sp1, sp3) in repeats:
+            continue
+        
+        repeats.append((sp1,sp3))
+        
+#        print (repeats)
+        
+        new = True
+
+        
+
+#        print ('SP1, SP3 {} {}'.format(sp1, sp3))
+        
+        ob_row = no_flag[(no_flag['sp1'] == sp1) & (no_flag['sp2'] == sp3)]
+        
+        if ob_row.empty:
+            continue
+        
+#        print ('OB ROW')
+#        print (ob_row)
+        
+        ob_b1 = ob_row.b1.iloc[0]
+        ob_b2 = ob_row.b2.iloc[0]
+        ob_block = ob_row.block.iloc[0]
+        
+        loop_repeats = []
+        
+        for sp2, sp4 in zip(h2_flag.sp2, h2_flag.sp4):
+            
+            if (sp2 != sp4):
+                continue
+
+
+            if (sp2, sp4) in loop_repeats:
+                continue
+            
+            
+            loop_repeats.append((sp2,sp4))
+            
+            tb_row = h2_flag[(h2_flag['sp1'] == sp1) & (h2_flag['sp2'] == sp2)
+            & (h2_flag['sp3'] == sp3) & (h2_flag['sp4'] == sp4)]
+
+            if tb_row.empty:
+                continue
+            
+#            print ('TB_row')
+#            print (tb_row)
+            
+            tb_b1 = tb_row.b1.iloc[0]
+            tb_b2 = tb_row.b2.iloc[0]
+            tb_block = tb_row.block.iloc[0]
+
+#            print ('ENTRIES {} {} {} {} {} {} {}'.format(
+#                    ob_b1, ob_b2, ob_block, tb_b1, tb_b2, tb_block, new))
+
+            sp_vals = sp_vals.append({'ob_b1':ob_b1, 'ob_b2':ob_b2, 
+                                      'ob_block':ob_block, 'tb_b1':tb_b1, 'tb_b2':tb_b2,
+                                      'tb_block':tb_block, 'new':new}, ignore_index=True)
+            
+            new = False
+        
+#        print (no_flag)
+
+        
+#        for i2, sp3, sp4 in zip (sp_vals.index, sp_vals.sp1, sp_vals.sp2):
+#            if sp2 == sp4 and i1 <= i2 and (sp1,sp3) not in repeats:
+#                repeats.append((sp1, sp3))
+#                print (sp1, sp2, sp3, sp4)
+#                count+=1
+
+
+    return sp_vals
+
+
 
 
 if __name__ == '__main__':
@@ -280,7 +432,7 @@ if __name__ == '__main__':
     tb_list = pd.DataFrame(columns= ['number', 'n1', 'l1', 'j1', 'mj1', 
                                      'n2', 'l2', 'j2', 'mj2', 'sp1', 'sp2'])
 
-    nmax = 6
+    nmax = 4
 
     sp_list = create_sp_list (nmax, sp_list)
 
@@ -308,11 +460,14 @@ if __name__ == '__main__':
                '_python_noflag.dat', no_terms, fmt='%6i')
 
 
+    print (no_terms)
+
     print ("OBME SUCCESS!")
-    sys.exit()
     
     tb_list = create_tb_list (nmax, sp_list, tb_list)
-    
+
+    tb_list = sort_tb (tb_list)
+
     tb_list.number = tb_list.number.astype(int)
     tb_list.n1 = tb_list.n1.astype(int)
     tb_list.l1 = tb_list.l1.astype(int)
@@ -321,6 +476,8 @@ if __name__ == '__main__':
     
     tb_list.sp1 = tb_list.sp1.astype(int)
     tb_list.sp2 = tb_list.sp2.astype(int)
+
+    print (tb_list)
     
     np.savetxt('../me_files/ref_files/nmax' + str(nmax) + 
                '_python_tb.dat', tb_list.values, fmt='%6.2f')
@@ -328,10 +485,25 @@ if __name__ == '__main__':
     print ('Memory size sp list {} bytes'.format(sys.getsizeof(sp_list)))
     print ('Memory size tb list {} bytes'.format(sys.getsizeof(tb_list)))
 
-    (Pnum, P_spterms) = P_flag_num (tb_list)
+    h2_terms = h2_flag (tb_list)
+
+    h2_terms = h2_terms.astype(int)
+
+    print (h2_terms)
 
     np.savetxt('../flag_files/nmax' + str (nmax) +
-               '_python_pflag.dat', P_spterms, fmt='%6i')
+               '_python_h2flag.dat', h2_terms, fmt='%6i')
+
+    p_terms = p_flag (no_terms, h2_terms)
+
+    print (p_terms)
+
+
+
+    np.savetxt('../flag_files/nmax' + str (nmax) +
+               '_python_pflag.dat', p_terms, fmt='%6i')
+    
+    sys.exit()
     
     print(sp_list) ; print ('\n')
     print(tb_list)

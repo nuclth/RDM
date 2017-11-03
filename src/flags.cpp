@@ -187,7 +187,7 @@ the negative energy.
 ***************************************************************/
 
 
-void init_C_matrix (const con_flags flag_pass, FILE * sdpa_out, const two_array & h1_mat, const two_array & h2_mat, size_t & con_count, const one_array & obme_blocks, const std::string no_flag)
+void init_C_matrix (const con_flags flag_pass, FILE * sdpa_out, const two_array & h1_mat, const two_array & h2_mat, size_t & con_count, const one_array & obme_blocks, const std::string no_flag, const std::string h2_flag)
 {
 
 
@@ -221,10 +221,42 @@ void init_C_matrix (const con_flags flag_pass, FILE * sdpa_out, const two_array 
   }
 
 
+  if (flag_pass.two_body_toggle)
+  {
+	  const char * h2_file = h2_flag.c_str();
+	  // input file stream for m_scheme
+	  std::ifstream ref_in (h2_file);
+	 
+	  std::string dummy;
+	  size_t b1, b2, m1, m2;
+
+	  size_t bcount = 0;
+
+	  // find total number of defined reference lines
+	  while (std::getline (ref_in, dummy))
+	  {
+
+		if (!dummy.length() || dummy[0] == '#')     // skip zero length lines and lines that start with #
+	    	continue;
+
+	  	std::stringstream ss;
+
+	 	ss << dummy;            // read in the line to stringstream ss
+	  	ss >> b1 >> b2 >> m1 >> m2;
+
+	  	double val3 = h2_mat [m1][m2] * -1./2.;
+
+	  	if (b1 == 1 and b2 == 1) bcount++;
+
+	    if (val3 != 0. and b1 <= b2)
+	    	fprintf(sdpa_out, "%lu %lu %lu %lu %f\n", con_count, bcount, b1, b2, val3);
+	  }
+  }
+
 //  size_t h1_len = h1_mat.size();
 
 
-  size_t h2_len = h2_mat.size();
+//  size_t h2_len = h2_mat.size();
 
 /*
   size_t n = 0;
@@ -252,7 +284,7 @@ void init_C_matrix (const con_flags flag_pass, FILE * sdpa_out, const two_array 
     }
 
 */
-
+/*
   if (flag_pass.two_body_toggle)
   {
       for (size_t ip = 0;  ip < h2_len; ip++)      // loop over ith constraint matrix
@@ -272,6 +304,8 @@ void init_C_matrix (const con_flags flag_pass, FILE * sdpa_out, const two_array 
       }
       }
   }
+*/
+
 
   con_count++;
 

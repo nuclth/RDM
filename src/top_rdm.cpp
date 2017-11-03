@@ -138,6 +138,11 @@ int main ()
   parser.str("");
   parser.clear();
 
+  parser << "flag_files/nmax" << nmax >> "_python_h2flag.dat";
+  const std::string h2_flag = parser.str();
+
+  parser.str("");
+  parser.clear();
 
   parser << "flag_files/nmax" << nmax << "_python_pflag.dat";
   const std::string pflag_info = parser.str();
@@ -158,7 +163,7 @@ int main ()
 
   size_t P_num = 0;
 
-  if (two_body_toggle) P_num = count_P_cons (pflag_info);
+  if (two_body_toggle) P_num = count_P_cons (h2_flag);
 
 
 
@@ -323,13 +328,13 @@ int main ()
   }
 
   if (two_body_toggle)
-  	blocks++;
+  	blocks+= 2;
   
   if (NN_flag)
   	cons += NN_num;
 
   if (P_flag)
-  	cons += F3num;
+  	cons += P_num;
 
   if (Q_flag)
   {
