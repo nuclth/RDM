@@ -69,14 +69,14 @@ int main ()
 {
   
   // define flags for all different combinations of conditions in RDM
-  const bool two_body_toggle = false;
+  const bool two_body_toggle = true;
 
 
   // START CONSTRAINT FLAG DEFINE
 
   const bool N_flag  = true; // p START - TRACE CONDITION
   const bool O_flag  = true; // q START - LINEAR RELATIONS
-  const bool P_flag  = false; // P START - TRACE CONDITION
+  const bool P_flag  = true; // P START - TRACE CONDITION
   const bool Q_flag  = false; // Q START - LINEAR RELATIONS
   const bool G_flag  = false; // G START - LINEAR REALTIONSi
 
@@ -138,7 +138,7 @@ int main ()
   parser.str("");
   parser.clear();
 
-  parser << "flag_files/nmax" << nmax >> "_python_h2flag.dat";
+  parser << "flag_files/nmax" << nmax << "_python_h2flag.dat";
   const std::string h2_flag = parser.str();
 
   parser.str("");
@@ -163,7 +163,7 @@ int main ()
 
   size_t P_num = 0;
 
-  if (two_body_toggle) P_num = count_P_cons (h2_flag);
+  if (two_body_toggle) P_num = count_P_cons (pflag_info);
 
 
 
@@ -410,7 +410,7 @@ int main ()
   size_t con_count = 0;
 
 
-  init_C_matrix (flag_pass, sdpa_out, h1_mat, h2_mat, con_count, obme_blocks, no_flag);
+  init_C_matrix (flag_pass, sdpa_out, h1_mat, h2_mat, con_count, obme_blocks, no_flag, h2_flag);
 
   std::cout << "C MATRIX DONE" << std::endl;
 
@@ -483,13 +483,23 @@ size_t count_P_cons (const std::string p_filename)
 
   size_t P_num = 0;
 
+  size_t ob_b1, ob_b2, ob_block;
+  size_t tb_b1, tb_b2, tb_block;
+  bool new_flag;
+
   // find total number of defined reference lines
   while (std::getline (ref_in, dummy)) 
   {
 	if (!dummy.length() || dummy[0] == '#')     // skip zero length lines and lines that start with #
     	continue;
 
-  	++P_num;
+	  	std::stringstream ss;
+
+	 	ss << dummy;            // read in the line to stringstream ss
+	  	ss >> ob_b1 >> ob_b2 >> ob_block >> tb_b1 >> tb_b2 >> tb_block >> new_flag;
+
+	  	if (new_flag)
+	  		++P_num;
   }
 
   return P_num;

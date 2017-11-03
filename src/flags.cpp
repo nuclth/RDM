@@ -228,9 +228,7 @@ void init_C_matrix (const con_flags flag_pass, FILE * sdpa_out, const two_array 
 	  std::ifstream ref_in (h2_file);
 	 
 	  std::string dummy;
-	  size_t b1, b2, m1, m2;
-
-	  size_t bcount = 0;
+	  size_t b1, b2, m1, m2, sp1, sp2, sp3, sp4, block;
 
 	  // find total number of defined reference lines
 	  while (std::getline (ref_in, dummy))
@@ -242,14 +240,13 @@ void init_C_matrix (const con_flags flag_pass, FILE * sdpa_out, const two_array 
 	  	std::stringstream ss;
 
 	 	ss << dummy;            // read in the line to stringstream ss
-	  	ss >> b1 >> b2 >> m1 >> m2;
+	  	ss >> b1 >> b2 >> m1 >> m2 >> sp1 >> sp2 >> sp3 >> sp4 >> block;
 
 	  	double val3 = h2_mat [m1][m2] * -1./2.;
 
-	  	if (b1 == 1 and b2 == 1) bcount++;
 
 	    if (val3 != 0. and b1 <= b2)
-	    	fprintf(sdpa_out, "%lu %lu %lu %lu %f\n", con_count, bcount, b1, b2, val3);
+	    	fprintf(sdpa_out, "%lu %lu %lu %lu %f\n", con_count, block, b1, b2, val3);
 	  }
   }
 
@@ -578,7 +575,45 @@ void init_P_flag (FILE * sdpa_out, const size_t bsize, size_t & con_count, const
 	const two_array & array_ref_tbme, const std::string pflag_info)
 {
 
+  const char * p_file = pflag_info.c_str();
+  // input file stream for m_scheme
+  std::ifstream ref_in (p_file);
+ 
+  std::string dummy;
+
+  size_t ob_b1, ob_b2, ob_block;
+  size_t tb_b1, tb_b2, tb_block;
+  bool new_flag;
+
+  double prefac = -1.0 * (N - 1.0) / 2.0;
+
+  // find total number of defined reference lines
+  while (std::getline (ref_in, dummy))
+  {
+
+	if (!dummy.length() || dummy[0] == '#')     // skip zero length lines and lines that start with #
+    	continue;
+
+  	std::stringstream ss;
+
+ 	ss << dummy;            // read in the line to stringstream ss
+  	ss >> ob_b1 >> ob_b2 >> ob_block >> tb_b1 >> tb_b2 >> tb_block >> new_flag;
+
+  	if (new_flag)
+    	fprintf(sdpa_out, "%lu %lu %lu %lu %f\n", con_count, ob_block, ob_b1, ob_b2, prefac);
+
+
+    fprintf(sdpa_out, "%lu %lu %lu %lu %f\n", con_count, tb_block, tb_b1, tb_b2, 1.0);
+
+  	if (new_flag)
+    	con_count++;
+  }
+
+
+
 //  std::ios_base::sync_with_stdio(false);
+
+/*
 
   const char * p_file = pflag_info.c_str();
   // input file stream for m_scheme
@@ -648,10 +683,14 @@ void init_P_flag (FILE * sdpa_out, const size_t bsize, size_t & con_count, const
     }
     }
     
-    
+   
 
 
   }
+
+
+*/
+
 //  char buffer[120*bsize];
 
 //  setbuf (sdpa_out, buffer);
