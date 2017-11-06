@@ -424,6 +424,45 @@ def p_flag (no_flag, h2_flag):
     return sp_vals
 
 
+def sort_pflag (p_terms):
+    
+    sp_vals = pd.DataFrame(columns=['ob_b1','ob_b2','ob_block',
+                                    'tb_b1','tb_b2','tb_block','new'])
+
+    hold_vals = pd.DataFrame(columns=['ob_b1','ob_b2','ob_block',
+                                    'tb_b1','tb_b2','tb_block','new'])
+    
+    start = True   
+    
+#    p_terms['new'].iloc[len(p_terms)-1] = False
+
+    for index, term in zip(p_terms.index, p_terms['new']):
+        
+        if term == False or start:
+            hold_vals = hold_vals.append(p_terms.iloc[index], ignore_index=True)
+        
+#        print (index, term)
+        
+        if term == True and not start:
+            hold_vals = hold_vals.sort_values(['tb_block', 'tb_b1','tb_b2'])
+            hold_vals['new'] = False
+            hold_vals['new'].iloc[0] = True
+            sp_vals = sp_vals.append(hold_vals, ignore_index=True)
+            hold_vals.drop(hold_vals.index, inplace=True)
+            hold_vals = hold_vals.append(p_terms.iloc[index], ignore_index=True)
+
+        
+        if index+1 == len(p_terms):
+            hold_vals = hold_vals.sort_values(['tb_block', 'tb_b1','tb_b2'])
+            hold_vals['new'] = False
+            hold_vals['new'].iloc[0] = True
+            sp_vals = sp_vals.append(hold_vals, ignore_index=True)
+            
+        start = False
+     
+    
+    return sp_vals
+
 
 
 if __name__ == '__main__':
@@ -432,7 +471,7 @@ if __name__ == '__main__':
     tb_list = pd.DataFrame(columns= ['number', 'n1', 'l1', 'j1', 'mj1', 
                                      'n2', 'l2', 'j2', 'mj2', 'sp1', 'sp2'])
 
-    nmax = 2
+    nmax = 3
 
     sp_list = create_sp_list (nmax, sp_list)
 
@@ -496,14 +535,16 @@ if __name__ == '__main__':
 
     p_terms = p_flag (no_terms, h2_terms)
 
+#    print (p_terms)
+
+    p_terms = sort_pflag (p_terms)
+
     print (p_terms)
-
-
 
     np.savetxt('../flag_files/nmax' + str (nmax) +
                '_python_pflag.dat', p_terms, fmt='%6i')
     
-    sys.exit()
+#    sys.exit()
     
-    print(sp_list) ; print ('\n')
-    print(tb_list)
+#    print(sp_list) ; print ('\n')
+#    print(tb_list)
