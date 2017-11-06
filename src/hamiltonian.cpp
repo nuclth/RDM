@@ -313,7 +313,7 @@ void readin_ref_tbme (two_array & ref_tbme, const std::string tbme_filename)
  
   size_t total_lines = 0;
   std::string dummy;
-  size_t num, n1, l1, n2, l2, sp1, sp2, block;
+  double num, n1, l1, n2, l2, sp1, sp2, block;
 
   double j1, mj1, j2, mj2;
 
@@ -388,9 +388,14 @@ void populate_2body (const two_array & ref_m, const two_array & ref_tbme, two_ar
   std::string dummy;
   size_t total_lines = 0;
 
-  while (std::getline) ++total_lines;
+  while (std::getline (flag_in, dummy)) ++total_lines;
 
-  two_array relational_sp (boost::extents[][]);
+  flag_in.clear();
+  flag_in.seekg(0, std::ios::beg);
+
+  two_array relational_sp (boost::extents[total_lines][10]);
+
+  size_t b1, b2, m1, m2, sp1, sp2, sp3, sp4, msp1, msp2, msp3, msp4, block;
 
   for (size_t loop = 0; loop < total_lines; loop++)
   {
@@ -404,8 +409,20 @@ void populate_2body (const two_array & ref_m, const two_array & ref_tbme, two_ar
 
     ss << dummy;
 
-    ss >> 
+    ss >> b1 >> b2 >> m1 >> m2 >> sp1 >> sp2 >> sp3 >> sp4 >> msp1 >> msp2 >> msp3 >> msp4 >> block;
 
+    relational_sp [loop][0] = m1;
+    relational_sp [loop][1] = m2;
+
+    relational_sp [loop][2] = sp1;
+    relational_sp [loop][3] = sp2;
+    relational_sp [loop][4] = sp3;
+    relational_sp [loop][5] = sp4;
+
+    relational_sp [loop][6] = msp1;
+    relational_sp [loop][7] = msp2;
+    relational_sp [loop][8] = msp3;
+    relational_sp [loop][9] = msp4;
   }
 
   total_lines = 0;
@@ -413,9 +430,8 @@ void populate_2body (const two_array & ref_m, const two_array & ref_tbme, two_ar
   const char * matrix_file = (me_tbme).c_str();
   std::ifstream matrix_in (matrix_file);
 
-  size_t total_lines = 0;
-  std::string dummy;
-  int alpha, beta, gamma, delta;
+
+  size_t alpha, beta, gamma, delta;
   double value;
 
   // get the total number of lines in the matrix elements file
@@ -425,8 +441,64 @@ void populate_2body (const two_array & ref_m, const two_array & ref_tbme, two_ar
   matrix_in.clear();
   matrix_in.seekg(0, std::ios::beg);
 
+  size_t relational_size = relational_sp.size();
 
 
+  for (size_t loop2 = 0; loop2 < total_lines; loop2++)
+  {
+//      std::cout << "LOOP TOP" << std::endl;
+
+    std::getline (matrix_in, dummy);
+
+    if (!dummy.length() || dummy[0] == '#')
+      continue;
+
+
+    std::stringstream ss;
+
+    ss << dummy;
+
+    ss >> alpha >> beta >> gamma >> delta >> value;
+
+
+    for (size_t loop3 = 0; loop3 < relational_size; loop3++)
+    {
+
+      size_t m1b = relational_sp [loop3][0];
+      size_t m2b = relational_sp [loop3][1];
+
+      size_t msp1b = relational_sp [loop3][6];
+      size_t msp2b = relational_sp [loop3][7];
+      size_t msp3b = relational_sp [loop3][8];
+      size_t msp4b = relational_sp [loop3][9];
+
+
+      if (alpha == msp1b and beta == msp2b and gamma == msp3b and delta == msp4b) 
+      {
+        h2_mat [m1b][m2b] = value;
+        break;
+      }
+
+      else if (alpha == msp1b and beta == msp2b and gamma == msp4b and delta == msp3b) 
+      {
+        h2_mat [m1b][m2b] = value * -1.0;
+        break;
+      }
+
+      else if (alpha == msp2b and beta == msp1b and gamma == msp3b and delta == msp4b) 
+      {
+        h2_mat [m1b][m2b] = value * -1.0;
+        break;
+      }
+
+      else if (alpha == msp2b and beta == msp1b and gamma == msp4b and delta == msp3b) 
+      {
+        h2_mat [m1b][m2b] = value;
+        break;
+      }
+
+    }
+  }
 
 
 /*

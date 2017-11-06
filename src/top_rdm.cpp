@@ -158,8 +158,8 @@ int main ()
 
 
 
-
   if (two_body_toggle) readin_ref_tbme (array_ref_tbme, ref_tbme);
+
 
   size_t P_num = 0;
 
@@ -254,10 +254,10 @@ int main ()
 
 
 
-  const size_t F1num  = 1;
-  const size_t F2num  = bsize * (bsize + 1)/2;
+//  const size_t F1num  = 1;
+//  const size_t F2num  = bsize * (bsize + 1)/2;
   const size_t NN_num = 1;
-  const size_t F3num  = P_num;//tbme_size * (tbme_size + 1)/2;
+//  const size_t F3num  = P_num;//tbme_size * (tbme_size + 1)/2;
   const size_t F7num  = Q_num;//bsize*bsize*bsize*bsize;
   const size_t F10num = G_num;//bsize*bsize*bsize*bsize;
 
@@ -388,7 +388,11 @@ int main ()
   }
   
   if (two_body_toggle)
-  	fprintf (sdpa_out, "%lu ", tbme_size);
+  {
+  	fprintf (sdpa_out, "%lu ", (size_t)array_ref_tbme[0][11]);
+  	fprintf (sdpa_out, "%lu ", (size_t)array_ref_tbme[1][11]);  	
+  }
+
 
   if (Q_flag)
   	fprintf (sdpa_out, "%lu ", tbme_size);
@@ -410,7 +414,7 @@ int main ()
   size_t con_count = 0;
 
 
-  init_C_matrix (flag_pass, sdpa_out, h1_mat, h2_mat, con_count, obme_blocks, no_flag, h2_flag);
+  init_C_matrix (flag_pass, sdpa_out, h1_mat, h2_mat, con_count, obme_blocks, no_flag, h2_flag, 2 * NO_blocks);
 
   std::cout << "C MATRIX DONE" << std::endl;
 
@@ -435,7 +439,7 @@ int main ()
 
   if (P_flag)
   {
-    init_P_flag (sdpa_out, bsize, con_count, particles, tbme_size, array_ref_tbme, pflag_info);
+    init_P_flag (sdpa_out, bsize, con_count, particles, tbme_size, array_ref_tbme, pflag_info, 2 * NO_blocks);
     std::cout << "P FLAG DONE" << std::endl;
   }
 
