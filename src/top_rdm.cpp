@@ -292,7 +292,7 @@ int main ()
 
 //  five_array h2_mat(boost::extents[bsize][bsize][bsize][bsize][5]);
 
-  fullm_populate_hamiltonian (array_ref_obme, array_ref_tbme, h1_mat, h2_mat, ref_obme, me_obme, ref_tbme, me_tbme, two_body_toggle, nmax);
+  fullm_populate_hamiltonian (array_ref_obme, array_ref_tbme, h1_mat, h2_mat, ref_obme, me_obme, ref_tbme, me_tbme, two_body_toggle, nmax, h2_flag);
 
   std::cout << "HAMILTONIAN BUILT" << std::endl;
 

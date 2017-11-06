@@ -229,7 +229,7 @@ def add_blocks (sp_list):
 
     sp_list['blocks'] = n_list['blocks']
     
-    print (sp_list)
+#    print (sp_list)
     
     return sp_list
 
@@ -296,10 +296,12 @@ def no_flag (sp_list):
 
 
 
-def h2_flag (tb_list):
+def h2_flag (tb_list, sp_relational):
     
     sp_vals = pd.DataFrame(columns=['b1','b2','m1','m2',
-                                    'sp1','sp2','sp3','sp4', 'block'])
+                                    'sp1','sp2','sp3','sp4', 
+                                    'm_sp1', 'm_sp2', 'm_sp3', 'm_sp4',
+                                    'block'])
 
     block_list = tb_list[['blocks']]
     
@@ -321,13 +323,21 @@ def h2_flag (tb_list):
             sp1 = tb_list.iloc[m1].sp1
             sp2 = tb_list.iloc[m1].sp2
             
+            m_sp1 = sp_relational[sp_relational['alex_sp'] == sp1].morten_sp.iloc[0]
+            m_sp2 = sp_relational[sp_relational['alex_sp'] == sp2].morten_sp.iloc[0]
+            
             for val2 in range (val1, num+1, 1):
                 sp3 = tb_list.iloc[m2].sp1
                 sp4 = tb_list.iloc[m2].sp2
+                
+                m_sp3 = sp_relational[sp_relational['alex_sp'] == sp3].morten_sp.iloc[0]
+                m_sp4 = sp_relational[sp_relational['alex_sp'] == sp4].morten_sp.iloc[0]
+                
                 sp_vals = sp_vals.append({'b1': val1, 'b2': val2, 
                                           'm1': m1, 'm2': m2, 'sp1': sp1,
                                           'sp2': sp2, 'sp3':sp3, 
-                                          'sp4' : sp4, 'block': block
+                                          'sp4' : sp4, 'm_sp1' : m_sp1, 'm_sp2': m_sp2,
+                                          'm_sp3' : m_sp3, 'm_sp4': m_sp4, 'block': block
                                           }, ignore_index=True)
                 m2 += 1
          
@@ -464,6 +474,37 @@ def sort_pflag (p_terms):
     return sp_vals
 
 
+def sp_relational_db_morten (nmax, sp_list):
+    
+    morten_splist = pd.DataFrame(columns = ['number', 'n', 'l', '2j', '2mj'])
+    
+    with open('../me_files/ref_files/nmax' + str(nmax) + "_spm.dat", 'r') as f:
+        content = f.readlines()
+        for x in content:
+            row = x.split()
+#            print (row)
+            if row[0] == '#': continue 
+            num   = int(row[2])
+            n     = int(row[3])
+            l     = int(row[4])
+            twoj  = int(row[5])
+            twomj = int(row[6])
+            
+            morten_splist = morten_splist.append({'number':num, 'n':n, 'l':l,'2j':twoj,
+                                                  '2mj':twomj}, ignore_index=True)
+#    print (morten_splist)
+     
+    relational_db = pd.DataFrame(columns = ['morten_sp', 'alex_sp'])
+    
+
+    for index, number in zip(morten_splist.index, morten_splist['number']):
+        relational_db = relational_db.append({'morten_sp':number, 
+                                              'alex_sp': index+1}, ignore_index=True)
+    
+    return relational_db
+
+
+
 
 if __name__ == '__main__':
     
@@ -471,7 +512,8 @@ if __name__ == '__main__':
     tb_list = pd.DataFrame(columns= ['number', 'n1', 'l1', 'j1', 'mj1', 
                                      'n2', 'l2', 'j2', 'mj2', 'sp1', 'sp2'])
 
-    nmax = 3
+    
+    nmax = 2
 
     sp_list = create_sp_list (nmax, sp_list)
 
@@ -487,7 +529,10 @@ if __name__ == '__main__':
     
     sp_list = add_blocks (sp_list)
     
-#    print (sp_list)
+    print (sp_list)
+
+
+    sp_relational = sp_relational_db_morten (nmax, sp_list)
 
     
     np.savetxt('../me_files/ref_files/nmax' + str(nmax) + 
@@ -524,7 +569,7 @@ if __name__ == '__main__':
     print ('Memory size sp list {} bytes'.format(sys.getsizeof(sp_list)))
     print ('Memory size tb list {} bytes'.format(sys.getsizeof(tb_list)))
 
-    h2_terms = h2_flag (tb_list)
+    h2_terms = h2_flag (tb_list, sp_relational)
 
     h2_terms = h2_terms.astype(int)
 

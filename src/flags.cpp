@@ -228,7 +228,7 @@ void init_C_matrix (const con_flags flag_pass, FILE * sdpa_out, const two_array 
 	  std::ifstream ref_in (h2_file);
 	 
 	  std::string dummy;
-	  size_t b1, b2, m1, m2, sp1, sp2, sp3, sp4, block;
+	  size_t b1, b2, m1, m2, sp1, sp2, sp3, sp4, msp1, msp2, msp3, msp4, block;
 
 	  // find total number of defined reference lines
 	  while (std::getline (ref_in, dummy))
@@ -240,7 +240,7 @@ void init_C_matrix (const con_flags flag_pass, FILE * sdpa_out, const two_array 
 	  	std::stringstream ss;
 
 	 	ss << dummy;            // read in the line to stringstream ss
-	  	ss >> b1 >> b2 >> m1 >> m2 >> sp1 >> sp2 >> sp3 >> sp4 >> block;
+	  	ss >> b1 >> b2 >> m1 >> m2 >> sp1 >> sp2 >> sp3 >> sp4 >> msp1 >> msp2 >> msp3 >> msp4 >> block;
 
 	  	double val3 = h2_mat [m1][m2] * -1./2.;
 

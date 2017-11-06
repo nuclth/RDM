@@ -279,7 +279,7 @@ populate 2-body matrix elements.
 ***************************************************************/
 
 
-void fullm_populate_hamiltonian (two_array & array_ref_obme, two_array & array_ref_tbme, two_array & h1_mat, two_array & h2_mat, const std::string ref_obme, const std::string me_obme, const std::string ref_tbme, const std::string me_tbme, const bool two_body_toggle, const int nmax) 
+void fullm_populate_hamiltonian (two_array & array_ref_obme, two_array & array_ref_tbme, two_array & h1_mat, two_array & h2_mat, const std::string ref_obme, const std::string me_obme, const std::string ref_tbme, const std::string me_tbme, const bool two_body_toggle, const int nmax, const std::string h2_flag) 
 {
 
     readin_ref_obme (array_ref_obme, ref_obme);
@@ -289,7 +289,7 @@ void fullm_populate_hamiltonian (two_array & array_ref_obme, two_array & array_r
     if (two_body_toggle)
     {
       std::cout << "TBME REFERENCE READ" << std::endl;
-      populate_2body (array_ref_obme, array_ref_tbme, h2_mat, me_tbme, nmax);
+      populate_2body (array_ref_obme, array_ref_tbme, h2_mat, me_tbme, nmax, h2_flag);
       std::cout << "2 BODY POPULATED" << std::endl;
     }
 
@@ -379,8 +379,58 @@ void readin_ref_tbme (two_array & ref_tbme, const std::string tbme_filename)
 
 ***************************************************************/
 
-void populate_2body (const two_array & ref_m, const two_array & ref_tbme, two_array & h2_mat, const std::string me_tbme, const int nmax)
+void populate_2body (const two_array & ref_m, const two_array & ref_tbme, two_array & h2_mat, const std::string me_tbme, const int nmax, const std::string h2_flag)
 {
+
+  const char * flag_file = (h2_flag).c_str();
+  std::ifstream flag_in (flag_file);
+
+  std::string dummy;
+  size_t total_lines = 0;
+
+  while (std::getline) ++total_lines;
+
+  two_array relational_sp (boost::extents[][]);
+
+  for (size_t loop = 0; loop < total_lines; loop++)
+  {
+
+    std::getline (flag_in, dummy);
+
+    if (!dummy.length() || dummy[0] == '#')
+      continue;
+
+    std::stringstream ss;
+
+    ss << dummy;
+
+    ss >> 
+
+  }
+
+  total_lines = 0;
+
+  const char * matrix_file = (me_tbme).c_str();
+  std::ifstream matrix_in (matrix_file);
+
+  size_t total_lines = 0;
+  std::string dummy;
+  int alpha, beta, gamma, delta;
+  double value;
+
+  // get the total number of lines in the matrix elements file
+  while(std::getline(matrix_in, dummy))  ++total_lines;
+ 
+  // clear and reset the file stream
+  matrix_in.clear();
+  matrix_in.seekg(0, std::ios::beg);
+
+
+
+
+
+/*
+
   // input file stream
   const char * matrix_file = (me_tbme).c_str();
   std::ifstream matrix_in (matrix_file);
@@ -536,6 +586,8 @@ void populate_2body (const two_array & ref_m, const two_array & ref_tbme, two_ar
 
 
   }
+
+*/
 
   return;
 
