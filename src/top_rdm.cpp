@@ -154,7 +154,7 @@ int main ()
   const size_t bsize = total_obme_states (ref_obme);
 
   const size_t tbme_size = total_tbme_states (ref_tbme);
-  two_array array_ref_tbme (boost::extents[tbme_size][11]);
+  two_array array_ref_tbme (boost::extents[tbme_size][13]);
 
 
 

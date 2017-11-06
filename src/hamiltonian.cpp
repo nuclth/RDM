@@ -144,6 +144,8 @@ void populate_1body (const two_array & array_ref_obme, two_array & h1_mat, const
 
 ***************************************************************/
 
+/*
+
 double find_obme_me (const double n1, const double n2, const double l, const double j, const double mj, two_array & obme)
 {
   size_t mat_extent = obme.size();
@@ -166,11 +168,15 @@ double find_obme_me (const double n1, const double n2, const double l, const dou
   return 0.;
 }
 
+*/
+
 /***************************************************************
 
 
 
 ***************************************************************/
+
+/*
 
 int get_obme_lines (const std::string obme_filename)
 {
@@ -191,7 +197,7 @@ int get_obme_lines (const std::string obme_filename)
 
   return total_lines;
 }
-
+*/
 
 /***************************************************************
 
@@ -200,7 +206,7 @@ int get_obme_lines (const std::string obme_filename)
 
 
 ***************************************************************/
-
+/*
 
 void read_in_obme (two_array & obme, const std::string obme_filename)
 {
@@ -262,6 +268,7 @@ void read_in_obme (two_array & obme, const std::string obme_filename)
   return;
 }
 
+*/
 
 /***************************************************************
 
@@ -306,11 +313,12 @@ void readin_ref_tbme (two_array & ref_tbme, const std::string tbme_filename)
  
   size_t total_lines = 0;
   std::string dummy;
-  double num, n1, l1, j1, mj1, n2, l2, j2, mj2, sp1, sp2;
+  size_t num, n1, l1, n2, l2, sp1, sp2, block;
+
+  double j1, mj1, j2, mj2;
 
   // find total number of defined reference lines
-  while (std::getline (ref_in, dummy))
-  ++total_lines;
+  while (std::getline (ref_in, dummy)) ++total_lines;
 
 
   // clear the file stream, reset to read in the elements
@@ -331,10 +339,10 @@ void readin_ref_tbme (two_array & ref_tbme, const std::string tbme_filename)
 
   	std::stringstream ss;
 
- 	ss << dummy;            // read in the line to stringstream ss
+   	ss << dummy;            // read in the line to stringstream ss
 
 
-  	ss >> num >> n1 >> l1 >> j1 >> mj1 >> n2 >> l2 >> j2 >> mj2 >> sp1 >> sp2;  // assign values of the line
+  	ss >> num >> n1 >> l1 >> j1 >> mj1 >> n2 >> l2 >> j2 >> mj2 >> sp1 >> sp2 >> block;  // assign values of the line
 
 
     ref_tbme [ele_in][0] = num;    // reference number of the line
@@ -350,6 +358,8 @@ void readin_ref_tbme (two_array & ref_tbme, const std::string tbme_filename)
     ref_tbme [ele_in][8] = mj2;   // total angular mom. projection
     ref_tbme [ele_in][9] = sp1;
     ref_tbme [ele_in][10] = sp2;
+    ref_tbme [ele_in][11] = block;
+    ref_tbme [ele_in][12] = ele_in;
 
     ele_in++;
 

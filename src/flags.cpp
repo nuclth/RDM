@@ -587,6 +587,8 @@ void init_P_flag (FILE * sdpa_out, const size_t bsize, size_t & con_count, const
 
   double prefac = -1.0 * (N - 1.0) / 2.0;
 
+  bool start = true;
+
   // find total number of defined reference lines
   while (std::getline (ref_in, dummy))
   {
@@ -599,14 +601,18 @@ void init_P_flag (FILE * sdpa_out, const size_t bsize, size_t & con_count, const
  	ss << dummy;            // read in the line to stringstream ss
   	ss >> ob_b1 >> ob_b2 >> ob_block >> tb_b1 >> tb_b2 >> tb_block >> new_flag;
 
+  	if (new_flag and !start)
+    	con_count++;
+
+    start = false;
+
   	if (new_flag)
     	fprintf(sdpa_out, "%lu %lu %lu %lu %f\n", con_count, ob_block, ob_b1, ob_b2, prefac);
 
 
     fprintf(sdpa_out, "%lu %lu %lu %lu %f\n", con_count, tb_block, tb_b1, tb_b2, 1.0);
 
-  	if (new_flag)
-    	con_count++;
+
   }
 
 
