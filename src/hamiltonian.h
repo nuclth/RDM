@@ -29,4 +29,6 @@ template <typename Array> void print(std::ostream& os, const Array & A);
 
 template <> void print (std::ostream& os, const double & x);
 
+int cantor (size_t a, size_t b);
+
 #endif

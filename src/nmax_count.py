@@ -513,7 +513,7 @@ if __name__ == '__main__':
                                      'n2', 'l2', 'j2', 'mj2', 'sp1', 'sp2'])
 
     
-    nmax = 8
+    nmax = 2
 
     sp_list = create_sp_list (nmax, sp_list)
 

@@ -1,7 +1,7 @@
 #include "hamiltonian.h"
 #include <sstream>
 #include <fstream>
-
+#include <map>
 
 /*
 template<> void print<double>(std::ostream& os, const double & x)
@@ -427,12 +427,11 @@ void populate_2body (const two_array & ref_m, const two_array & ref_tbme, two_ar
 
   total_lines = 0;
 
+
   const char * matrix_file = (me_tbme).c_str();
   std::ifstream matrix_in (matrix_file);
 
 
-  size_t alpha, beta, gamma, delta;
-  double value;
 
   // get the total number of lines in the matrix elements file
   while(std::getline(matrix_in, dummy))  ++total_lines;
@@ -443,15 +442,49 @@ void populate_2body (const two_array & ref_m, const two_array & ref_tbme, two_ar
 
   size_t relational_size = relational_sp.size();
 
+  std::map<int, int> morten_map;
+  std::map<int, int> sign_map;
+
+  for (size_t loop = 0; loop < relational_size; loop++)
+  {
+  	size_t msp1 = relational_sp [loop][6];
+  	size_t msp2 = relational_sp [loop][7];
+
+  	int m1 = relational_sp [loop][0];
+
+  	int pair_map1 = cantor (msp1, msp2);
+  	int pair_map2 = cantor (msp2, msp1);
+
+  	morten_map.insert(std::make_pair(pair_map1, m1));
+  	morten_map.insert(std::make_pair(pair_map2, m1));
+
+  	sign_map.insert(std::make_pair(pair_map1,  1));
+  	sign_map.insert(std::make_pair(pair_map2, -1));
+  }
+
+//  int cant_test1 = cantor (1, 2);
+//  int cant_test2 = cantor (2, 6);
+//  int cant_test3 = cantor (1, 38);
+
+//  std::cout << morten_map.find(cant_test1)->second << std::endl;
+//  std::cout << morten_map.find(cant_test2) << std::endl;
+//  std::cout << morten_map.find(cant_test3) << std::endl;
+
+
+//  two_array hold (boost::extents [total_lines][5]);
 
   for (size_t loop2 = 0; loop2 < total_lines; loop2++)
   {
 //      std::cout << "LOOP TOP" << std::endl;
 
+    size_t alpha, beta, gamma, delta;
+    double value;
+
     std::getline (matrix_in, dummy);
 
     if (!dummy.length() || dummy[0] == '#')
       continue;
+
 
 
     std::stringstream ss;
@@ -460,6 +493,35 @@ void populate_2body (const two_array & ref_m, const two_array & ref_tbme, two_ar
 
     ss >> alpha >> beta >> gamma >> delta >> value;
 
+
+    int cant1 = cantor (alpha, beta);
+    int cant2 = cantor (gamma, delta);
+
+    int sign1 = sign_map.find(cant1)->second;
+    int sign2 = sign_map.find(cant2)->second;
+
+    int m1 = morten_map.find(cant1)->second;
+    int m2 = morten_map.find(cant2)->second;
+
+    h2_mat[m1][m2] = value * sign1 * sign2;
+
+//    hold[loop2][0] = alpha;
+//    hold[loop2][1] = beta;
+//    hold[loop2][2] = gamma;
+//    hold[loop2][3] = delta;
+//    hold[loop2][4] = value;
+  }
+/*
+  std::cout << "FILLED" << std::endl;
+
+  for (size_t loop2 = 0; loop2 < total_lines; loop2++)
+  {
+
+  	size_t alpha = hold [loop2][0]; 
+  	size_t beta  = hold [loop2][1]; 
+  	size_t gamma = hold [loop2][2];
+  	size_t delta = hold [loop2][3];
+    double value = hold [loop2][4];
 
     for (size_t loop3 = 0; loop3 < relational_size; loop3++)
     {
@@ -499,7 +561,7 @@ void populate_2body (const two_array & ref_m, const two_array & ref_tbme, two_ar
 
     }
   }
-
+*/
 
 /*
 
@@ -988,4 +1050,15 @@ void print(std::ostream& os, const Array & A)
 template<> void print<double>(std::ostream& os, const double & x)
 {
   os << x;
+}
+
+
+
+int cantor (size_t a, size_t b)
+{
+	double mapped = 0.5 * (a + b) * (a + b + 1.0) + b;
+
+	int value = (int) mapped;
+
+	return value;
 }
