@@ -41,6 +41,66 @@ parameters read_in_inputs ()
   return input;						// return the struct 
 }
 
+
+string_holder string_reader (const size_t nmax, const size_t basis_hw)
+{
+  struct string_holder input;
+
+  // Create filenames from inputs
+  std::stringstream parser;
+  
+  parser << "me_files/ref_files/nmax" << nmax << "_spm.dat";
+  input.morten_spm = parser.str();
+
+  // clear parser and repeat for other files
+  parser.str("");
+  parser.clear();
+
+  parser << "me_files/ref_files/nmax" << nmax << "_python_sp.dat";
+  input.ref_obme = parser.str();
+
+  parser.str("");
+  parser.clear();
+
+  parser << "me_files/obme/nmax" << nmax << "_obme_hw" << basis_hw << ".dat";
+  input.me_obme = parser.str();
+
+  parser.str("");
+  parser.clear();
+
+  parser << "me_files/ref_files/nmax" << nmax << "_python_tb.dat";
+  input.ref_tbme = parser.str();
+
+  parser.str("");
+  parser.clear();
+
+  parser << "me_files/tbme/nmax" << nmax << "_tbme_hw" << basis_hw << ".dat";
+  input.me_tbme = parser.str();
+
+  parser.str("");
+  parser.clear();
+
+  parser << "flag_files/nmax" << nmax << "_python_noflag.dat";
+  input.no_flag = parser.str();
+
+  parser.str("");
+  parser.clear();
+
+  parser << "flag_files/nmax" << nmax << "_python_h2flag.dat";
+  input.h2_flag = parser.str();
+
+  parser.str("");
+  parser.clear();
+
+  parser << "flag_files/nmax" << nmax << "_python_pflag.dat";
+  input.pflag_info = parser.str();
+
+  parser.str("");
+  parser.clear();
+
+  return input;
+}
+
 /*
 size_t T2_count (const size_t bsize)
 {

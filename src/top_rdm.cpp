@@ -61,68 +61,30 @@ int main ()
 
 
 
-  parameters input_params;						             // create a struct to hold user specified parameters
-  input_params = read_in_inputs (); 					     // read in the values from inputs.inp, store in input_params	
+  parameters input_params = read_in_inputs ();						             // create a struct to hold user specified parameters
+//  input_params = read_in_inputs (); 					     // read in the values from inputs.inp, store in input_params	
 
   // Now create/copy input parameters for ease of reading the code into newly defined local variables
   const size_t nmax  = input_params.nmax;	
   const size_t basis_hw = input_params.basis_hw;   
   const size_t particles = input_params.particles;		 
 
-  std::cout << ("Building system... ") << std::endl;
 
-  // Create filenames from inputs
-  std::stringstream parser;
-  
-  parser << "me_files/ref_files/nmax" << nmax << "_spm.dat";
-  const std::string morten_spm = parser.str();
+  string_holder input_strings = string_reader (nmax, basis_hw);
 
-  // clear parser and repeat for other files
-  parser.str("");
-  parser.clear();
+  cout << ("Building system... ") << endl;
 
-  parser << "me_files/ref_files/nmax" << nmax << "_python_sp.dat";
-  const std::string ref_obme = parser.str();
+  const std::string morten_spm = input_strings.morten_spm;
+  const std::string ref_obme = input_strings.ref_obme;
+  const std::string me_obme = input_strings.me_obme;
+  const std::string ref_tbme = input_strings.ref_tbme;
+  const std::string me_tbme = input_strings.me_tbme;
+  const std::string no_flag = input_strings.no_flag;
+  const std::string h2_flag = input_strings.h2_flag;
+  const std::string pflag_info = input_strings.pflag_info;
 
-  parser.str("");
-  parser.clear();
 
-  parser << "me_files/obme/nmax" << nmax << "_obme_hw" << basis_hw << ".dat";
-  const std::string me_obme = parser.str();
-
-  parser.str("");
-  parser.clear();
-
-  parser << "me_files/ref_files/nmax" << nmax << "_python_tb.dat";
-  const std::string ref_tbme = parser.str();
-
-  parser.str("");
-  parser.clear();
-
-  parser << "me_files/tbme/nmax" << nmax << "_tbme_hw" << basis_hw << ".dat";
-  const std::string me_tbme = parser.str();
-
-  parser.str("");
-  parser.clear();
-
-  parser << "flag_files/nmax" << nmax << "_python_noflag.dat";
-  const std::string no_flag = parser.str();
-
-  parser.str("");
-  parser.clear();
-
-  parser << "flag_files/nmax" << nmax << "_python_h2flag.dat";
-  const std::string h2_flag = parser.str();
-
-  parser.str("");
-  parser.clear();
-
-  parser << "flag_files/nmax" << nmax << "_python_pflag.dat";
-  const std::string pflag_info = parser.str();
-
-  parser.str("");
-  parser.clear();
-
+ 
 
   const size_t bsize = total_obme_states (ref_obme);
 
@@ -165,11 +127,6 @@ int main ()
   flag_pass.N_flag  = N_flag;
   flag_pass.O_flag  = O_flag;
   flag_pass.P_flag  = P_flag;
-  flag_pass.Q_flag  = Q_flag;
-  flag_pass.G_flag  = G_flag;
-  flag_pass.T1_flag = T1_flag;
-  flag_pass.T2_flag = T2_flag;
-
 
   flag_pass.two_body_toggle = two_body_toggle;
 
@@ -182,31 +139,23 @@ int main ()
 
   FILE * sdpa_out;
 
+
+  const char * sdpa_char = (sdpa_file).c_str();
+
   sdpa_out = fopen (sdpa_char, "w");
 
 
   two_array array_ref_obme (boost::extents[bsize][7]);
   two_array h1_mat(boost::extents[bsize][bsize]);
 
-//  std::cout << "TBME SIZE: " << tbme_size << std::endl;
-
   two_array h2_mat (boost::extents[tbme_size][tbme_size]);
 
 
-//  five_array h2_mat(boost::extents[bsize][bsize][bsize][bsize][5]);
 
   fullm_populate_hamiltonian (array_ref_obme, array_ref_tbme, h1_mat, h2_mat, ref_obme, me_obme, ref_tbme, me_tbme, two_body_toggle, nmax, h2_flag);
 
   std::cout << "HAMILTONIAN BUILT" << std::endl;
 
-//  two_array comp_h2 (boost::extents[bsize*(bsize-1)/2][bsize*(bsize-1)/2]);
-
-//  if (two_body_toggle) 
-//  {
-//  	compactify_h2 (ref_m, comp_h2, h2_mat, diag_out, diag_toggle);
-//
-//  	std::cout << "POTENTIAL COMPACTIFIED" << std::endl;
-//  }
 
 
   size_t NO_blocks = count_NO_blocks (array_ref_obme);
@@ -236,29 +185,7 @@ int main ()
   if (P_flag)
   	cons += P_num;
 
-  if (Q_flag)
-  {
-  	cons += F7num;
-  	blocks++;
-  }
 
-  if (G_flag)
-  {
-  	cons += F10num;
-  	blocks++;
-  }
-
-  if (T1_flag)
-  {
-  	cons += T1_num;
-  	blocks++;
-  }
-
-  if (T2_flag)
-  {
-  	cons += T2_num;
-  	blocks++;
-  }
 
   fprintf (sdpa_out, "%lu\n", cons);
   fprintf (sdpa_out, "%lu\n", blocks);
@@ -275,6 +202,7 @@ int main ()
   }
 
 
+
   if (O_flag)
   {
   	for (size_t loop = 0; loop < bsize; loop++)
@@ -285,6 +213,7 @@ int main ()
   	}
   }
   
+
   if (two_body_toggle)
   {
   	fprintf (sdpa_out, "%lu ", (size_t)array_ref_tbme[0][11]);
@@ -292,16 +221,7 @@ int main ()
   }
 
 
-  if (Q_flag)
-  	fprintf (sdpa_out, "%lu ", tbme_size);
 
-  if (G_flag)
-  	fprintf (sdpa_out, "%lu ", bsize*bsize);
-
-
-
-  if (T2_flag)
-  	fprintf (sdpa_out, "%lu ", T2_DIM_count (bsize));
 
 
   fprintf (sdpa_out, "\n");
@@ -336,28 +256,6 @@ int main ()
     std::cout << "P FLAG DONE" << std::endl;
   }
 
-  if (Q_flag)
-  {
-//    init_Q_flag (sdpa_out, bsize, con_count);
-    std::cout << "Q FLAG DONE" << std::endl;
-  }
-
-  if (G_flag)
-  {
-//    init_G_flag (sdpa_out, bsize, con_count);
-    std::cout << "G FLAG DONE" << std::endl;
-  }
-
-  if (T1_flag)
-  {
-  	std::cout << "T1 FLAG DONE" << std::endl;
-  }
-
-  if (T2_flag)
-  {
-//  	init_T2_flag (sdpa_out, bsize, con_count);
-  	std::cout << "T2 FLAG DONE" << std::endl;
-  }
 
   return EXIT_SUCCESS;
 

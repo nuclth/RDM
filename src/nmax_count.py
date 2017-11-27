@@ -6,15 +6,22 @@ Created on Sun Oct 29 11:03:52 2017
 @author: alex
 """
 
+# standard libraries import
 import sys
 
+# import third party libraries
 import pandas as pd
 import numpy as np
 
     
 def create_sp_list (nmax, sp_list):
     """Function to create a list of single-particle orbitals for a given Nmax
-    truncation in m-scheme harmonic oscillator basis."""
+    truncation in m-scheme harmonic oscillator basis. 
+    
+    Arguments:
+    nmax    - nmax truncation size
+    sp_list - dataframe to hold single-particle orbital quantum numbers 
+    """
     
     # initialize values
     new_ncount = True    
@@ -22,29 +29,30 @@ def create_sp_list (nmax, sp_list):
     num= 1
     n = 0
     l = 0
-    j = 2 * abs (l + 1/2)
-    mj = -j
+    twoj = 2 * abs (l + 1/2)
+    twomj = -twoj
     icount = 0
     l_list = []
 
     while nmax >= ncount:    
+        
         # add new single-particle orbital to dataframe
         sp_list = sp_list.append({'number': num, 'n': n, 'l': l, 
-                                  'j': j, 'mj' : mj}, ignore_index=True)
+                                  'j': twoj, 'mj' : twomj}, ignore_index=True)
     
+        # increment sp orbital counter
         num += 1
     
-        # cycle through mj and j values
-        if mj < j:
-            mj += 2
+        # cycle through mj values for a given n,l,j
+        if twomj < twoj:
+            twomj += 2
             continue
     
-        if j > 2 * abs (l - 1/2):
-            j = j - 2
-            mj = -j
+        # cylce through j values for a given n,l
+        if twoj > 2 * abs (l - 1/2):
+            twoj = twoj - 2
+            twomj = -twoj
             continue
-
- #       (n, l, ncount) = increment_nl (n, l, ncount)
 
         if icount >= len(l_list) and not new_ncount:
             new_ncount = True
@@ -59,65 +67,19 @@ def create_sp_list (nmax, sp_list):
         if ncount > nmax:
             break
         
-#        print (icount)
-#        print (len(l_list))
-        
+      
         l = l_list[icount]
         n = n_list[icount]
         
         icount += 1
 
         # reset j,mj for new n,l values
-        j = 2 * abs (l + 1/2)
-        mj = -j
+        twoj = 2 * abs (l + 1/2)
+        twomj = -twoj
     
-        # break if we get above nmax
-#        if ncount > nmax:
-#            break
+
     
     return sp_list
-
-
-
-def increment_nl (n, l, ncount):
-    """Function to increment either n or l in the single-particle space
-    depending on which is lower energy. Incrementing n resets l back to 
-    zero."""
-    
-    ncount = 5
-    
-  
-    l_list = [a for a in range (ncount, -1, -2)]
-    n_list = [a for a in range (0, int(np.floor(ncount/2))+1, 1)]
-
-    print (len(l_list))
-    sys.exit()
-
-    for n1 in n_list:
-        for l1 in l_list:
-            print (l1)
-
-    print (n_list)
-    print (l_list)
-    sys.exit()
-    
-    if (2*(n+1) + l > ncount and 2*n + l + 1 > ncount): ncount += 1
-    
-    n_incr = 2 * (n + 1)
-    l_incr = 2 * n + (l + 1)
-    
-    if n_incr < l_incr:
-        n += 1
-        l = 0
-        ncount = n_incr
-        
-    else:
-        l += 1
-        ncount = l_incr
-    
-    return (n, l, ncount)
-
-
 
 
 def create_tb_list (nmax, sp_list, tb_list):
@@ -175,11 +137,25 @@ def create_tb_list (nmax, sp_list, tb_list):
 
 
 def sort_sp (sp_list):
+    """Sort sp_list dataframe by j, mj values in ascending order. Then 
     
-#    shifted_list = pd.DataFrame(columns= ['number', 'n', 'l', 'j', 'mj'])
+    Argument:
+        sp_list - dataframe to hold sp orbital quantum numbers
+    """
 
+
+    print (sp_list)
+    
     sp_list = sp_list.sort_values(['j','mj'])
+    
+    print (sp_list)
+        
     sp_list = sort_sp_l (sp_list)
+    
+    print (sp_list)
+
+    sys.exit()
+
     
     return sp_list
 
@@ -192,8 +168,7 @@ def sort_sp_l (sp_list):
     shifted_list = sp_list[even_parity]
     shifted_list = shifted_list.append(sp_list[odd_parity])
 
-#    print (shifted_list)
-
+    # drop index
     shifted_list = shifted_list.reset_index(drop=True)
 
     return shifted_list

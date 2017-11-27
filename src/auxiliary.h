@@ -4,6 +4,8 @@
 #include <iostream>
 #include <string>
 
+using std::string;
+
 // struct to hold the input file variables
 struct parameters 
 {
@@ -12,25 +14,36 @@ struct parameters
 	size_t particles;
 };
 
+// struct 
+struct string_holder
+{
+
+  string morten_spm;
+
+  string ref_obme;
+  string me_obme;
+
+  string ref_tbme;
+  string me_tbme;
+
+  string no_flag;
+  string h2_flag;
+  string pflag_info;
+};
+
 // struct to hold the constraint flag toggles
 struct con_flags
 {
 	bool N_flag;
 	bool O_flag;
 	bool P_flag;
-  	bool Q_flag;
-  	bool G_flag;
 
-  	bool T1_flag;
-  	bool T2_flag;
-
-  	bool NN_flag;
-
-	bool diag_toggle;
 	bool two_body_toggle;
 };
 
 parameters read_in_inputs ();
+
+string_holder string_reader (const size_t nmax, const size_t basis_hw);
 
 inline double kron_del(const size_t i, const size_t j)
 {
@@ -39,12 +52,6 @@ inline double kron_del(const size_t i, const size_t j)
 
   return 0.;
 }
-
-template <typename Array> void print(std::ostream& os, const Array & A);
-
-template <> void print (std::ostream& os, const int & x);
-size_t T2_count (const size_t bsize);
-size_t T2_DIM_count (const size_t bsize);
 
 
 
