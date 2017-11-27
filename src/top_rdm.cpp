@@ -1,41 +1,13 @@
-/*
-plan:
-	create mesh
-	allocate space for 1 and 2-body ME
-	populate 1 and 2-body matrix elements
-	output ME to dat file in SDPA format
-	call CSDP program	
-*/
 /*****************************************************************************
 
 Programmer: Alex Dyhdalo
 
-This is the main wrapper file that calls all the other machinery to solve the HF
-equations. 
-
-The struct defined here holds all the user specified parameters which are read in via the 
-read_in_inputs function below. User inputs are read in from the file "inputs.inp". This is 
-done to avoid having to recompile when the user changes input parameters. 
-
-Then, depending on the user choice, an instance of the corresponding derived class is 
-created (swave, fullm, or fullj). These derived classes are derived from the base class phys_system.
-The basis size is extracted via a class function. Then, an instance of the hartree_fock class is created
- and the hartree_fock class function ".run" is called which actually outputs the ground state energy 
-for the system. 
 
 *****************************************************************************/
 
 // necessary definitions
 
-//#include "boost/cstdlib.hpp"
-
-#include "matrix_define.h"
-#include "auxiliary.h"
-#include "flags.h"
-#include "hamiltonian.h"
-
-#include <gsl/gsl_sf_laguerre.h>
-#include <gsl/gsl_sf_gamma.h>
+// standard libraries
 #include <cstdio>
 #include <iomanip>
 #include <armadillo>
@@ -45,6 +17,12 @@ for the system.
 #include <iostream>
 #include <sstream>
 #include <fstream>
+
+// custom header files
+#include "matrix_define.h"
+#include "auxiliary.h"
+#include "flags.h"
+#include "hamiltonian.h"
 
 using std::cout;
 using std::endl;
@@ -77,13 +55,8 @@ int main ()
   const bool N_flag  = true; // p START - TRACE CONDITION
   const bool O_flag  = true; // q START - LINEAR RELATIONS
   const bool P_flag  = true; // P START - TRACE CONDITION
-  const bool Q_flag  = false; // Q START - LINEAR RELATIONS
-  const bool G_flag  = false; // G START - LINEAR REALTIONSi
 
-  const bool T1_flag = false;
-  const bool T2_flag = false;
 
-  const bool NN_flag = false;
 
 
 
@@ -174,66 +147,15 @@ int main ()
   cout << "PNUM: " << P_num << endl << endl;
   
 
-  size_t Q_num = 0;
-/*
-  for (size_t i = 0; i < bsize; i++)      // loop over ith constraint matrix
-  {
-  for (size_t j = i+1; j < bsize; j++)      // loop over jth constraint matrix
-  {
-  for (size_t k = i; k < bsize; k++)    // loop over matrix row
-  {
-  for (size_t l = k+1; l < bsize; l++)    // loop over matrix column
-  {
-    if (j < l && k <= i)
-      continue;
-
-    Q_num++;
-  }
-  }
-  }
-  }
-*/
-  size_t G_num = 0;
-/*
-  for (size_t i = 0; i < bsize; i++)      // loop over ith constraint matrix
-  {
-  for (size_t j = 0; j < bsize; j++)      // loop over jth constraint matrix
-  {
-  for (size_t k = 0; k < bsize; k++)    // loop over matrix row
-  {
-  for (size_t l = j; l < bsize; l++)    // loop over matrix column
-  {
-    
-    if (j == l && k < i)
-      continue;
-
-    G_num++;
-  }
-  }
-  }
-  }
-*/
 
 
-
-  if (!two_body_toggle and (P_flag or Q_flag or G_flag))
+  if (!two_body_toggle and P_flag)
   {
   	std::cerr << "ERROR: TWO-BODY TOGGLE AND CONSTRAINT FLAGS INCOMPATIBLE - GIVING UP" << std::endl;
   	return EXIT_FAILURE;
   }	
 
-  if (!P_flag and (Q_flag or G_flag))
-  {
-    std::cerr << "ERROR: CANNOT INIT G OR Q FLAG WITHOUT P FLAG - GIVING UP" << std::endl;
-    return EXIT_FAILURE;
-  }
 
-
-  if (G_flag and !Q_flag)
-  {
-    std::cerr << "ERROR: CANNOT INIT G FLAG WITHOUT Q FLAG - GIVING UP" << std::endl;
-    return EXIT_FAILURE;
-  }
 
 
 
@@ -248,37 +170,18 @@ int main ()
   flag_pass.T1_flag = T1_flag;
   flag_pass.T2_flag = T2_flag;
 
-  flag_pass.NN_flag = NN_flag;
 
   flag_pass.two_body_toggle = two_body_toggle;
 
 
 
-//  const size_t F1num  = 1;
-//  const size_t F2num  = bsize * (bsize + 1)/2;
-  const size_t NN_num = 1;
-//  const size_t F3num  = P_num;//tbme_size * (tbme_size + 1)/2;
-  const size_t F7num  = Q_num;//bsize*bsize*bsize*bsize;
-  const size_t F10num = G_num;//bsize*bsize*bsize*bsize;
 
-  const size_t T1_num = 1;
-  const size_t T2_num = 1; //T2_count (bsize);
-
-
-//  const std::string diag_file = "diagnostic_out/test_diag.dat";
   const std::string sdpa_file = "sdp_files/test_sdp.dat-s";
 
-//  std::ofstream diag_out (diag_file);
-//  std::ofstream sdpa_out (sdpa_file);
 
 
-//  const char * diag_char = (diag_file).c_str();
-  const char * sdpa_char = (sdpa_file).c_str();
-
-//  FILE * diag_out;
   FILE * sdpa_out;
 
-//  diag_out = fopen (diag_char, "w");
   sdpa_out = fopen (sdpa_char, "w");
 
 
@@ -329,9 +232,6 @@ int main ()
 
   if (two_body_toggle)
   	blocks+= 2;
-  
-  if (NN_flag)
-  	cons += NN_num;
 
   if (P_flag)
   	cons += P_num;
@@ -363,8 +263,6 @@ int main ()
   fprintf (sdpa_out, "%lu\n", cons);
   fprintf (sdpa_out, "%lu\n", blocks);
 
-//  sdpa_out << cons << std::endl;
-//  sdpa_out << blocks << std::endl;
 
   if (N_flag)
   {
@@ -431,11 +329,6 @@ int main ()
     std::cout << "O FLAG DONE" << std::endl;
   }
 
-  if (NN_flag)
-  {
-  	init_NN_flag (sdpa_out, bsize, con_count);
-  	std::cout << "NN FLAG DONE" << std::endl;
-  }
 
   if (P_flag)
   {
@@ -445,13 +338,13 @@ int main ()
 
   if (Q_flag)
   {
-    init_Q_flag (sdpa_out, bsize, con_count);
+//    init_Q_flag (sdpa_out, bsize, con_count);
     std::cout << "Q FLAG DONE" << std::endl;
   }
 
   if (G_flag)
   {
-    init_G_flag (sdpa_out, bsize, con_count);
+//    init_G_flag (sdpa_out, bsize, con_count);
     std::cout << "G FLAG DONE" << std::endl;
   }
 
@@ -462,7 +355,7 @@ int main ()
 
   if (T2_flag)
   {
-  	init_T2_flag (sdpa_out, bsize, con_count);
+//  	init_T2_flag (sdpa_out, bsize, con_count);
   	std::cout << "T2 FLAG DONE" << std::endl;
   }
 

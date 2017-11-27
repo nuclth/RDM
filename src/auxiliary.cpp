@@ -41,7 +41,7 @@ parameters read_in_inputs ()
   return input;						// return the struct 
 }
 
-
+/*
 size_t T2_count (const size_t bsize)
 {
 	size_t T2_num = 0;
@@ -88,6 +88,9 @@ size_t T2_DIM_count (const size_t bsize)
 
 	return dim;
 }
+
+*/
+
 /***************************************************************
 
 Kronecker delta function. Returns 1 if i=j and 0 otherwise.

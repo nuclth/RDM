@@ -3,12 +3,112 @@
 #include <fstream>
 #include <map>
 
-/*
-template<> void print<double>(std::ostream& os, const double & x)
+
+/***************************************************************
+
+Wrapper function to read in single-particle m scheme reference 
+file, populate 1-body Hamiltonian matrix elements, and then 
+populate 2-body matrix elements.
+
+***************************************************************/
+
+
+void fullm_populate_hamiltonian (two_array & array_ref_obme, two_array & array_ref_tbme, two_array & h1_mat, two_array & h2_mat, const std::string ref_obme, const std::string me_obme, const std::string ref_tbme, const std::string me_tbme, const bool two_body_toggle, const int nmax, const std::string h2_flag) 
 {
-  os << x << "\t";
+
+    readin_ref_obme (array_ref_obme, ref_obme);
+    std::cout << "OBME REFERENCE READ" << std::endl;
+
+    populate_1body (array_ref_obme, h1_mat, me_obme, nmax);
+    std::cout << "1 BODY POPULATED" << std::endl;
+
+    if (two_body_toggle)
+    {
+      std::cout << "TBME REFERENCE READ" << std::endl;
+      populate_2body (array_ref_obme, array_ref_tbme, h2_mat, me_tbme, nmax, h2_flag);
+      std::cout << "2 BODY POPULATED" << std::endl;
+    }
+
 }
-*/
+
+
+
+/***************************************************************
+
+ 
+ Function to read in the reference file for m scheme.
+
+
+***************************************************************/
+
+
+void readin_ref_obme (two_array & array_ref_obme, const std::string ref_obme)
+{
+  const char * ref_file = (ref_obme).c_str();
+  // input file stream for m_scheme
+  std::ifstream ref_in (ref_file);
+ 
+  size_t total_lines = 0;
+  std::string dummy;
+  double num, n, l, j, mj, block;
+
+  // find total number of defined reference lines
+  while (std::getline (ref_in, dummy)) ++total_lines;
+
+
+  // clear the file stream, reset to read in the elements
+  ref_in.clear();
+  ref_in.seekg (0, std::ios::beg);
+
+  size_t ref_size = array_ref_obme.size();
+  size_t ele_in = 0;
+
+  // read in and assign the references line by line
+  // to the matrix ref_m
+  for (size_t i = 0; i < total_lines; i++)
+  {
+//  std::string orbit_dummy_1;
+//  std::string orbit_dummy_2;
+  	std::getline (ref_in, dummy);
+
+	if (!dummy.length() || dummy[0] == '#')     // skip zero length lines and lines that start with #
+	    continue;
+
+	std::stringstream ss;
+
+ 	ss << dummy;            // read in the line to stringstream ss
+
+ 	ss >> num >> n >> l >> j >> mj >> block;
+
+  // MORTEN VS. HEIKO READ IN FILE FORMAT
+
+//  ss >> orbit_dummy_1 >> orbit_dummy_2 >> ref_num >> n >> l >> j >> m_j >> tz;  // assign values of the line
+
+//  ss >> ref_num >> n >> l >> j >> m_j >> tz;  // assign values of the line
+
+//  std::cout << ref_num << " " << n << " " << l << " " << j << " " << m_j << " " << tz << "\n";
+
+
+  // only extract neutron-neutron states
+
+    array_ref_obme [ele_in][0] = num;    // reference number of the line
+    array_ref_obme [ele_in][1] = n;          // principle quantum number
+    array_ref_obme [ele_in][2] = l;          // orbital angular mom.
+    array_ref_obme [ele_in][3] = j * 0.5;    // total angular mom.
+    array_ref_obme [ele_in][4] = mj * 0.5;  // total angular mom. projection
+    array_ref_obme [ele_in][5] = block;         // isospin projection (should all be -1.0)
+    array_ref_obme [ele_in][6] = ele_in;     // new index for sp orbital
+    ele_in++;
+
+
+	if (ele_in >= ref_size)
+	    break;
+
+  }
+  
+
+  return;
+}
 
 
 /***************************************************************
@@ -270,30 +370,7 @@ void read_in_obme (two_array & obme, const std::string obme_filename)
 
 */
 
-/***************************************************************
 
-Wrapper function to read in single-particle m scheme reference 
-file, populate 1-body Hamiltonian matrix elements, and then 
-populate 2-body matrix elements.
-
-***************************************************************/
-
-
-void fullm_populate_hamiltonian (two_array & array_ref_obme, two_array & array_ref_tbme, two_array & h1_mat, two_array & h2_mat, const std::string ref_obme, const std::string me_obme, const std::string ref_tbme, const std::string me_tbme, const bool two_body_toggle, const int nmax, const std::string h2_flag) 
-{
-
-    readin_ref_obme (array_ref_obme, ref_obme);
-    std::cout << "OBME REFERENCE READ" << std::endl;
-    populate_1body (array_ref_obme, h1_mat, me_obme, nmax);
-    std::cout << "1 BODY POPULATED" << std::endl;
-    if (two_body_toggle)
-    {
-      std::cout << "TBME REFERENCE READ" << std::endl;
-      populate_2body (array_ref_obme, array_ref_tbme, h2_mat, me_tbme, nmax, h2_flag);
-      std::cout << "2 BODY POPULATED" << std::endl;
-    }
-
-}
 
 
 
@@ -829,8 +906,7 @@ void compactify_h2 (const two_array & ref_m, two_array & comp_h2, five_array & h
             comp_h2 [left][right] = value;
 
   }
-  }
-  }
+  }  }
   }
 
   if (diag_toggle)
@@ -838,82 +914,7 @@ void compactify_h2 (const two_array & ref_m, two_array & comp_h2, five_array & h
 }
 */
 
-/***************************************************************
 
- 
- Function to read in the reference file for m scheme.
-
-
-***************************************************************/
-
-
-void readin_ref_obme (two_array & array_ref_obme, const std::string ref_obme)
-{
-  const char * ref_file = (ref_obme).c_str();
-  // input file stream for m_scheme
-  std::ifstream ref_in (ref_file);
- 
-  size_t total_lines = 0;
-  std::string dummy;
-  double num, n, l, j, mj, block;
-
-  // find total number of defined reference lines
-  while (std::getline (ref_in, dummy)) ++total_lines;
-
-
-  // clear the file stream, reset to read in the elements
-  ref_in.clear();
-  ref_in.seekg (0, std::ios::beg);
-
-  size_t ref_size = array_ref_obme.size();
-  size_t ele_in = 0;
-
-  // read in and assign the references line by line
-  // to the matrix ref_m
-  for (size_t i = 0; i < total_lines; i++)
-  {
-//  std::string orbit_dummy_1;
-//  std::string orbit_dummy_2;
-  	std::getline (ref_in, dummy);
-
-	if (!dummy.length() || dummy[0] == '#')     // skip zero length lines and lines that start with #
-	    continue;
-
-	std::stringstream ss;
-
- 	ss << dummy;            // read in the line to stringstream ss
-
- 	ss >> num >> n >> l >> j >> mj >> block;
-
-  // MORTEN VS. HEIKO READ IN FILE FORMAT
-
-//  ss >> orbit_dummy_1 >> orbit_dummy_2 >> ref_num >> n >> l >> j >> m_j >> tz;  // assign values of the line
-
-//  ss >> ref_num >> n >> l >> j >> m_j >> tz;  // assign values of the line
-
-//  std::cout << ref_num << " " << n << " " << l << " " << j << " " << m_j << " " << tz << "\n";
-
-
-  // only extract neutron-neutron states
-
-    array_ref_obme [ele_in][0] = num;    // reference number of the line
-    array_ref_obme [ele_in][1] = n;          // principle quantum number
-    array_ref_obme [ele_in][2] = l;          // orbital angular mom.
-    array_ref_obme [ele_in][3] = j * 0.5;    // total angular mom.
-    array_ref_obme [ele_in][4] = mj * 0.5;  // total angular mom. projection
-    array_ref_obme [ele_in][5] = block;         // isospin projection (should all be -1.0)
-    array_ref_obme [ele_in][6] = ele_in;     // new index for sp orbital
-    ele_in++;
-
-
-	if (ele_in >= ref_size)
-	    break;
-
-  }
-  
-
-  return;
-}
 
 /***************************************************************
 
