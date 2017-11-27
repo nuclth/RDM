@@ -19,8 +19,16 @@ def create_sp_list (nmax, sp_list):
     truncation in m-scheme harmonic oscillator basis. 
     
     Arguments:
-    nmax    - nmax truncation size
-    sp_list - dataframe to hold single-particle orbital quantum numbers 
+        nmax    - nmax truncation size
+        sp_list - dataframe to hold single-particle orbital quantum numbers 
+        
+    Returns:
+        sp_list
+            number - sp orbital number
+            n - principal quantum number
+            l - orbital quantum  number
+            j - angular momentum quantum number (actually 2j)
+            mj - ang. mom. quantum num. projection (actually 2mj)
     """
     
     # initialize values
@@ -48,7 +56,7 @@ def create_sp_list (nmax, sp_list):
             twomj += 2
             continue
     
-        # cylce through j values for a given n,l
+        # cycle through j values for a given n,l
         if twoj > 2 * abs (l - 1/2):
             twoj = twoj - 2
             twomj = -twoj
@@ -83,33 +91,36 @@ def create_sp_list (nmax, sp_list):
 
 
 def create_tb_list (nmax, sp_list, tb_list):
-    """Function to create the two-particle basis set. Two loops are run over 
-    the single-particle basis set taking two elements in the set taking care
-    not to do repeats, e.g., 1,2 and 2,1 and not to take the same element
-    twice e.g., 1,1"""
+    """Function to create the two-particle basis set. A double loop is run over 
+    the sp orbital basis set taking unique pairs. 
     
+    Arguments:
+        nmax    - nmax truncation size
+        sp_list - dataframe to hold single-particle orbital quantum numbers 
+        tb_list - dataframe to hold two-particle basis states
+    """
+    
+    # total number of sp states and counter
     total_orbs = len (sp_list)
     num = 1
     
     for orb1 in range (0, total_orbs):
         for orb2 in range (orb1+1, total_orbs):
             
-            sp1 = sp_list.iloc[orb1].number
-            
+            # sp values
+            sp1 = sp_list.iloc[orb1].number            
             n1  = sp_list.iloc[orb1].n
             l1  = sp_list.iloc[orb1].l
             j1  = sp_list.iloc[orb1].j
             mj1 = sp_list.iloc[orb1].mj
 
             sp2 = sp_list.iloc[orb2].number
-
             n2  = sp_list.iloc[orb2].n
             l2  = sp_list.iloc[orb2].l
             j2  = sp_list.iloc[orb2].j
             mj2 = sp_list.iloc[orb2].mj
 
-            # The hamiltonian is rotationally invariant so            
-            # only take elements from total M=0 block
+            # Ham. rotationally invariant so only accept states with total M = 0         
             if mj1 + mj2 != 0:
                 continue
             
@@ -118,18 +129,21 @@ def create_tb_list (nmax, sp_list, tb_list):
             if ncount > nmax:
                 continue
             
+            # convert from 2j and 2mj to j and mj
             mj1 *= 0.5
             mj2 *= 0.5
             
             j1 *= 0.5
             j2 *= 0.5
             
+            # add basis state to dataframe
             tb_list = tb_list.append({'number': num, 
                                       'n1': n1, 'l1': l1, 'j1': j1, 'mj1': mj1,
                                       'n2': n2, 'l2': l2, 'j2': j2, 'mj2': mj2,
                                       'sp1' : sp1, 'sp2' : sp2
                                       }, ignore_index=True) 
     
+            # increment counter
             num +=1
     
     return tb_list
@@ -137,101 +151,133 @@ def create_tb_list (nmax, sp_list, tb_list):
 
 
 def sort_sp (sp_list):
-    """Sort sp_list dataframe by j, mj values in ascending order. Then 
+    """Sort sp_list dataframe by j, mj values in ascending order. Then sort by
+    parity of the given sp orbital, even first then odd.
     
     Argument:
         sp_list - dataframe to hold sp orbital quantum numbers
     """
 
-
-    print (sp_list)
-    
+  
     sp_list = sp_list.sort_values(['j','mj'])
-    
-    print (sp_list)
         
-    sp_list = sort_sp_l (sp_list)
-    
-    print (sp_list)
-
-    sys.exit()
-
-    
-    return sp_list
-
-
-def sort_sp_l (sp_list):
-    
     even_parity = sp_list['l'] % 2 == 0
     odd_parity = sp_list['l'] % 2 == 1
     
     shifted_list = sp_list[even_parity]
     shifted_list = shifted_list.append(sp_list[odd_parity])
 
-    # drop index
+    # reset index for dataframe
     shifted_list = shifted_list.reset_index(drop=True)
 
+    
     return shifted_list
+    
+
 
 
 def add_blocks (sp_list):
+    """Add new column called 'blocks' to sp dataframe. Value is the block
+    size of a set of given sp orbitals. The block size is only given for the
+    last orbital in a given block; all other values are set to 0. 
     
+    Argument:
+        sp_list - dataframe to hold sp orbital quantum numbers
+    """
   
+    # dummy list, all values initialized to -2
     n_list = sp_list[['n']]
     n_list['blocks'] = -2
 
+    # counter for # of orbitals in a block
     ncount = 1
     
+    # loop over n quantum number for sp orbital and the next sp orbital
     for val1, val2 in zip(n_list.iterrows(), n_list.iloc[1:].iterrows()):
         
+        # n values
         n_set = val1[1][0]
         n_nxt = val2[1][0]
         
+        # if both in same block
         if n_set < n_nxt:
             ncount += 1
             val1[1][1] = 0
         
+        # if new block case 1
         if n_set == n_nxt:
             ncount = 1
             val1[1][1] = 1
 
+        # if new block case 2
         if n_set > n_nxt:
             val1[1][1] = ncount
             ncount = 1
   
-          
+    # set last block value (always 1)
     n_list.iloc[len(n_list)-1][1] = 1
 
     sp_list['blocks'] = n_list['blocks']
     
-#    print (sp_list)
-    
     return sp_list
 
-def sort_tb (tb_list):
 
+
+def sort_tb (tb_list):
+    """Function to sort the two-particle basis states by their parity. 
+    Even partiy states are given first and then odd. The final dataframe also
+    adds a new column with the first two entries being the block sizes of
+    the even and odd parity states (all other values in the column being 0).
+    
+    Argument:
+        tb_list - dataframe to hold two-particle basis states
+    """
+    
+    # create even/odd two-particle basis states
     even_parity = (tb_list['l1'] + tb_list['l2']) % 2 == 0
     odd_parity  = (tb_list['l1'] + tb_list['l2']) % 2 == 1
 
+    # total number of states
     num_even = sum (a for a in even_parity)
     num_odd = sum (a for a in odd_parity)
     
-#    print (num_even, num_odd)
-    
+
+    # create new dataframe for even/odd ordering
     shifted_list = tb_list[even_parity]
     shifted_list = shifted_list.append(tb_list[odd_parity])
 
-    shifted_list['blocks'] = 0
-    
+    # reset index after moving states
     shifted_list = shifted_list.reset_index(drop=True)
-    
+
+    # add column for block sizes
+    shifted_list['blocks'] = 0
     shifted_list['blocks'][0] = num_even
     shifted_list['blocks'][1] = num_odd
 
 
     return shifted_list
 
+
+
 def no_flag (sp_list):
+    """Function to create a dataframe that holds the non-zero matrix entries 
+    for the one-body N and O flags. Dataframe columns include matrix indices, 
+    sp numbers, and block number information for use in creating an SDP file.
+    
+    Argument: 
+        sp_list - dataframe to hold sp orbital quantum numbers
+
+    Returns:
+        sp_val - dataframe that holds the following:
+            
+            b1 - first matrix index for SDP output (starts at 1) 
+            b2 - second matrix index for SDP output
+            m1 - first conventional matrix index (starts at 0)
+            m2 - second conventional matrix index
+            sp1 - first sp state
+            sp2 - second sp state
+            block - which matrix block the entry is in
+    """
       
     sp_vals = pd.DataFrame(columns=['b1','b2','m1','m2','sp1','sp2', 'block'])
 
@@ -264,7 +310,7 @@ def no_flag (sp_list):
                                           }, ignore_index=True)
                 m2 += 1
                 
-                
+
 
     return sp_vals
 
@@ -450,14 +496,26 @@ def sort_pflag (p_terms):
 
 
 def sp_relational_db_morten (nmax, sp_list):
+    """Function to create a relational table for the sp orbital numbering scheme
+    used by Morten and myself. This is needed to determine which sp state is which in
+    our two schemes and convert seamlessly. This function is necessary for two reasons:
+        1. Morten's sp states include proton states (not needed) 
+        2. I reorder the sp states for block diagonalization purposes
+    
+    Arguments:
+        nmax    - nmax truncation size
+        sp_list - dataframe to hold single-particle orbital quantum numbers  
+    """
+    
     
     morten_splist = pd.DataFrame(columns = ['number', 'n', 'l', '2j', '2mj'])
     
+    # open and read in Morten sp data file
     with open('../me_files/ref_files/nmax' + str(nmax) + "_spm.dat", 'r') as f:
         content = f.readlines()
         for x in content:
             row = x.split()
-#            print (row)
+
             if row[0] == '#': continue 
             num   = int(row[2])
             n     = int(row[3])
@@ -467,11 +525,12 @@ def sp_relational_db_morten (nmax, sp_list):
             
             morten_splist = morten_splist.append({'number':num, 'n':n, 'l':l,'2j':twoj,
                                                   '2mj':twomj}, ignore_index=True)
-#    print (morten_splist)
-     
+    
+    # create relational dataframe
     relational_db = pd.DataFrame(columns = ['morten_sp', 'alex_sp'])
     
 
+    # fill in relational dataframe with my sp numbers and Morten's
     for index, number in zip(morten_splist.index, morten_splist['number']):
         relational_db = relational_db.append({'morten_sp':number, 
                                               'alex_sp': index+1}, ignore_index=True)
@@ -482,61 +541,61 @@ def sp_relational_db_morten (nmax, sp_list):
 
 
 if __name__ == '__main__':
+        
+    nmax = 2
     
+    # create single-particle and two-particle dataframes
     sp_list = pd.DataFrame(columns= ['number', 'n', 'l', 'j', 'mj'])
     tb_list = pd.DataFrame(columns= ['number', 'n1', 'l1', 'j1', 'mj1', 
                                      'n2', 'l2', 'j2', 'mj2', 'sp1', 'sp2'])
 
-    
-    nmax = 2
 
+    # populate sp dataframe
     sp_list = create_sp_list (nmax, sp_list)
 
-
+    # recast values as ints
     sp_list.number = sp_list.number.astype(int)
     sp_list.n = sp_list.n.astype(int)
     sp_list.l = sp_list.l.astype(int)
     sp_list.j = sp_list.j.astype(int)
     sp_list.mj = sp_list.mj.astype(int)
 
-    
+    # sort sp dataframe and add blocks column
     sp_list = sort_sp (sp_list)
-    
     sp_list = add_blocks (sp_list)
     
-    print (sp_list)
 
-
+    # create sp relational dataframe and no flag dataframe
     sp_relational = sp_relational_db_morten (nmax, sp_list)
-
+    no_terms = no_flag (sp_list)
+ 
+    print (sp_relational)
+    sys.exit()
     
+    # save sp list and no flag dataframes to disk
     np.savetxt('../me_files/ref_files/nmax' + str(nmax) + 
                '_python_sp.dat', sp_list.values, fmt='%6i')
-
-    no_terms = no_flag (sp_list)
-
     np.savetxt('../flag_files/nmax' + str(nmax) + 
                '_python_noflag.dat', no_terms, fmt='%6i')
 
 
-    print (no_terms)
-
-    print ("OBME SUCCESS!")
+    print ("OB TERMS COMPLETE")
     
+    
+    # create and sort two particle basis    
     tb_list = create_tb_list (nmax, sp_list, tb_list)
-
     tb_list = sort_tb (tb_list)
 
+    # recast values as ints
     tb_list.number = tb_list.number.astype(int)
     tb_list.n1 = tb_list.n1.astype(int)
     tb_list.l1 = tb_list.l1.astype(int)
     tb_list.n2 = tb_list.n2.astype(int)
     tb_list.l2 = tb_list.l2.astype(int)
-    
     tb_list.sp1 = tb_list.sp1.astype(int)
     tb_list.sp2 = tb_list.sp2.astype(int)
 
-    print (tb_list)
+
     
     np.savetxt('../me_files/ref_files/nmax' + str(nmax) + 
                '_python_tb.dat', tb_list.values, fmt='%6.2f')
@@ -544,8 +603,8 @@ if __name__ == '__main__':
     print ('Memory size sp list {} bytes'.format(sys.getsizeof(sp_list)))
     print ('Memory size tb list {} bytes'.format(sys.getsizeof(tb_list)))
 
+    # create and sort flag for hamiltonian dataframe
     h2_terms = h2_flag (tb_list, sp_relational)
-
     h2_terms = h2_terms.astype(int)
 
     print (h2_terms)
@@ -555,7 +614,7 @@ if __name__ == '__main__':
 
     p_terms = p_flag (no_terms, h2_terms)
 
-#    print (p_terms)
+    print (p_terms)
 
     p_terms = sort_pflag (p_terms)
 
@@ -566,7 +625,3 @@ if __name__ == '__main__':
     
     
     print ("FINISHED")
-#    sys.exit()
-    
-#    print(sp_list) ; print ('\n')
-#    print(tb_list)
