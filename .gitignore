@@ -10,3 +10,6 @@ run_rdm
 
 # ignore swap files
 *.swp
+
+# ignore pycache
+__pycache__
