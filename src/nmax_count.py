@@ -4,6 +4,21 @@
 Created on Sun Oct 29 11:03:52 2017
 
 @author: alex
+
+Program to create a list of single-particle (sp) orbitals, the associated
+two-body (TB) basis set in m-scheme, and related flag files for use in the
+SDP program. 
+
+User input is to specify the nmax value (N truncation scheme) for the basis. The
+program does run a bit slow if this starts to get large say around nmax = 6 or 8.
+Some optimization required here for larger basis sets.
+
+The program output is a number of text data files:
+    sp_list - list of the different single-particle states
+    no_terms - non-zero matrix entries of the OBDM used in the N and O flags
+    tb_list - list of the unique two-body basis states
+    h2_terms - non-zero matrix entries for the Hamiltonian and TBDM
+    p_terms - non-zero matrix entries for the P flag
 """
 
 # standard libraries import
@@ -48,7 +63,7 @@ if __name__ == '__main__':
     # create sp relational dataframe and no flag dataframe
     sp_relational = sp_functs.sp_relational_db_morten (nmax, sp_list)
     no_terms = flag_functs.no_flag (sp_list)
- 
+
 
     # save sp list and no flag dataframes to disk
     np.savetxt('../me_files/ref_files/nmax' + str(nmax) + 
@@ -94,7 +109,6 @@ if __name__ == '__main__':
     p_terms = flag_functs.p_flag (no_terms, h2_terms)
     p_terms = flag_functs.sort_pflag (p_terms)
 
-    print (p_terms)
 
     # save h2 and p flag info to disk
     np.savetxt('../flag_files/nmax' + str (nmax) +
@@ -103,4 +117,4 @@ if __name__ == '__main__':
                '_python_pflag.dat', p_terms, fmt='%6i')
     
     
-    print ("FINISHED")
+    print ("TB FLAGS COMPLETE - PROGRAM FINISHED")
