@@ -14,7 +14,10 @@ import numpy as np
 
 def create_sp_list (nmax, sp_list):
     """Function to create a list of single-particle orbitals for a given Nmax
-    truncation in m-scheme harmonic oscillator basis. 
+    truncation in m-scheme harmonic oscillator basis. The sp loop first goes over the
+    angular projection and then the total angular momentum quantum number. Afterwards, 
+    the loop increments to a greater total N = 2n + l (e.g. N = 1 with n,l = 0,1 to 
+    N = 2 with n,l = 0,2 and 1,0).
     
     Arguments:
         nmax    - nmax truncation size
@@ -30,7 +33,7 @@ def create_sp_list (nmax, sp_list):
     """
     
     # initialize values
-    new_ncount = True    
+    new_Ncount = True    
     ncount = 0
     num= 1
     n = 0
@@ -60,30 +63,35 @@ def create_sp_list (nmax, sp_list):
             twomj = -twoj
             continue
 
-        if icount >= len(l_list) and not new_ncount:
-            new_ncount = True
+        # conditions to increment N count 
+        if icount >= len(l_list) and not new_Ncount:
+            new_Ncount = True
 
-        if new_ncount:
-            new_ncount = False
+        # increment N count
+        if new_Ncount:
+            new_Ncount = False
             ncount += 1
             icount = 0
+            
+            # create matching lists of total N for n,l 
+            # e.g., l_list[a] + n_list[a] = N for any a
             l_list = [a for a in range (ncount, -1, -2)]
             n_list = [a for a in range (0, int(np.floor(ncount/2))+1, 1)]
       
         if ncount > nmax:
             break
         
-      
+        # set new n and l
         l = l_list[icount]
         n = n_list[icount]
         
+        # increment n,l counter for a given total N
         icount += 1
 
         # reset j,mj for new n,l values
         twoj = 2 * abs (l + 1/2)
         twomj = -twoj
     
-
     
     return sp_list
 
@@ -96,6 +104,9 @@ def sort_sp (sp_list):
     
     Argument:
         sp_list - dataframe to hold sp orbital quantum numbers
+        
+    Returns:
+        sp_list sorted by parity and parity blocks sorted by j, mj
     """
 
   
@@ -123,6 +134,9 @@ def add_blocks (sp_list):
     
     Argument:
         sp_list - dataframe to hold sp orbital quantum numbers
+        
+    Returns:
+        sp_list with additional blocks column
     """
   
     # dummy list, all values initialized to -2
@@ -172,7 +186,12 @@ def sp_relational_db_morten (nmax, sp_list):
     
     Arguments:
         nmax    - nmax truncation size
-        sp_list - dataframe to hold single-particle orbital quantum numbers  
+        sp_list - dataframe to hold single-particle orbital quantum numbers
+        
+    Returns:
+        relational_db
+            morten_sp - morten's sp orbital number for a given state
+            alex_sp - my sp orbital number for the same state
     """
     
     
