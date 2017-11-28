@@ -6,6 +6,8 @@ Created on Tue Nov 28 11:14:38 2017
 @author: alex
 """
 
+import sys
+
 # import third party libraries
 import pandas as pd
 import numpy as np
@@ -28,8 +30,8 @@ def create_sp_list (nmax, sp_list):
             number - sp orbital number
             n - principal quantum number
             l - orbital quantum  number
-            j - angular momentum quantum number (actually 2j)
-            mj - ang. mom. quantum num. projection (actually 2mj)
+            2j - twice the angular momentum quantum number 
+            2mj - twice ang. mom. quantum num. projection 
     """
     
     # initialize values
@@ -47,7 +49,7 @@ def create_sp_list (nmax, sp_list):
         
         # add new single-particle orbital to dataframe
         sp_list = sp_list.append({'number': num, 'n': n, 'l': l, 
-                                  'j': twoj, 'mj' : twomj}, ignore_index=True)
+                                  '2j': twoj, '2mj' : twomj}, ignore_index=True)
     
         # increment sp orbital counter
         num += 1
@@ -99,18 +101,18 @@ def create_sp_list (nmax, sp_list):
 
 
 def sort_sp (sp_list):
-    """Sort sp_list dataframe by j, mj values in ascending order. Then sort by
+    """Sort sp_list dataframe by 2j, 2mj values in ascending order. Then sort by
     parity of the given sp orbital, even first then odd.
     
     Argument:
         sp_list - dataframe to hold sp orbital quantum numbers
         
     Returns:
-        sp_list sorted by parity and parity blocks sorted by j, mj
+        sp_list sorted by parity and parity blocks sorted by 2j, 2mj
     """
 
   
-    sp_list = sp_list.sort_values(['j','mj'])
+    sp_list = sp_list.sort_values(['2j','2mj'])
         
     even_parity = sp_list['l'] % 2 == 0
     odd_parity = sp_list['l'] % 2 == 1
@@ -140,8 +142,8 @@ def add_blocks (sp_list):
     """
   
     # dummy list, all values initialized to -2
-    n_list = sp_list[['n']]
-    n_list['blocks'] = -2
+    n_list = pd.DataFrame(sp_list[['n']])
+    n_list.loc[:,'blocks'] = -2
 
     # counter for # of orbitals in a block
     ncount = 1
@@ -171,7 +173,7 @@ def add_blocks (sp_list):
     # set last block value (always 1)
     n_list.iloc[len(n_list)-1][1] = 1
 
-    sp_list['blocks'] = n_list['blocks']
+    sp_list.loc[:,'blocks'] = n_list.loc[:,'blocks']
     
     return sp_list
 
@@ -181,8 +183,8 @@ def sp_relational_db_morten (nmax, sp_list):
     """Function to create a relational table for the sp orbital numbering scheme
     used by Morten and myself. This is needed to determine which sp state is which in
     our two schemes and convert seamlessly. This function is necessary for two reasons:
-        1. Morten's sp states include proton states (not needed) 
-        2. I reorder the sp states for block diagonalization purposes
+        1. Morten's sp states include proton states (not needed by me) 
+        2. I reorder my sp states for block diagonalization purposes
     
     Arguments:
         nmax    - nmax truncation size

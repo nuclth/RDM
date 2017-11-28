@@ -6,6 +6,7 @@ Created on Tue Nov 28 11:20:37 2017
 @author: alex
 """
 
+import sys
 
 def create_tb_list (nmax, sp_list, tb_list):
     """Function to create the two-particle basis set. A double loop is run over 
@@ -38,14 +39,14 @@ def create_tb_list (nmax, sp_list, tb_list):
             sp1 = sp_list.iloc[orb1].number            
             n1  = sp_list.iloc[orb1].n
             l1  = sp_list.iloc[orb1].l
-            j1  = sp_list.iloc[orb1].j
-            mj1 = sp_list.iloc[orb1].mj
+            j1  = sp_list.iloc[orb1]['2j']
+            mj1 = sp_list.iloc[orb1]['2mj']
 
             sp2 = sp_list.iloc[orb2].number
             n2  = sp_list.iloc[orb2].n
             l2  = sp_list.iloc[orb2].l
-            j2  = sp_list.iloc[orb2].j
-            mj2 = sp_list.iloc[orb2].mj
+            j2  = sp_list.iloc[orb2]['2j']
+            mj2 = sp_list.iloc[orb2]['2mj']
 
             # Ham. rotationally invariant so only accept states with total M = 0         
             if mj1 + mj2 != 0:
@@ -105,8 +106,8 @@ def sort_tb (tb_list):
 
     # add column for block sizes
     shifted_list['blocks'] = 0
-    shifted_list['blocks'][0] = num_even
-    shifted_list['blocks'][1] = num_odd
+    shifted_list.loc[0, 'blocks'] = num_even
+    shifted_list.loc[1, 'blocks'] = num_odd
 
 
     return shifted_list
