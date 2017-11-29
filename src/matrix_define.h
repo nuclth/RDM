@@ -1,3 +1,9 @@
+/***************************************************
+
+Header to define custom tensor data structures.
+
+***************************************************/
+
 #ifndef MATRIX_DEFINE_H
 #define MATRIX_DEFINE_H
 

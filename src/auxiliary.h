@@ -12,6 +12,12 @@ struct parameters
 	size_t basis_hw;
 	size_t nmax;
 	size_t particles;
+
+	bool N_flag;
+	bool O_flag;
+	bool P_flag;
+
+	bool two_body_toggle;
 };
 
 // struct 

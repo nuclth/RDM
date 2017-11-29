@@ -2,6 +2,7 @@
 
 Programmer: Alex Dyhdalo
 
+Main program to create the SDP output file. 
 
 *****************************************************************************/
 
@@ -26,6 +27,7 @@ Programmer: Alex Dyhdalo
 
 using std::cout;
 using std::endl;
+using std::boolalpha;
 
 
 size_t count_P_cons (const std::string);
@@ -37,6 +39,9 @@ void populate_obme_blocks (one_array & obme_blocks, const two_array & array_ref_
 
 size_t count_no_flags (const std::string);
 
+
+
+
 /********************************************
 
 BEGIN MAIN PROGRAM
@@ -46,59 +51,42 @@ BEGIN MAIN PROGRAM
 int main ()
 {
   
-  // define flags for all different combinations of conditions in RDM
-  const bool two_body_toggle = true;
 
-
-  // START CONSTRAINT FLAG DEFINE
-
-  const bool N_flag  = true; // p START - TRACE CONDITION
-  const bool O_flag  = true; // q START - LINEAR RELATIONS
-  const bool P_flag  = true; // P START - TRACE CONDITION
-
-
-
-
-
-
-  parameters input_params = read_in_inputs ();						             // create a struct to hold user specified parameters
-//  input_params = read_in_inputs (); 					     // read in the values from inputs.inp, store in input_params	
-
+  // create a struct to hold user specified parameters
+  parameters input_params = read_in_inputs ();						             
+  
   // Now create/copy input parameters for ease of reading the code into newly defined local variables
   const size_t nmax  = input_params.nmax;	
   const size_t basis_hw = input_params.basis_hw;   
   const size_t particles = input_params.particles;		 
 
 
+  const bool N_flag = input_params.N_flag;
+  const bool O_flag = input_params.O_flag;
+  const bool P_flag = input_params.P_flag;
+
+  const bool two_body_toggle = input_params.two_body_toggle;
+
+  cout << "N FLAG: " << boolalpha << N_flag << endl;
+  cout << "O FLAG: " << boolalpha << O_flag << endl;
+  cout << "P FLAG: " << boolalpha << P_flag << endl;
+
+
   string_holder input_strings = string_reader (nmax, basis_hw);
 
   cout << ("Building system... ") << endl;
 
-  const std::string morten_spm = input_strings.morten_spm;
-  const std::string ref_obme = input_strings.ref_obme;
-  const std::string me_obme = input_strings.me_obme;
-  const std::string ref_tbme = input_strings.ref_tbme;
-  const std::string me_tbme = input_strings.me_tbme;
-  const std::string no_flag = input_strings.no_flag;
-  const std::string h2_flag = input_strings.h2_flag;
-  const std::string pflag_info = input_strings.pflag_info;
-
-
  
 
-  const size_t bsize = total_obme_states (ref_obme);
+  const size_t bsize = total_obme_states (input_strings.ref_obme);
 
-  const size_t tbme_size = total_tbme_states (ref_tbme);
+  const size_t tbme_size = total_tbme_states (input_strings.ref_tbme);
   two_array array_ref_tbme (boost::extents[tbme_size][13]);
-
-
-
-  if (two_body_toggle) readin_ref_tbme (array_ref_tbme, ref_tbme);
 
 
   size_t P_num = 0;
 
-  if (two_body_toggle) P_num = count_P_cons (pflag_info);
+  if (two_body_toggle) P_num = count_P_cons (input_strings.pflag_info);
 
 
 
@@ -152,7 +140,7 @@ int main ()
 
 
 
-  fullm_populate_hamiltonian (array_ref_obme, array_ref_tbme, h1_mat, h2_mat, ref_obme, me_obme, ref_tbme, me_tbme, two_body_toggle, nmax, h2_flag);
+  populate_hamiltonian (array_ref_obme, array_ref_tbme, h1_mat, h2_mat, input_strings.ref_obme, input_strings.me_obme, input_strings.ref_tbme, input_strings.me_tbme, two_body_toggle, nmax, input_strings.h2_flag);
 
   std::cout << "HAMILTONIAN BUILT" << std::endl;
 
@@ -175,7 +163,7 @@ int main ()
 
   if (O_flag)
   {
-  	cons += count_no_flags (no_flag);
+  	cons += count_no_flags (input_strings.no_flag);
   	blocks+= NO_blocks;
   }
 
@@ -227,32 +215,32 @@ int main ()
   fprintf (sdpa_out, "\n");
 
   
-  init_con_values (flag_pass, sdpa_out, bsize, tbme_size, particles, P_num, no_flag);
+  init_con_values (flag_pass, sdpa_out, bsize, tbme_size, particles, P_num, input_strings.no_flag);
 
   size_t con_count = 0;
 
 
-  init_C_matrix (flag_pass, sdpa_out, h1_mat, h2_mat, con_count, obme_blocks, no_flag, h2_flag, 2 * NO_blocks);
+  init_C_matrix (flag_pass, sdpa_out, h1_mat, h2_mat, con_count, obme_blocks, input_strings.no_flag, input_strings.h2_flag, 2 * NO_blocks);
 
   std::cout << "C MATRIX DONE" << std::endl;
 
 
   if (N_flag)
   {
-    init_N_flag (sdpa_out, bsize, con_count, no_flag);
+    init_N_flag (sdpa_out, bsize, con_count, input_strings.no_flag);
     std::cout << "N FLAG DONE" << std::endl;
   }
 
   if (O_flag)
   {
-    init_O_flag (sdpa_out, bsize, con_count, no_flag, NO_blocks);
+    init_O_flag (sdpa_out, bsize, con_count, input_strings.no_flag, NO_blocks);
     std::cout << "O FLAG DONE" << std::endl;
   }
 
 
   if (P_flag)
   {
-    init_P_flag (sdpa_out, bsize, con_count, particles, tbme_size, array_ref_tbme, pflag_info, 2 * NO_blocks);
+    init_P_flag (sdpa_out, bsize, con_count, particles, tbme_size, array_ref_tbme, input_strings.pflag_info, 2 * NO_blocks);
     std::cout << "P FLAG DONE" << std::endl;
   }
 
