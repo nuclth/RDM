@@ -1,6 +1,8 @@
 # Reduced Density Matrices (RDMs) for Neutron Drops using Semi-Definite Programming (SDP)
 
-A program to output an SDP data format file for neutrons in a harmonic trap interacting via the Minnesota potential. This can then be solved using an external SDP solver to find the ground state energy (along with the associated one- and two-body RDMs). Only the m scheme harmonic oscillator basis is currently supported.
+A program to output an SDP data format file for neutrons in a harmonic trap interacting via the Minnesota potential. This can then be solved using a SDP solver to find the ground state energy (along with the associated one- and two-body RDMs). Only the m scheme harmonic oscillator basis is currently supported.
+
+* To render equations on this page in Chrome, enable the [Github with mathjax extension](https://chrome.google.com/webstore/detail/github-with-mathjax/ioemnmodlmafdkllaclgeombjnmnbima)
 
 ## Usage Instructions
 
@@ -12,7 +14,7 @@ There are three steps that must be followed before running the RDM program (whic
 
 3. Create the single-particle orbital states list, two-body basis states list, and data files with SDP constraint information using the python file ```nmax_count.py```. The user needs to specify the ```nmax``` variable in the file (where the ```nmax``` variable is our $N_{\text{max}}$ truncation) and then run the python file.
 
-After this is all done, the user specifies the $N_{\text{max}}$ truncation, basis $\hbar \omega$, and the number of particles in the ```inputs.inp``` file (constraint flags in the inputs file are not yet operational; changing these currently needs to be done in the ```top_rdm.cpp``` file). Then make the program with ```make``` and run with ```./run_rdm```.
+After this is all done, the user specifies the $N_{\text{max}}$ truncation, basis $\hbar \omega$, the number of particles, and the chosen constraint flags in the ```inputs.inp``` file. Then make the program with ```make``` and run with ```./run_rdm```.
 
 After the SDP file is generated (currently only with filename ```sdp_files/test_sdp.dat-s```), the SDP solver can then be called on it using for example:
 
@@ -73,7 +75,7 @@ was our first and only constraint matrix term with the constant value 4.5 in the
 Calculations for benchmarks assume the following parameter values:
 
 
-* $\hbar c = 197.326 \text{MeV-fm}$
+* $\hbar c = 197.326 \ \text{MeV-fm}$
 * $m    = 938.92 \ \text{MeV}$
 * $\hbar \omega = 10 \ \text{MeV}$
 * $b    = \frac{\hbar c}{\sqrt{\hbar \omega m}} = 2.0364 \ \text{fm}$
