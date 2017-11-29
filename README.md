@@ -73,8 +73,8 @@ was our first and only constraint matrix term with the constant value 4.5 in the
 Calculations for benchmarks assume the following parameter values:
 
 
-$\hbar c = 197.326 \text{MeV-fm}$
-$m    = 938.92 \ \text{MeV}$
-$\hbar \omega = 10 \ \text{MeV}$
-$b    = \frac{\hbar c}{\sqrt{\hbar \omega m} = 2.0364 \ \text{fm}$
+* $\hbar c = 197.326 \text{MeV-fm}$
+* $m    = 938.92 \ \text{MeV}$
+* $\hbar \omega = 10 \ \text{MeV}$
+* $b    = \frac{\hbar c}{\sqrt{\hbar \omega m}} = 2.0364 \ \text{fm}$
 
