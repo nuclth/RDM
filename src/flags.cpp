@@ -76,9 +76,8 @@ void init_con_values (const con_flags flag_pass, FILE * sdpa_out, const size_t b
 /***************************************************************
 
 Function to create the F0 constraint matrix for the SDP solver.
-This matrix is just the Hamiltonian matrix elements for the 1RDM
-and 2RDM parts (where applicable) with zeros in the other parts
-of the matrix.
+This F0 matrix is just the Hamiltonian matrix elements for the 1RDM
+and 2RDM parts. 
 
 Note that since the SDP solver maximizes the objective function,
 here we multiply all elements by -1 so that we are maximizing
@@ -92,67 +91,72 @@ void init_C_matrix (const con_flags flag_pass, FILE * sdpa_out, const two_array 
 
 
   const char * no_file = no_flag.c_str();
-  // input file stream for m_scheme
   std::ifstream ref_in (no_file);
  
   std::string dummy;
   size_t b1a, b2a, m1a, m2a;
-
   size_t bcount = 0;
 
-  // find total number of defined reference lines
-  while (std::getline (ref_in, dummy))
+
+  while (std::getline (ref_in, dummy))									// loop over lines in no_flag (ONE-BODY)
   {
 
-	if (!dummy.length() || dummy[0] == '#')     // skip zero length lines and lines that start with #
+	if (!dummy.length() || dummy[0] == '#')    
     	continue;
 
   	std::stringstream ss;
 
- 	ss << dummy;            // read in the line to stringstream ss
-  	ss >> b1a >> b2a >> m1a >> m2a;
+ 	ss << dummy;            
+  	ss >> b1a >> b2a >> m1a >> m2a;										// b1a, b2a are SDP matrix indices, m1a, m2a array matrix indices
 
-  	double val1 = h1_mat [m1a][m2a] * -1.0;
+  	double val1 = h1_mat [m1a][m2a] * -1.0;								// get one-body Hamiltonian matrix element
 
-  	if (b1a == 1 and b2a == 1) bcount++;
+  	if (b1a == 1 and b2a == 1) bcount++;   								// increment block counter when SDP indices both equal to 1
 
-    if (val1 != 0. and b1a <= b2a)
+    if (val1 != 0. and b1a <= b2a)										// output non-zero upper triangle values
+    {
     	fprintf(sdpa_out, "%lu %lu %lu %lu %f\n", con_count, bcount, b1a, b2a, val1);
-  }
+    }
+
+  } 																	// end one-body while loop
+
+
 
 
   if (flag_pass.two_body_toggle)
   {
 	  const char * h2_file = h2_flag.c_str();
-	  // input file stream for m_scheme
 	  std::ifstream h2_in (h2_file);
 	 
-//	  std::string dummy;
 	  size_t b1, b2, m1, m2, sp1, sp2, sp3, sp4, msp1, msp2, msp3, msp4, block;
 
-	  // find total number of defined reference lines
-	  while (std::getline (h2_in, dummy))
+
+	  while (std::getline (h2_in, dummy))								// loop over lines in h2_flag (TWO-BODY)
 	  {
 
-		if (!dummy.length() || dummy[0] == '#')     // skip zero length lines and lines that start with #
+		if (!dummy.length() || dummy[0] == '#')    	 
 	    	continue;
 
 	  	std::stringstream ss;
 
-	 	ss << dummy;            // read in the line to stringstream ss
+	 	ss << dummy;            
 	  	ss >> b1 >> b2 >> m1 >> m2 >> sp1 >> sp2 >> sp3 >> sp4 >> msp1 >> msp2 >> msp3 >> msp4 >> block;
 
-	  	double val3 = h2_mat [m1][m2] * -1./2.;
+	  	double val3 = h2_mat [m1][m2] * -1./2.;							// get two-body Hamiltonian matrix element
 
-	  	block += two_body_block_bias;
+	  	block += two_body_block_bias;									// account for block offset in two-body terms 
 
-	    if (val3 != 0. and b1 <= b2)
+	    if (val3 != 0. and b1 <= b2)									// output non-zero upper triangle values
+	    {
 	    	fprintf(sdpa_out, "%lu %lu %lu %lu %f\n", con_count, block, b1, b2, val3);
-	  }
+	    }
+
+
+	  } 																// end two-body while loop
   }
 
 
-  con_count++;
+  con_count++;  														// increment constraint counter
 
   return;
 }
@@ -164,12 +168,6 @@ void init_C_matrix (const con_flags flag_pass, FILE * sdpa_out, const two_array 
 Function to create our F1 constraint matrix to fix the total
 particle number N (fixes trace of the 1RDM to be N). 
 
-In keeping with other constraint functions, first populate the
-F1_con_1 matrix (only one constraint) then populate the full F1_con
-matrix. 
-
-Note that F1_con_1 is a basis x basis size matrix while F1_con 
-matches the dimensions of the F0 constraint matrix.
 
 ***************************************************************/
 
@@ -178,7 +176,6 @@ void init_N_flag (FILE * sdpa_out, const size_t bsize, size_t & con_count, const
 
 
   const char * no_file = no_flag.c_str();
-  // input file stream for m_scheme
   std::ifstream ref_in (no_file);
  
   std::string dummy;
@@ -186,19 +183,18 @@ void init_N_flag (FILE * sdpa_out, const size_t bsize, size_t & con_count, const
 
   size_t bcount = 0;
 
-  // find total number of defined reference lines
-  while (std::getline (ref_in, dummy))
+  while (std::getline (ref_in, dummy)) 			 // loop over lines in no_flag file
   {
 
-	if (!dummy.length() || dummy[0] == '#')     // skip zero length lines and lines that start with #
+	if (!dummy.length() || dummy[0] == '#')    
     	continue;
 
   	std::stringstream ss;
 
- 	ss << dummy;            // read in the line to stringstream ss
+ 	ss << dummy;            
   	ss >> b1 >> b2 >> m1 >> m2;
 
-  	double val1 = kron_del (m1, m2);
+  	double val1 = kron_del (m1, m2);			 // constraint matrix is 0 or 1 (kronecker delta)
 
   	if (b1 == 1 and b2 == 1) bcount++;
 
@@ -217,15 +213,8 @@ void init_N_flag (FILE * sdpa_out, const size_t bsize, size_t & con_count, const
 
 /***************************************************************
 
-Function to create our O constraint matrices to fix the relation
+Function to create the constraint matrices that fix the linear relations
 between the 1RDM and its twin q. 
-
-First populate the F2_con_1 matrix which serves as the basis x basis
-size constraint matrix for the 1RDM sector and the q sector (both 
-have the same constraint matrix).
-
-Then populate this matrix into the full F0 sized constraint term 
-F2_con. 
 
 ***************************************************************/
 
@@ -233,26 +222,24 @@ void init_O_flag (FILE * sdpa_out, const size_t bsize, size_t & con_count, const
 {
 
   const char * no_file = no_flag.c_str();
-  // input file stream for m_scheme
   std::ifstream ref_in (no_file);
  
   std::string dummy;
   size_t b1, b2, m1, m2;
 
-  size_t bcount1 = 0;
-  size_t bcount2 = obme_block_count;
+  size_t bcount1 = 0;							// block count for 1RDM
+  size_t bcount2 = obme_block_count;			// block count for q with bias 
 
-  // find total number of defined reference lines
-  while (std::getline (ref_in, dummy))
+  while (std::getline (ref_in, dummy))			// loop over lines in no_flag file
   {
 
-	if (!dummy.length() || dummy[0] == '#')     // skip zero length lines and lines that start with #
+	if (!dummy.length() || dummy[0] == '#')     
     	continue;
 
   	std::stringstream ss;
 
- 	ss << dummy;            // read in the line to stringstream ss
-  	ss >> b1 >> b2 >> m1 >> m2;
+ 	ss << dummy;            
+  	ss >> b1 >> b2 >> m1 >> m2;					// (b1,b2) = SDP matrix indices
 
 
   	if (b1 == 1 and b2 == 1)
@@ -275,12 +262,12 @@ void init_O_flag (FILE * sdpa_out, const size_t bsize, size_t & con_count, const
 }
 
 
-/***************************************************************
+/***********************************************************************
 
-Function to create our P constraint matrix to fix the relation
+Function to create our P constraint matrices that fix the linear relations
 between the 2RDM partial trace and the 1RDM.
 
-***************************************************************/
+************************************************************************/
 
 
 void init_P_flag (FILE * sdpa_out, const size_t bsize, size_t & con_count, const size_t N, const size_t tbme_size, 
@@ -288,7 +275,6 @@ void init_P_flag (FILE * sdpa_out, const size_t bsize, size_t & con_count, const
 {
 
   const char * p_file = pflag_info.c_str();
-  // input file stream for m_scheme
   std::ifstream ref_in (p_file);
  
   std::string dummy;
@@ -297,12 +283,11 @@ void init_P_flag (FILE * sdpa_out, const size_t bsize, size_t & con_count, const
   size_t tb_b1, tb_b2, tb_block;
   bool new_flag;
 
-  double prefac = -1.0 * (N - 1.0) / 2.0;
+  double prefac = -1.0 * (N - 1.0) / 2.0;		// prefactor for the 1RDM part of the relation
 
-  bool start = true;
+  bool start = true;							
 
-  // find total number of defined reference lines
-  while (std::getline (ref_in, dummy))
+  while (std::getline (ref_in, dummy))			// loop over lines in pflag file
   {
 
 	if (!dummy.length() || dummy[0] == '#')     // skip zero length lines and lines that start with #
@@ -310,12 +295,12 @@ void init_P_flag (FILE * sdpa_out, const size_t bsize, size_t & con_count, const
 
   	std::stringstream ss;
 
- 	ss << dummy;            // read in the line to stringstream ss
+ 	ss << dummy;            
   	ss >> ob_b1 >> ob_b2 >> ob_block >> tb_b1 >> tb_b2 >> tb_block >> new_flag;
 
   	tb_block += two_body_block_bias;
 
-  	if (new_flag and !start)
+  	if (new_flag and !start)					// increment our constraint matrix count for every new_flag indicator
     	con_count++;
 
     start = false;

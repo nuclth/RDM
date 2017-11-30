@@ -4,13 +4,12 @@
 #include <map>
 
 
-/***************************************************************
+/*********************************************************************************
 
-Wrapper function to read in single-particle m scheme reference 
-file, populate 1-body Hamiltonian matrix elements, and then 
-populate 2-body matrix elements.
+Wrapper function to read in the one- and two-body matrix elements and populate
+the associated arrays to hold those values.
 
-***************************************************************/
+*********************************************************************************/
 
 
 void populate_hamiltonian (two_array & array_ref_obme, two_array & array_ref_tbme, two_array & h1_mat, two_array & h2_mat, const std::string ref_obme, const std::string me_obme, const std::string ref_tbme, const std::string me_tbme, const bool two_body_toggle, const int nmax, const std::string h2_flag) 
@@ -27,7 +26,7 @@ void populate_hamiltonian (two_array & array_ref_obme, two_array & array_ref_tbm
     	readin_ref_tbme (array_ref_tbme, ref_tbme);
     	std::cout << "TBME REFERENCE READ" << std::endl;
 
-    	populate_2body (array_ref_obme, array_ref_tbme, h2_mat, me_tbme, nmax, h2_flag);
+    	populate_2body (array_ref_tbme, h2_mat, me_tbme, nmax, h2_flag);
     	std::cout << "2 BODY POPULATED" << std::endl;
     }
 
@@ -40,7 +39,12 @@ void populate_hamiltonian (two_array & array_ref_obme, two_array & array_ref_tbm
  Function to read in the single-particle orbital reference file
  and populate array_ref_obme.
 
- ref_obme = "me_files/ref_files/nmax*_python_sp.dat"
+ Arguments:
+
+	array_ref_obme - array to hold obme
+
+	ref_obme - data file that holds the sp orbital information
+	  i.e., "me_files/ref_files/nmax*_python_sp.dat"
 
 ***************************************************************/
 
@@ -54,25 +58,24 @@ void readin_ref_obme (two_array & array_ref_obme, const std::string ref_obme)
   std::string dummy;
   double num, n, l, j, mj, block;
 
-  // find total number of defined reference lines
-  while (std::getline (ref_in, dummy)) ++total_lines;
+  
+  while (std::getline (ref_in, dummy)) ++total_lines;				// find total number of defined reference lines
 
 
-  // clear the file stream, reset to read in the elements
-  ref_in.clear();
+  ref_in.clear();										  			// clear the file stream, reset to read in the elements
   ref_in.seekg (0, std::ios::beg);
 
   size_t ref_size = array_ref_obme.size();
   size_t ele_in = 0;
 
-  // read in line by line and assign to array
-  for (size_t i = 0; i < total_lines; i++)
+
+  for (size_t i = 0; i < total_lines; i++)							// loop over reference file for one-body states
   {
 
   	std::getline (ref_in, dummy);
 
- 	// skip zero length lines and lines that start with #
-	if (!dummy.length() || dummy[0] == '#')    
+
+	if (!dummy.length() || dummy[0] == '#')    						// skip zero length lines and lines that start with #
 	    continue;
 
 	std::stringstream ss;
@@ -80,13 +83,13 @@ void readin_ref_obme (two_array & array_ref_obme, const std::string ref_obme)
  	ss << dummy;            
  	ss >> num >> n >> l >> j >> mj >> block;
 
-    array_ref_obme [ele_in][0] = num;      // sp orbital number
-    array_ref_obme [ele_in][1] = n;        // principal quantum number
-    array_ref_obme [ele_in][2] = l;        // orbital angular mom.
-    array_ref_obme [ele_in][3] = j * 0.5;  // total angular mom.
-    array_ref_obme [ele_in][4] = mj * 0.5; // total angular mom. projection
-    array_ref_obme [ele_in][5] = block;    // block number (non-zero for last spo in block, 0 otherwise)
-    array_ref_obme [ele_in][6] = ele_in;   // index of array
+    array_ref_obme [ele_in][0] = num;      							// sp orbital number
+    array_ref_obme [ele_in][1] = n;        							// principal quantum number
+    array_ref_obme [ele_in][2] = l;       							// orbital angular mom.
+    array_ref_obme [ele_in][3] = j * 0.5;  							// total angular mom.
+    array_ref_obme [ele_in][4] = mj * 0.5; 							// total angular mom. projection
+    array_ref_obme [ele_in][5] = block;   							// block number (non-zero for last spo in block, 0 otherwise)
+    array_ref_obme [ele_in][6] = ele_in;  							// index of array
     ele_in++;
 
 
@@ -100,7 +103,7 @@ void readin_ref_obme (two_array & array_ref_obme, const std::string ref_obme)
 }
 
 
-/***************************************************************
+/*******************************************************************************
 
 
  Function to populate the 1-body part of the Hamiltonian, h1_mat. 
@@ -117,7 +120,7 @@ void readin_ref_obme (two_array & array_ref_obme, const std::string ref_obme)
 
 	nmax - Nmax truncation value
 
-***************************************************************/
+*******************************************************************************/
 
 
 void populate_1body (const two_array & array_ref_obme, two_array & h1_mat, const std::string obme_filename, const int nmax)
@@ -131,17 +134,15 @@ void populate_1body (const two_array & array_ref_obme, two_array & h1_mat, const
   int n1, n2, l;
   double j, mj, me;
 
-  // find total number of defined reference lines
   while (std::getline (ref_in, dummy)) ++total_lines;
 
-  // clear the file stream, reset to read in the elements
   ref_in.clear();
   ref_in.seekg (0, std::ios::beg);
 
   size_t obme_size = h1_mat.size();
 
 
-  for (size_t i = 0; i < total_lines; i++)
+  for (size_t i = 0; i < total_lines; i++)							// loop over all lines in one-body matrix elements file
   {
 	std::getline (ref_in, dummy);
 
@@ -151,7 +152,7 @@ void populate_1body (const two_array & array_ref_obme, two_array & h1_mat, const
   	std::stringstream ss;
 
   	ss << dummy;            
-  	ss >> n1 >> n2 >> l >> j >> mj >> me;  
+  	ss >> n1 >> n2 >> l >> j >> mj >> me;  							// pull off quantum numbers for a given matrix element
 
   	if (nmax < n1 + l or nmax < n2 + l)
   		continue;
@@ -190,17 +191,24 @@ void populate_1body (const two_array & array_ref_obme, two_array & h1_mat, const
 
 
 
-/***************************************************************
+/******************************************************************
 
+ Function to read in the two-body basis set file
+ and populate array_ref_obme.
 
+ Arguments:
 
-***************************************************************/
+	array_ref_tbme - array to hold two-body basis info
 
-void readin_ref_tbme (two_array & ref_tbme, const std::string tbme_filename)
+	ref_tbme - data file that holds the 2 particle basis info
+	  i.e., "me_files/ref_files/nmax*_python_tb.dat"
+
+*******************************************************************/
+
+void readin_ref_tbme (two_array & array_ref_tbme, const std::string ref_tbme)
 {
 
-  const char * ref_file = tbme_filename.c_str();
-  // input file stream for m_scheme
+  const char * ref_file = ref_tbme.c_str();
   std::ifstream ref_in (ref_file);
  
   size_t total_lines = 0;
@@ -209,49 +217,45 @@ void readin_ref_tbme (two_array & ref_tbme, const std::string tbme_filename)
 
   double j1, mj1, j2, mj2;
 
-  // find total number of defined reference lines
-  while (std::getline (ref_in, dummy)) ++total_lines;
+  while (std::getline (ref_in, dummy)) ++total_lines;		 // find total number of defined reference lines
 
 
-  // clear the file stream, reset to read in the elements
-  ref_in.clear();
+  ref_in.clear();											 // clear the file stream, reset to read in the elements
   ref_in.seekg (0, std::ios::beg);
 
   size_t ref_size = ref_tbme.size();
   size_t ele_in = 0;
 
-  // read in and assign the references line by line
-  // to the matrix ref_m
-  for (size_t i = 0; i < total_lines; i++)
+
+  for (size_t i = 0; i < total_lines; i++)					 // read through file line by line
   {
   	std::getline (ref_in, dummy);
 
-  	if (!dummy.length() || dummy[0] == '#')     // skip zero length lines and lines that start with #
+  	if (!dummy.length() || dummy[0] == '#')    
     	continue;
 
   	std::stringstream ss;
 
-   	ss << dummy;            // read in the line to stringstream ss
+   	ss << dummy;         
+  	ss >> num >> n1 >> l1 >> j1 >> mj1 >> n2 >> l2 >> j2 >> mj2 >> sp1 >> sp2 >> block;  
 
 
-  	ss >> num >> n1 >> l1 >> j1 >> mj1 >> n2 >> l2 >> j2 >> mj2 >> sp1 >> sp2 >> block;  // assign values of the line
+    array_ref_tbme [ele_in][0] = num;   
 
+    array_ref_tbme [ele_in][1] = n1;   						 // particle 1 quantum numbers
+    array_ref_tbme [ele_in][2] = l1;    
+    array_ref_tbme [ele_in][3] = j1;    
+    array_ref_tbme [ele_in][4] = mj1;   
 
-    ref_tbme [ele_in][0] = num;    // reference number of the line
+    array_ref_tbme [ele_in][5] = n2;   						 // particle 2 quantum numbers
+    array_ref_tbme [ele_in][6] = l2;         
+    array_ref_tbme [ele_in][7] = j2;   
+    array_ref_tbme [ele_in][8] = mj2;   
 
-    ref_tbme [ele_in][1] = n1;          // principle quantum number
-    ref_tbme [ele_in][2] = l1;          // orbital angular mom.
-    ref_tbme [ele_in][3] = j1;    // total angular mom.
-    ref_tbme [ele_in][4] = mj1;   // total angular mom. projection
-
-    ref_tbme [ele_in][5] = n2;          // principle quantum number
-    ref_tbme [ele_in][6] = l2;          // orbital angular mom.
-    ref_tbme [ele_in][7] = j2;    // total angular mom.
-    ref_tbme [ele_in][8] = mj2;   // total angular mom. projection
-    ref_tbme [ele_in][9] = sp1;
-    ref_tbme [ele_in][10] = sp2;
-    ref_tbme [ele_in][11] = block;
-    ref_tbme [ele_in][12] = ele_in;
+    array_ref_tbme [ele_in][9] = sp1; 						 // sp orbital numbers and block info
+    array_ref_tbme [ele_in][10] = sp2;
+    array_ref_tbme [ele_in][11] = block;
+    array_ref_tbme [ele_in][12] = ele_in;
 
     ele_in++;
 
@@ -265,13 +269,32 @@ void readin_ref_tbme (two_array & ref_tbme, const std::string tbme_filename)
 
 }
 
-/***************************************************************
+/********************************************************************************************
 
+ Function to populate the 2-body part of the Hamiltonian, h2_mat. The 2-body part here is just the potential V.
 
+ Function proceeds by reading in the relations between my sp numbers and Morten's sp numbers. 
+ Next we take a given sp orbital number pair (say 2, 8) and map those to a unique number via the cantor function.
+ This number is then put into a C++ map for relating the number to the matrix index of the sp orbital pair. For example
+ cantor (2, 8) = 63 and morten_map (63) = our matrix index for this sp pair. 
 
-***************************************************************/
+ Arguments:
 
-void populate_2body (const two_array & ref_m, const two_array & ref_tbme, two_array & h2_mat, const std::string me_tbme, const int nmax, const std::string h2_flag)
+	array_ref_tbme - matrix that holds info about the tb basis states
+
+	h2_mat - matrix to hold two-body matrix elments
+
+ 	me_tbme - string to data file with matrix elements of the two-body hamiltonian
+ 		e.g., "me_files/tbme/nmax*_tbme_hw*.dat"
+
+	nmax - Nmax truncation value
+
+	h2_flag - string to data file with information about matrix indices and Morten/my sp  numbers
+		e.g., "flag_files/nmax*_python_h2flag.dat"
+
+**********************************************************************************************/
+
+void populate_2body (const two_array & array_ref_tbme, two_array & h2_mat, const std::string me_tbme, const int nmax, const std::string h2_flag)
 {
 
   const char * flag_file = (h2_flag).c_str();
@@ -285,11 +308,12 @@ void populate_2body (const two_array & ref_m, const two_array & ref_tbme, two_ar
   flag_in.clear();
   flag_in.seekg(0, std::ios::beg);
 
-  two_array relational_sp (boost::extents[total_lines][10]);
+  two_array relational_sp (boost::extents[total_lines][10]); 	// array to hold relations between Morten/my sp numbers
 
   size_t b1, b2, m1, m2, sp1, sp2, sp3, sp4, msp1, msp2, msp3, msp4, block;
 
-  for (size_t loop = 0; loop < total_lines; loop++)
+
+  for (size_t loop = 0; loop < total_lines; loop++) 			// loop over h2_flag file
   {
 
     std::getline (flag_in, dummy);
@@ -303,15 +327,15 @@ void populate_2body (const two_array & ref_m, const two_array & ref_tbme, two_ar
 
     ss >> b1 >> b2 >> m1 >> m2 >> sp1 >> sp2 >> sp3 >> sp4 >> msp1 >> msp2 >> msp3 >> msp4 >> block;
 
-    relational_sp [loop][0] = m1;
+    relational_sp [loop][0] = m1;								// pull off matrix indices
     relational_sp [loop][1] = m2;
 
-    relational_sp [loop][2] = sp1;
+    relational_sp [loop][2] = sp1;								// pull off my sp numbers
     relational_sp [loop][3] = sp2;
     relational_sp [loop][4] = sp3;
     relational_sp [loop][5] = sp4;
 
-    relational_sp [loop][6] = msp1;
+    relational_sp [loop][6] = msp1;								// pull off Morten's sp numbers
     relational_sp [loop][7] = msp2;
     relational_sp [loop][8] = msp3;
     relational_sp [loop][9] = msp4;
@@ -323,51 +347,38 @@ void populate_2body (const two_array & ref_m, const two_array & ref_tbme, two_ar
   const char * matrix_file = (me_tbme).c_str();
   std::ifstream matrix_in (matrix_file);
 
-
-
-  // get the total number of lines in the matrix elements file
   while(std::getline(matrix_in, dummy))  ++total_lines;
  
-  // clear and reset the file stream
   matrix_in.clear();
   matrix_in.seekg(0, std::ios::beg);
 
   size_t relational_size = relational_sp.size();
 
-  std::map<int, int> morten_map;
-  std::map<int, int> sign_map;
+  std::map<int, int> morten_map;								// map from Morten's sp numbers to matrix index
+  std::map<int, int> sign_map;									// map to take care of sign (e.g., (a,b) vs. -1 * (b,a))
 
-  for (size_t loop = 0; loop < relational_size; loop++)
+
+  for (size_t loop = 0; loop < relational_size; loop++)			// loop over all elements in relational array
   {
-  	size_t msp1 = relational_sp [loop][6];
-  	size_t msp2 = relational_sp [loop][7];
+  	size_t msp1 = relational_sp [loop][6];						// Morten's sp number 1
+  	size_t msp2 = relational_sp [loop][7];						// Morten's sp number 2
 
-  	int m1 = relational_sp [loop][0];
+  	int m1 = relational_sp [loop][0];							// unique matrix index to map to
 
-  	int pair_map1 = cantor (msp1, msp2);
-  	int pair_map2 = cantor (msp2, msp1);
+  	int pair_map1 = cantor (msp1, msp2);						// associate unique number with a given Morten sp pair
+  	int pair_map2 = cantor (msp2, msp1);	
 
-  	morten_map.insert(std::make_pair(pair_map1, m1));
+  	morten_map.insert(std::make_pair(pair_map1, m1));			// insert unique number into map and associate with matrix index
   	morten_map.insert(std::make_pair(pair_map2, m1));
 
   	sign_map.insert(std::make_pair(pair_map1,  1));
   	sign_map.insert(std::make_pair(pair_map2, -1));
   }
 
-//  int cant_test1 = cantor (1, 2);
-//  int cant_test2 = cantor (2, 6);
-//  int cant_test3 = cantor (1, 38);
-
-//  std::cout << morten_map.find(cant_test1)->second << std::endl;
-//  std::cout << morten_map.find(cant_test2) << std::endl;
-//  std::cout << morten_map.find(cant_test3) << std::endl;
 
 
-//  two_array hold (boost::extents [total_lines][5]);
-
-  for (size_t loop2 = 0; loop2 < total_lines; loop2++)
+  for (size_t loop2 = 0; loop2 < total_lines; loop2++)			// loop over two-body matrix elements file
   {
-//      std::cout << "LOOP TOP" << std::endl;
 
     size_t alpha, beta, gamma, delta;
     double value;
@@ -383,19 +394,19 @@ void populate_2body (const two_array & ref_m, const two_array & ref_tbme, two_ar
 
     ss << dummy;
 
-    ss >> alpha >> beta >> gamma >> delta >> value;
+    ss >> alpha >> beta >> gamma >> delta >> value;				// pull off Morten sp numbers and matrix element
 
 
-    int cant1 = cantor (alpha, beta);
+    int cant1 = cantor (alpha, beta);							// create unique number for Morten sp number pair
     int cant2 = cantor (gamma, delta);
 
-    int sign1 = sign_map.find(cant1)->second;
+    int sign1 = sign_map.find(cant1)->second;					// get sign for unique number via map
     int sign2 = sign_map.find(cant2)->second;
 
-    int m1 = morten_map.find(cant1)->second;
+    int m1 = morten_map.find(cant1)->second;					// get matrix index for unique number via map
     int m2 = morten_map.find(cant2)->second;
 
-    h2_mat[m1][m2] = value * sign1 * sign2;
+    h2_mat[m1][m2] = value * sign1 * sign2;						// write value of Hamiltonian to matrix
 
   }
 
@@ -406,7 +417,15 @@ void populate_2body (const two_array & ref_m, const two_array & ref_tbme, two_ar
 
 /***************************************************************
 
+Cantor function. Creates a unique map from two integers to a 
+third integer.
 
+Arguments:
+	a - the first integer
+	b - the second integer
+
+Returns:
+	value - the unique integer associated with (a,b)
 
 ***************************************************************/
 

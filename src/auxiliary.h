@@ -6,8 +6,7 @@
 
 using std::string;
 
-// struct to hold the input file variables
-struct parameters 
+struct parameters     // struct to hold the input file variables
 {
 	size_t basis_hw;
 	size_t nmax;
@@ -20,8 +19,7 @@ struct parameters
 	bool two_body_toggle;
 };
 
-// struct 
-struct string_holder
+struct string_holder  // struct to hold strings for filenames
 {
 
   string morten_spm;
@@ -36,9 +34,8 @@ struct string_holder
   string h2_flag;
   string pflag_info;
 };
-
-// struct to hold the constraint flag toggles
-struct con_flags
+ 
+struct con_flags     // struct to hold the constraint flag toggles
 {
 	bool N_flag;
 	bool O_flag;
@@ -47,9 +44,10 @@ struct con_flags
 	bool two_body_toggle;
 };
 
+// function prototypes
 parameters read_in_inputs ();
-
 string_holder string_reader (const size_t nmax, const size_t basis_hw);
+
 
 inline double kron_del(const size_t i, const size_t j)
 {
