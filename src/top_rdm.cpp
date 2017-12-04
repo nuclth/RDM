@@ -30,12 +30,6 @@ using std::endl;
 using std::boolalpha;
 
 
-
-
-size_t count_NO_blocks (const two_array & array_ref_obme);
-void populate_obme_blocks (one_array & obme_blocks, const two_array & array_ref_obme);
-
-
 /********************************************
 
 BEGIN MAIN PROGRAM
@@ -81,6 +75,7 @@ int main ()
   cout << "N FLAG: " << boolalpha << N_flag << endl;
   cout << "O FLAG: " << boolalpha << O_flag << endl;
   cout << "P FLAG: " << boolalpha << P_flag << endl;
+  cout << "NMAX: " << nmax << endl;
   cout << "TOTAL SP ORBITALS: " << bsize << endl;
   cout << "TOTAL TB STATES: " << tbme_size << endl;
   cout << "TOTAL O FLAG CONSTRAINTS: " << O_num << endl;
@@ -113,79 +108,41 @@ int main ()
 
 
 
-  size_t NO_blocks = count_NO_blocks (array_ref_obme);
-
-  one_array obme_blocks (boost::extents[NO_blocks]);
-
+  size_t NO_blocks = count_NO_blocks (array_ref_obme);								// count number of blocks in 1-body matrix 
+  one_array obme_blocks (boost::extents[NO_blocks]);								// create and populate array to hold 1-body block values
   populate_obme_blocks (obme_blocks, array_ref_obme);
 
 
 
-  init_con_blocks (input_params, NO_blocks, O_num, P_num, sdpa_out);
-
-
-  if (N_flag)
-  {
-  	for (size_t loop = 0; loop < bsize; loop++)
-  	{
-  		size_t block_size = array_ref_obme[loop][5];
-
-  		if (block_size > 0) fprintf (sdpa_out, "%lu ", block_size);
-  	}
-  }
-
-
-
-  if (O_flag)
-  {
-  	for (size_t loop = 0; loop < bsize; loop++)
-  	{
-  		size_t block_size = array_ref_obme[loop][5];
-
-  		if (block_size > 0) fprintf (sdpa_out, "%lu ", block_size);
-  	}
-  }
-  
-
-  if (two_body_toggle)
-  {
-  	fprintf (sdpa_out, "%lu ", (size_t)array_ref_tbme[0][11]);
-  	fprintf (sdpa_out, "%lu ", (size_t)array_ref_tbme[1][11]);  	
-  }
-
-
-
-
-
-  fprintf (sdpa_out, "\n");
+  output_con_blocks (input_params, NO_blocks, O_num, P_num, sdpa_out);				// output total # of constraints and blocks to SDP file
+  output_blocks (input_params, array_ref_obme, array_ref_tbme, bsize, sdpa_out); 	// output matrix block sizes to SDP file
 
   
-  init_con_values (input_params, sdpa_out, bsize, tbme_size, particles, P_num, input_strings.no_flag);
+  init_con_values (input_params, sdpa_out, bsize, tbme_size, particles, P_num, input_strings.no_flag); // output constraint values to SDP file
 
-  size_t con_count = 0;
+  size_t con_count = 0; // constraint matrix counter
 
-
-  init_C_matrix (input_params, sdpa_out, h1_mat, h2_mat, con_count, obme_blocks, input_strings.no_flag, input_strings.h2_flag, 2 * NO_blocks);
+  init_C_matrix (input_params, sdpa_out, h1_mat, h2_mat, con_count, obme_blocks, input_strings.no_flag, input_strings.h2_flag, 2 * NO_blocks); // output H constraint to SDP file
 
   std::cout << "C MATRIX DONE" << std::endl;
 
 
   if (N_flag)
   {
-    init_N_flag (sdpa_out, bsize, con_count, input_strings.no_flag);
+    init_N_flag (sdpa_out, bsize, con_count, input_strings.no_flag); // output N particle matrix constraint to SDP file
     std::cout << "N FLAG DONE" << std::endl;
   }
 
   if (O_flag)
   {
-    init_O_flag (sdpa_out, bsize, con_count, input_strings.no_flag, NO_blocks);
+    init_O_flag (sdpa_out, bsize, con_count, input_strings.no_flag, NO_blocks); // output O flag matrix constraints to SDP file
     std::cout << "O FLAG DONE" << std::endl;
   }
 
 
   if (P_flag)
   {
-    init_P_flag (sdpa_out, bsize, con_count, particles, tbme_size, array_ref_tbme, input_strings.pflag_info, 2 * NO_blocks);
+    init_P_flag (sdpa_out, bsize, con_count, particles, tbme_size, array_ref_tbme, input_strings.pflag_info, 2 * NO_blocks); // output P flag matrix constraints to SDP file
     std::cout << "P FLAG DONE" << std::endl;
   }
 
@@ -200,50 +157,3 @@ int main ()
 END MAIN PROGRAM
 
 ************************************************/
-
-
-
-
-
-/***************************************************************
-
-
-
-***************************************************************/
-
-size_t count_NO_blocks (const two_array & array_ref_obme)
-{
-	size_t count = 0;
-	size_t states = array_ref_obme.size();
-
-	for (size_t loop = 0; loop < states; loop++) 
-	{
-		if (array_ref_obme[loop][5] > 0) count += 1;
-	}
-
-	return count;
-}
-
-/***************************************************************
-
-
-
-***************************************************************/
-
-void populate_obme_blocks (one_array & obme_blocks, const two_array & array_ref_obme)
-{
-	size_t count = 0;
-	size_t states = array_ref_obme.size();
-
-	for (size_t loop = 0; loop < states; loop++) 
-	{
-		if (array_ref_obme[loop][5] > 0)
-		{
-			obme_blocks[count] = array_ref_obme[loop][5];
-			count++;
-		}
-	}
-
-	return;
-}
-

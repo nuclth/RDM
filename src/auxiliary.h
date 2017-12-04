@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <string>
+#include "matrix_define.h"
 
 using std::string;
 
@@ -45,7 +46,11 @@ size_t total_tbme_states (const string tbme_filename);
 size_t count_no_flags (const string no_flag);
 size_t count_P_cons (const string p_filename);
 
-void init_con_blocks (const parameters flag_pass, const size_t NO_blocks, const size_t O_num, const size_t P_num, FILE * sdpa_out);
+size_t count_NO_blocks (const two_array & array_ref_obme);
+void populate_obme_blocks (one_array & obme_blocks, const two_array & array_ref_obme);
+
+void output_con_blocks (const parameters flag_pass, const size_t NO_blocks, const size_t O_num, const size_t P_num, FILE * sdpa_out);
+void output_blocks (const parameters inputs, const two_array & array_ref_obme, const two_array & array_ref_tbme, const size_t bsize, FILE * sdpa_out);
 
 
 inline double kron_del(const size_t i, const size_t j)

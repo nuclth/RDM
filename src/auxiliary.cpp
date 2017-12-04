@@ -263,13 +263,62 @@ size_t count_P_cons (const string p_filename)
 
 
 
+
+
+
+
+/*********************************************************************************
+
+Function to count the total number of block diagonal matrices in the 1-body part. 
+
+**********************************************************************************/
+
+size_t count_NO_blocks (const two_array & array_ref_obme)
+{
+	size_t count = 0;
+	size_t states = array_ref_obme.size();
+
+	for (size_t loop = 0; loop < states; loop++) 
+	{
+		if (array_ref_obme[loop][5] > 0) count += 1;
+	}
+
+	return count;
+}
+
+/****************************************************************************
+
+Function to populate an array with values of the 1-body matrix block sizes.
+
+*****************************************************************************/
+
+void populate_obme_blocks (one_array & obme_blocks, const two_array & array_ref_obme)
+{
+	size_t count = 0;
+	size_t states = array_ref_obme.size();
+
+	for (size_t loop = 0; loop < states; loop++) 
+	{
+		if (array_ref_obme[loop][5] > 0)
+		{
+			obme_blocks[count] = array_ref_obme[loop][5];
+			count++;
+		}
+	}
+
+	return;
+}
+
+
+
+
 /*****************************************************************************
 
 Function to output the total number of constraints and blocks in our SDP file
 
 *****************************************************************************/
 
-void init_con_blocks (const parameters flag_pass, const size_t NO_blocks, const size_t O_num, const size_t P_num, FILE * sdpa_out)
+void output_con_blocks (const parameters flag_pass, const size_t NO_blocks, const size_t O_num, const size_t P_num, FILE * sdpa_out)
 {
 
   size_t cons = 0;
@@ -299,4 +348,46 @@ void init_con_blocks (const parameters flag_pass, const size_t NO_blocks, const 
   fprintf (sdpa_out, "%lu\n", blocks);
 
   return;
+}
+
+/***************************************************************************
+
+Function to output the different block sizes in our matrix to the SDP file.
+
+***************************************************************************/
+
+void output_blocks (const parameters inputs, const two_array & array_ref_obme, const two_array & array_ref_tbme, const size_t bsize, FILE * sdpa_out)
+{
+
+  if (inputs.N_flag)
+  {
+  	for (size_t loop = 0; loop < bsize; loop++)
+  	{
+  		size_t block_size = array_ref_obme[loop][5];
+
+  		if (block_size > 0) fprintf (sdpa_out, "%lu ", block_size);
+  	}
+  }
+
+
+
+  if (inputs.O_flag)
+  {
+  	for (size_t loop = 0; loop < bsize; loop++)
+  	{
+  		size_t block_size = array_ref_obme[loop][5];
+
+  		if (block_size > 0) fprintf (sdpa_out, "%lu ", block_size);
+  	}
+  }
+  
+
+  if (inputs.two_body_toggle)
+  {
+  	fprintf (sdpa_out, "%lu ", (size_t)array_ref_tbme[0][11]);
+  	fprintf (sdpa_out, "%lu ", (size_t)array_ref_tbme[1][11]);  	
+  }
+
+  fprintf (sdpa_out, "\n");
+
 }
