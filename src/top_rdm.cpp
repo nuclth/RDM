@@ -30,16 +30,10 @@ using std::endl;
 using std::boolalpha;
 
 
-size_t count_P_cons (const std::string);
-size_t total_tbme_states (const std::string tbme_filename);
-size_t total_obme_states (const std::string obme_filename);
+
 
 size_t count_NO_blocks (const two_array & array_ref_obme);
 void populate_obme_blocks (one_array & obme_blocks, const two_array & array_ref_obme);
-
-size_t count_no_flags (const std::string);
-
-
 
 
 /********************************************
@@ -52,50 +46,46 @@ int main ()
 {
   
 
-  // create a struct to hold user specified parameters
-  parameters input_params = read_in_inputs ();						             
+  parameters input_params = read_in_inputs (); 							// create a struct to hold user specified parameters
   
-  // Now create/copy input parameters for ease of reading the code into newly defined local variables
-  const size_t nmax  = input_params.nmax;	
+  
+  const size_t nmax  = input_params.nmax;								// create local copies of input params
   const size_t basis_hw = input_params.basis_hw;   
   const size_t particles = input_params.particles;		 
-
-
   const bool N_flag = input_params.N_flag;
   const bool O_flag = input_params.O_flag;
   const bool P_flag = input_params.P_flag;
-
   const bool two_body_toggle = input_params.two_body_toggle;
+
+
+  const std::string sdpa_file = "sdp_files/test_sdp.dat-s";				// set up output file for SDP
+  FILE * sdpa_out;
+  const char * sdpa_char = (sdpa_file).c_str();
+  sdpa_out = fopen (sdpa_char, "w");
+
+
+  string_holder input_strings = string_reader (nmax, basis_hw);			// create struct for string names of data files
+
+ 
+
+  const size_t bsize = total_obme_states (input_strings.ref_obme);		// get total # of 1-body and 2-body states
+  const size_t tbme_size = total_tbme_states (input_strings.ref_tbme);
+
+
+  const size_t O_num = count_no_flags (input_strings.no_flag);			// get total # of constraint matrices in the O and P flag
+  const size_t P_num = count_P_cons (input_strings.pflag_info);	
+
+
+
 
   cout << "N FLAG: " << boolalpha << N_flag << endl;
   cout << "O FLAG: " << boolalpha << O_flag << endl;
   cout << "P FLAG: " << boolalpha << P_flag << endl;
-
-
-  string_holder input_strings = string_reader (nmax, basis_hw);
-
-  cout << ("Building system... ") << endl;
-
- 
-
-  const size_t bsize = total_obme_states (input_strings.ref_obme);
-
-  const size_t tbme_size = total_tbme_states (input_strings.ref_tbme);
-  two_array array_ref_tbme (boost::extents[tbme_size][13]);
-
-
-  size_t P_num = 0;
-
-  if (two_body_toggle) P_num = count_P_cons (input_strings.pflag_info);
-
-
-
-
-
-  cout << "BSIZE: " << bsize << endl;
-  cout << "TBME SIZE: " << tbme_size << endl;
-  cout << "PNUM: " << P_num << endl << endl;
-  
+  cout << "TOTAL SP ORBITALS: " << bsize << endl;
+  cout << "TOTAL TB STATES: " << tbme_size << endl;
+  cout << "TOTAL O FLAG CONSTRAINTS: " << O_num << endl;
+  cout << "TOTAL P FLAG CONSTRAINTS: " << P_num << endl << endl;
+  cout << "Building system... " << endl;
 
 
 
@@ -108,39 +98,16 @@ int main ()
 
 
 
+  two_array array_ref_obme (boost::extents[bsize][7]);					// 1- and 2-body reference arrays
+  two_array array_ref_tbme (boost::extents[tbme_size][13]);
 
-
-  struct con_flags flag_pass;
-
-  flag_pass.N_flag  = N_flag;
-  flag_pass.O_flag  = O_flag;
-  flag_pass.P_flag  = P_flag;
-
-  flag_pass.two_body_toggle = two_body_toggle;
-
-
-
-
-  const std::string sdpa_file = "sdp_files/test_sdp.dat-s";
-
-
-
-  FILE * sdpa_out;
-
-
-  const char * sdpa_char = (sdpa_file).c_str();
-
-  sdpa_out = fopen (sdpa_char, "w");
-
-
-  two_array array_ref_obme (boost::extents[bsize][7]);
-  two_array h1_mat(boost::extents[bsize][bsize]);
-
+  two_array h1_mat(boost::extents[bsize][bsize]);						// 1- and 2-body hamiltonians
   two_array h2_mat (boost::extents[tbme_size][tbme_size]);
 
 
 
   populate_hamiltonian (array_ref_obme, array_ref_tbme, h1_mat, h2_mat, input_strings.ref_obme, input_strings.me_obme, input_strings.ref_tbme, input_strings.me_tbme, two_body_toggle, nmax, input_strings.h2_flag);
+
 
   std::cout << "HAMILTONIAN BUILT" << std::endl;
 
@@ -152,31 +119,9 @@ int main ()
 
   populate_obme_blocks (obme_blocks, array_ref_obme);
 
-  size_t cons = 0;
-  size_t blocks = 0;
-
-  if (N_flag)
-  {
-  	cons += 1;
-  	blocks+= NO_blocks;
-  }
-
-  if (O_flag)
-  {
-  	cons += count_no_flags (input_strings.no_flag);
-  	blocks+= NO_blocks;
-  }
-
-  if (two_body_toggle)
-  	blocks+= 2;
-
-  if (P_flag)
-  	cons += P_num;
 
 
-
-  fprintf (sdpa_out, "%lu\n", cons);
-  fprintf (sdpa_out, "%lu\n", blocks);
+  init_con_blocks (input_params, NO_blocks, O_num, P_num, sdpa_out);
 
 
   if (N_flag)
@@ -215,12 +160,12 @@ int main ()
   fprintf (sdpa_out, "\n");
 
   
-  init_con_values (flag_pass, sdpa_out, bsize, tbme_size, particles, P_num, input_strings.no_flag);
+  init_con_values (input_params, sdpa_out, bsize, tbme_size, particles, P_num, input_strings.no_flag);
 
   size_t con_count = 0;
 
 
-  init_C_matrix (flag_pass, sdpa_out, h1_mat, h2_mat, con_count, obme_blocks, input_strings.no_flag, input_strings.h2_flag, 2 * NO_blocks);
+  init_C_matrix (input_params, sdpa_out, h1_mat, h2_mat, con_count, obme_blocks, input_strings.no_flag, input_strings.h2_flag, 2 * NO_blocks);
 
   std::cout << "C MATRIX DONE" << std::endl;
 
@@ -256,37 +201,8 @@ END MAIN PROGRAM
 
 ************************************************/
 
-size_t count_P_cons (const std::string p_filename)
-{
-  const char * p_file = p_filename.c_str();
-  // input file stream for m_scheme
-  std::ifstream ref_in (p_file);
- 
-  std::string dummy;
 
-  size_t P_num = 0;
 
-  size_t ob_b1, ob_b2, ob_block;
-  size_t tb_b1, tb_b2, tb_block;
-  bool new_flag;
-
-  // find total number of defined reference lines
-  while (std::getline (ref_in, dummy)) 
-  {
-	if (!dummy.length() || dummy[0] == '#')     // skip zero length lines and lines that start with #
-    	continue;
-
-	  	std::stringstream ss;
-
-	 	ss << dummy;            // read in the line to stringstream ss
-	  	ss >> ob_b1 >> ob_b2 >> ob_block >> tb_b1 >> tb_b2 >> tb_block >> new_flag;
-
-	  	if (new_flag)
-	  		++P_num;
-  }
-
-  return P_num;
-}
 
 
 /***************************************************************
@@ -294,54 +210,6 @@ size_t count_P_cons (const std::string p_filename)
 
 
 ***************************************************************/
-
-size_t total_tbme_states (const std::string tbme_filename)
-{
-  const char * ref_file = tbme_filename.c_str();
-  std::ifstream ref_in (ref_file);
- 
-  size_t total_lines = 0;
-  std::string dummy;
-
-  // find total number of defined reference lines
-  while (std::getline (ref_in, dummy)) 
-  {
-	if (!dummy.length() || dummy[0] == '#')     // skip zero length lines and lines that start with #
-    	continue;
-
-  	++total_lines;
-  }
-
-  return total_lines;
-}
-
-
-/***************************************************************
-
-
-
-***************************************************************/
-
-size_t total_obme_states (const std::string ref_obme)
-{
-  const char * ref_file = ref_obme.c_str();
-  std::ifstream ref_in (ref_file);
- 
-  size_t total_lines = 0;
-  std::string dummy;
-
-  // find total number of defined reference lines
-  while (std::getline (ref_in, dummy)) 
-  {
-	if (!dummy.length() || dummy[0] == '#')     // skip zero length lines and lines that start with #
-    	continue;
-
-  	++total_lines;
-  }
-
-  return total_lines;
-}
-
 
 size_t count_NO_blocks (const two_array & array_ref_obme)
 {
@@ -356,6 +224,11 @@ size_t count_NO_blocks (const two_array & array_ref_obme)
 	return count;
 }
 
+/***************************************************************
+
+
+
+***************************************************************/
 
 void populate_obme_blocks (one_array & obme_blocks, const two_array & array_ref_obme)
 {
@@ -370,27 +243,7 @@ void populate_obme_blocks (one_array & obme_blocks, const two_array & array_ref_
 			count++;
 		}
 	}
+
+	return;
 }
 
-
-size_t count_no_flags (const std::string no_flag)
-{
-	const char * no_file = no_flag.c_str();
-	// input file stream for m_scheme
-	std::ifstream ref_in (no_file);
-	 
-	std::string dummy;
-	size_t total_lines = 0;
-
-	// find total number of defined reference lines
-	while (std::getline (ref_in, dummy))
-	{
-
-		if (!dummy.length() || dummy[0] == '#')     // skip zero length lines and lines that start with #
-	    	continue;
-
-	    total_lines++;
-	}
-
-	return total_lines;
-}

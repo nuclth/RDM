@@ -35,18 +35,17 @@ struct string_holder  // struct to hold strings for filenames
   string pflag_info;
 };
  
-struct con_flags     // struct to hold the constraint flag toggles
-{
-	bool N_flag;
-	bool O_flag;
-	bool P_flag;
-
-	bool two_body_toggle;
-};
 
 // function prototypes
+
 parameters read_in_inputs ();
 string_holder string_reader (const size_t nmax, const size_t basis_hw);
+size_t total_obme_states (const string obme_filename);
+size_t total_tbme_states (const string tbme_filename);
+size_t count_no_flags (const string no_flag);
+size_t count_P_cons (const string p_filename);
+
+void init_con_blocks (const parameters flag_pass, const size_t NO_blocks, const size_t O_num, const size_t P_num, FILE * sdpa_out);
 
 
 inline double kron_del(const size_t i, const size_t j)
