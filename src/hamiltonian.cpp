@@ -360,16 +360,16 @@ void populate_2body (const two_array & array_ref_tbme, two_array & h2_mat, const
 
   for (size_t loop = 0; loop < relational_size; loop++)			// loop over all elements in relational array
   {
-  	size_t msp1 = relational_sp [loop][6];						// Morten's sp number 1
-  	size_t msp2 = relational_sp [loop][7];						// Morten's sp number 2
+  	size_t mort_sp1 = relational_sp [loop][6];					// Morten's sp number 1
+  	size_t mort_sp2 = relational_sp [loop][7];					// Morten's sp number 2
 
-  	int m1 = relational_sp [loop][0];							// unique matrix index to map to
+  	int unique = relational_sp [loop][0];						// unique matrix index to map to
 
-  	int pair_map1 = cantor (msp1, msp2);						// associate unique number with a given Morten sp pair
-  	int pair_map2 = cantor (msp2, msp1);	
+  	int pair_map1 = cantor (mort_sp1, mort_sp2);				// associate unique number with a given Morten sp pair
+  	int pair_map2 = cantor (mort_sp2, mort_sp1);	
 
-  	morten_map.insert(std::make_pair(pair_map1, m1));			// insert unique number into map and associate with matrix index
-  	morten_map.insert(std::make_pair(pair_map2, m1));
+  	morten_map.insert(std::make_pair(pair_map1, unique));		// insert unique number into map and associate with matrix index
+  	morten_map.insert(std::make_pair(pair_map2, unique));
 
   	sign_map.insert(std::make_pair(pair_map1,  1));
   	sign_map.insert(std::make_pair(pair_map2, -1));
@@ -403,10 +403,10 @@ void populate_2body (const two_array & array_ref_tbme, two_array & h2_mat, const
     int sign1 = sign_map.find(cant1)->second;					// get sign for unique number via map
     int sign2 = sign_map.find(cant2)->second;
 
-    int m1 = morten_map.find(cant1)->second;					// get matrix index for unique number via map
-    int m2 = morten_map.find(cant2)->second;
+    int mat1 = morten_map.find(cant1)->second;					// get matrix index for unique number via map
+    int mat2 = morten_map.find(cant2)->second;
 
-    h2_mat[m1][m2] = value * sign1 * sign2;						// write value of Hamiltonian to matrix
+    h2_mat[mat1][mat2] = value * sign1 * sign2;					// write value of Hamiltonian to matrix
 
   }
 
