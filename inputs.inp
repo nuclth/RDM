@@ -1,11 +1,11 @@
 # nmax truncation for basis size
-4
+10
 
 # basis hw parameter
-20
+10
 
 # Number of particles
-2
+4
 
 # N flag - trace OB to particles
 true
@@ -14,7 +14,7 @@ true
 true
 
 # two body toggle - turn potential on/off
-true
+false
 
 # P flag - linear OB and TB trace relations
-true
+false
