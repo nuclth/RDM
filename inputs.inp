@@ -2,10 +2,10 @@
 10
 
 # basis hw parameter
-10
+60
 
 # Number of particles
-4
+2
 
 # N flag - trace OB to particles
 true
