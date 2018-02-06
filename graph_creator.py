@@ -107,8 +107,47 @@ def onebody_plot4 ():
 
 	plt.savefig('plots/' + plot_name + '.pdf', format='pdf')
 
+def nmax_plot (nmax, energy):
+
+	dir = os.path.abspath('..' + '/plots/')
+
+	fig = plt.figure(frameon=False)
+
+	ax = fig.add_subplot(111)
+
+	ax.set_xlabel('$\hbar \omega$', fontsize = 22)
+	ax.set_ylabel('Energy [MeV]', fontsize = 22)
+
+	fig.suptitle('2 particles - trap $\hbar \omega$ = 10 MeV', fontsize = 22)
+
+	plot_name = 'nmax' + str(nmax) + '_results'
+
+	methods  = ['k-', 'r-',  'g-', 'b-', 'y-', 'm-', 'c-', 'r--', 'g--', 'b--']
+
+	hw = [10, 15, 20, 25, 30, 35, 40, 45, 50, 60]
+
+	energy2 = [27.76, 28.20, 30.08, 32.40, 35.35, 38.75, 42.45, 46.35, 50.40, 58.80]
+
+	energy4 = [26.91, 26.75, 27.20, 28.42, 30.30, 32.33, 34.55, 36.96, 39.55, 45.09]
+
+	plt.subplot(111).plot(hw, energy, methods[3], label = '${N}_{max} =$ ' + str(nmax), linewidth=2)
+
+	ax.legend(loc = 'best', frameon=False, fontsize = 18)
+
+	fig.set_size_inches(8,8)
+
+	ax.xaxis.set_tick_params(labelsize=20)
+	ax.yaxis.set_tick_params(labelsize=20)
+
+	plt.savefig('plots/' + plot_name + '.pdf', format='pdf')
+
 
 if __name__ == '__main__':
 
+	energy2 = [27.76, 28.20, 30.08, 32.40, 35.35, 38.75, 42.45, 46.35, 50.40, 58.80]
+	energy4 = [26.91, 26.75, 27.20, 28.42, 30.30, 32.33, 34.55, 36.96, 39.55, 45.09]
+
 	onebody_plot2 ()
 	onebody_plot4 ()
+	nmax_plot (2, energy2)
+	nmax_plot (4, energy4)

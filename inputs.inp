@@ -1,5 +1,5 @@
 # nmax truncation for basis size
-10
+4
 
 # basis hw parameter
 60
@@ -14,7 +14,7 @@ true
 true
 
 # two body toggle - turn potential on/off
-false
+true
 
 # P flag - linear OB and TB trace relations
-false
+true
