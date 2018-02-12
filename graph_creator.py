@@ -126,11 +126,10 @@ def nmax_plot (nmax, energy):
 
 	hw = [10, 15, 20, 25, 30, 35, 40, 45, 50, 60]
 
-	energy2 = [27.76, 28.20, 30.08, 32.40, 35.35, 38.75, 42.45, 46.35, 50.40, 58.80]
-
-	energy4 = [26.91, 26.75, 27.20, 28.42, 30.30, 32.33, 34.55, 36.96, 39.55, 45.09]
+	exact = [24.26 for i in range (0, 10)]
 
 	plt.subplot(111).plot(hw, energy, methods[3], label = '${N}_{max} =$ ' + str(nmax), linewidth=2)
+	plt.subplot(111).plot(hw, exact, 'k--', label = 'Exact', linewidth = 2)
 
 	ax.legend(loc = 'best', frameon=False, fontsize = 18)
 
@@ -139,15 +138,23 @@ def nmax_plot (nmax, energy):
 	ax.xaxis.set_tick_params(labelsize=20)
 	ax.yaxis.set_tick_params(labelsize=20)
 
-	plt.savefig('plots/' + plot_name + '.pdf', format='pdf')
+	yint = [24+(2*i) for i in range (0, 14)]
+
+	plt.yticks (yint)
+
+	ax.set_ylim ([24, 45])
+
+	plt.savefig('plots/' + plot_name + '.pdf', format='pdf', layout='tight')
 
 
 if __name__ == '__main__':
 
 	energy2 = [27.76, 28.20, 30.08, 32.40, 35.35, 38.75, 42.45, 46.35, 50.40, 58.80]
 	energy4 = [26.91, 26.75, 27.20, 28.42, 30.30, 32.33, 34.55, 36.96, 39.55, 45.09]
+	energy6 = [26.56, 26.45, 26.55, 26.91, 27.69, 28.88, 30.41, 32.20, 34.03, 37.94]
 
 	onebody_plot2 ()
 	onebody_plot4 ()
 	nmax_plot (2, energy2)
 	nmax_plot (4, energy4)
+	nmax_plot (6, energy6)
